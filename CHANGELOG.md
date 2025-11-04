@@ -1,3 +1,2 @@
-## 0.1.0
-Clone of InstantDB Flutter
+## 1.0.0
 ### 🎉 Initial Release
