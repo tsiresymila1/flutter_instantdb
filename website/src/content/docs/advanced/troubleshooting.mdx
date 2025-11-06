@@ -1,13 +1,13 @@
 ---
 title: Troubleshooting
-description: Common issues and debugging techniques for InstantDB Flutter
+description: Common issues and debugging techniques for Flutter InstantDB
 sidebar:
   order: 3
 ---
 
 import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
 
-Debug and resolve common issues with InstantDB Flutter applications using systematic troubleshooting techniques and diagnostic tools.
+Debug and resolve common issues with Flutter InstantDB applications using systematic troubleshooting techniques and diagnostic tools.
 
 ## Common Issues
 
@@ -26,7 +26,7 @@ final db = await InstantDB.init(
   config: const InstantConfig(
     syncEnabled: true,
     // Use custom endpoint if needed
-    apiUrl: 'https://api.instantdb.com', // Default
+    baseUrl: 'https://api.instantdb.com', // Default
     websocketUrl: 'wss://api.instantdb.com/ws', // Default
   ),
 );
@@ -1041,7 +1041,7 @@ Future<void> reproduceIssue() async {
 ### 3. Report Bugs
 
 Include this information when reporting bugs:
-- InstantDB Flutter version
+- Flutter InstantDB version
 - Flutter/Dart version
 - Platform (iOS/Android/Web)
 - Complete error messages and stack traces

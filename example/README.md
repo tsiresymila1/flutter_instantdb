@@ -1,6 +1,6 @@
-# InstantDB Flutter Examples
+# Flutter InstantDB Examples
 
-This example app demonstrates various real-time, collaborative features using InstantDB Flutter. The app includes 8 different examples showcasing different aspects of InstantDB's capabilities.
+This example app demonstrates various real-time, collaborative features using Flutter InstantDB. The app includes 8 different examples showcasing different aspects of InstantDB's capabilities.
 
 ## Examples Included
 
@@ -229,7 +229,7 @@ ConnectionStatusBuilder(
 
 ## Architecture
 
-The app demonstrates several key InstantDB Flutter patterns:
+The app demonstrates several key Flutter InstantDB patterns:
 
 - **InstantProvider**: Provides InstantDB instance to the widget tree
 - **InstantBuilderTyped**: Reactive widget that rebuilds when query results change  
@@ -257,7 +257,7 @@ The app demonstrates several key InstantDB Flutter patterns:
 ## Learn More
 
 - [InstantDB Documentation](https://instantdb.com/docs)
-- [InstantDB Flutter Package](../README.md)
+- [Flutter InstantDB Package](../README.md)
 - [Flutter Documentation](https://flutter.dev)
 
 ## Next Steps

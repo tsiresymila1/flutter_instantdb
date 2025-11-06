@@ -4,7 +4,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter_instantdb/flutter_instantdb.dart';
 
 void main() {
-  group('InstantDB Flutter Tests', () {
+  group('Flutter InstantDB Tests', () {
     late InstantDB db;
     late String appId;
 

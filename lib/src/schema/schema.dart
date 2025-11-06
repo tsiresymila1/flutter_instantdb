@@ -1,4 +1,4 @@
-/// Simple schema system for InstantDB Flutter.
+/// Simple schema system for Flutter InstantDB.
 /// This is a basic implementation - in production you'd want more sophisticated validation.
 library;
 

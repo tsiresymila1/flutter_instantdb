@@ -447,10 +447,10 @@ We value all contributions and maintain a list of contributors in our README. Si
 
 ## License
 
-By contributing to InstantDB Flutter, you agree that your contributions will be licensed under the same MIT license that covers the project.
+By contributing to Flutter InstantDB, you agree that your contributions will be licensed under the same MIT license that covers the project.
 
 ---
 
-Thank you for contributing to InstantDB Flutter! 🎉
+Thank you for contributing to Flutter InstantDB! 🎉
 
 If you have questions about contributing, please don't hesitate to ask in our GitHub Discussions or create an issue.

@@ -97,7 +97,7 @@ class TodoList extends StatelessWidget {
 final todoId = db.id();
 await db.transactChunk(
   db.tx['todos'][todoId].update({
-    'text': 'Learn InstantDB Flutter',
+    'text': 'Learn Flutter InstantDB',
     'completed': false,
     'createdAt': DateTime.now().millisecondsSinceEpoch,
   })
@@ -107,7 +107,7 @@ await db.transactChunk(
 await db.transact([
   ...db.create('todos', {
     'id': db.id(), // Generates a proper UUID - required by InstantDB
-    'text': 'Learn InstantDB Flutter',
+    'text': 'Learn Flutter InstantDB',
     'completed': false,
     'createdAt': DateTime.now().millisecondsSinceEpoch,
   }),
@@ -138,7 +138,7 @@ await db.transact([
 
 ### Reactive Queries
 
-InstantDB Flutter uses [Signals](https://pub.dev/packages/signals_flutter) for reactivity. Queries return `Signal<QueryResult>` objects that automatically update when underlying data changes.
+Flutter InstantDB uses [Signals](https://pub.dev/packages/signals_flutter) for reactivity. Queries return `Signal<QueryResult>` objects that automatically update when underlying data changes.
 
 ```dart
 // Simple query with the new subscribeQuery alias (recommended)
@@ -228,7 +228,7 @@ ConnectionStatusBuilder(
 
 #### Enhanced Sync Features
 
-InstantDB Flutter includes advanced synchronization capabilities:
+Flutter InstantDB includes advanced synchronization capabilities:
 
 - **Differential Sync**: Automatically detects and syncs deletions between instances
 - **Deduplication Logic**: Prevents duplicate entities during sync operations
@@ -514,7 +514,7 @@ INSTANTDB_API_ID=your-test-app-id
 
 ## Architecture
 
-InstantDB Flutter is built on several key components:
+Flutter InstantDB is built on several key components:
 
 - **Triple Store**: Local SQLite-based storage using the RDF triple model (supports pattern queries like `todos:*`)
 - **Query Engine**: InstaQL parser and executor with reactive bindings using Signals
@@ -525,7 +525,7 @@ InstantDB Flutter is built on several key components:
 
 ## Logging and Debugging
 
-InstantDB Flutter includes comprehensive logging to help with development and debugging:
+Flutter InstantDB includes comprehensive logging to help with development and debugging:
 
 ### Configuration Options
 

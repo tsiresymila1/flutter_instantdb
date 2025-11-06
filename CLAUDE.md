@@ -46,7 +46,7 @@ Key dependencies:
 
 ## Implementation Status
 
-This is a fully functional InstantDB Flutter implementation with feature parity to the React SDK. The package includes:
+This is a fully functional Flutter InstantDB implementation with feature parity to the React SDK. The package includes:
 
 - ✅ **Complete Core Implementation**: Full InstantDB client with initialization and configuration
 - ✅ **SQLite Triple Store**: Robust local storage with full pattern query support 

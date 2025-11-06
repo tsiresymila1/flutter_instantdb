@@ -1,4 +1,4 @@
-# InstantDB Flutter Package Development Tasks
+# Flutter InstantDB Package Development Tasks
 # Use `just --list` to see all available tasks
 
 # Default task - show help

@@ -7,9 +7,9 @@ export default defineConfig({
   site: "https://instantdb-flutter-docs.pages.dev",
   integrations: [
     starlight({
-      title: "InstantDB Flutter",
+      title: "Flutter InstantDB",
       social: {
-        github: "https://github.com/pillowsoft/flutter_instantdb",
+        github: "https://github.com/tsiresymila1/flutter_instantdb",
       },
       customCss: ["/src/styles/custom.css", "/src/fonts/font-face.css"],
       sidebar: [

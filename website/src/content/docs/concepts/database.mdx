@@ -29,8 +29,8 @@ final db = await InstantDB.init(
   config: const InstantConfig(
     syncEnabled: true,              // Enable real-time sync
     persistenceDir: 'my_app_db',    // Custom database directory
-    logLevel: LogLevel.info,        // Logging level
-    apiUrl: 'https://api.instantdb.com', // Custom API endpoint
+    verboseLogging: true ,        // Logging level
+    baseUrl: 'https://api.instantdb.com', // Custom API endpoint
   ),
 );
 ```
@@ -42,7 +42,7 @@ final db = await InstantDB.init(
 | `syncEnabled` | `bool` | `true` | Enable/disable real-time synchronization |
 | `persistenceDir` | `String?` | `null` | Custom directory for local database files |
 | `logLevel` | `LogLevel` | `LogLevel.warning` | Logging verbosity level |
-| `apiUrl` | `String` | `'https://api.instantdb.com'` | InstantDB API endpoint |
+| `baseUrl` | `String` | `'https://api.instantdb.com'` | InstantDB API endpoint |
 | `websocketUrl` | `String?` | `null` | Custom WebSocket endpoint for real-time sync |
 
 ## Application Integration

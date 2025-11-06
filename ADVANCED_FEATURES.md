@@ -1,6 +1,6 @@
 # Advanced Features Guide
 
-This guide covers the advanced features available in InstantDB Flutter that provide feature parity with the InstantDB React/JS SDK.
+This guide covers the advanced features available in Flutter InstantDB that provide feature parity with the InstantDB React/JS SDK.
 
 ## Transaction System (tx namespace)
 
@@ -495,7 +495,7 @@ try {
 
 ## Logging and Debugging
 
-InstantDB Flutter provides comprehensive logging and debugging capabilities to help you develop and troubleshoot your applications.
+Flutter InstantDB provides comprehensive logging and debugging capabilities to help you develop and troubleshoot your applications.
 
 ### Hierarchical Logging System
 

@@ -2,10 +2,10 @@
   "name": "instantdb-flutter-docs",
   "type": "module",
   "version": "1.0.0",
-  "description": "Documentation website for InstantDB Flutter",
+  "description": "Documentation website for Flutter InstantDB",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pillowsoft/flutter_instantdb.git",
+    "url": "https://github.com/tsiresymila1/flutter_instantdb.git",
     "directory": "website"
   },
   "homepage": "https://instantdb-flutter-docs.pages.dev",

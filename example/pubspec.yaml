@@ -1,5 +1,5 @@
 name: instantdb_todo_example
-description: An example todo app demonstrating InstantDB Flutter with real-time sync.
+description: An example todo app demonstrating Flutter InstantDB with real-time sync.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   
-  # InstantDB Flutter package
+  # Flutter InstantDB package
   flutter_instantdb:
     path: ../
   

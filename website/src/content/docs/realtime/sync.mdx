@@ -1,13 +1,13 @@
 ---
 title: WebSocket Synchronization
-description: Real-time data synchronization with InstantDB Flutter
+description: Real-time data synchronization with Flutter InstantDB
 sidebar:
   order: 1
 ---
 
 import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
 
-InstantDB Flutter provides real-time synchronization across all connected clients using WebSocket connections. Changes are propagated instantly with conflict resolution and offline support.
+Flutter InstantDB provides real-time synchronization across all connected clients using WebSocket connections. Changes are propagated instantly with conflict resolution and offline support.
 
 ## Enabling Sync
 
@@ -245,7 +245,7 @@ final db = await InstantDB.init(
     verboseLogging: true,
     
     // Custom API endpoint
-    apiUrl: 'https://custom.instantdb.com',
+    baseUrl: 'https://custom.instantdb.com',
   ),
 );
 ```

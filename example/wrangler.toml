@@ -1,4 +1,4 @@
-# Cloudflare Pages configuration for InstantDB Flutter Example
+# Cloudflare Pages configuration for Flutter InstantDB Example
 # Documentation: https://developers.cloudflare.com/pages/platform/configuration/
 
 name = "instantdb-flutter-demo"

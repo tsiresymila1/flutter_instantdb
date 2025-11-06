@@ -1,6 +1,6 @@
 ---
 title: Permissions & Access Control
-description: Role-based access control and permission management in InstantDB Flutter
+description: Role-based access control and permission management in Flutter InstantDB
 sidebar:
   order: 3
 ---
@@ -67,7 +67,7 @@ class UserPermissions {
 
   UserPermissions(this.user) {
     // Extract role from user metadata
-    final roleString = user.metadata?['role'] as String?;
+    final roleString = user.type as String?;
     role = UserRole.values.firstWhere(
       (r) => r.name == roleString,
       orElse: () => UserRole.guest,

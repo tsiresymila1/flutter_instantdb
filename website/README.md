@@ -1,8 +1,8 @@
-# InstantDB Flutter Documentation
+# Flutter InstantDB Documentation
 
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
-This is the documentation website for InstantDB Flutter - a real-time, offline-first database client for Flutter applications.
+This is the documentation website for Flutter InstantDB - a real-time, offline-first database client for Flutter applications.
 
 ## 🚀 Project Structure
 
@@ -126,7 +126,7 @@ import { Card, CardGrid, Code, Tabs, TabItem } from '@astrojs/starlight/componen
 
 ## 🔗 Links
 
-- [InstantDB Flutter Repository](https://github.com/pillowsoft/flutter_instantdb)
+- [Flutter InstantDB Repository](https://github.com/tsiresymila1/flutter_instantdb)
 - [InstantDB Website](https://instantdb.com)
 - [Astro Documentation](https://docs.astro.build)
 - [Starlight Documentation](https://starlight.astro.build)

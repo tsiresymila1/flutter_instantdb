@@ -1,6 +1,6 @@
 # Flutter InstantDB - Development Guide
 
-This guide covers building, testing, debugging, and maintaining the InstantDB Flutter library and example application.
+This guide covers building, testing, debugging, and maintaining the Flutter InstantDB library and example application.
 
 ## 📋 Table of Contents
 
@@ -18,7 +18,7 @@ This guide covers building, testing, debugging, and maintaining the InstantDB Fl
 ## 🏗️ Project Overview
 
 ### Architecture
-InstantDB Flutter is a real-time, offline-first database client that provides:
+Flutter InstantDB is a real-time, offline-first database client that provides:
 
 - **SQLite Triple Store**: Local persistence using RDF triple model
 - **Real-time Sync Engine**: WebSocket-based synchronization with InstantDB cloud

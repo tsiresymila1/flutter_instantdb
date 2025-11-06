@@ -1,13 +1,13 @@
 ---
 title: Types Reference
-description: Complete type definitions and interfaces for InstantDB Flutter
+description: Complete type definitions and interfaces for Flutter InstantDB
 sidebar:
   order: 6
 ---
 
 import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
 
-This reference documents all the types, classes, and interfaces used in InstantDB Flutter, providing complete type information for building type-safe applications.
+This reference documents all the types, classes, and interfaces used in Flutter InstantDB, providing complete type information for building type-safe applications.
 
 ## Core Types
 
@@ -54,20 +54,20 @@ class InstantConfig {
   const InstantConfig({
     this.syncEnabled = true,
     this.verboseLogging = false,
-    this.apiUrl = 'https://api.instantdb.com',
+    this.baseUrl = 'https://api.instantdb.com',
     this.websocketUrl = 'wss://api.instantdb.com/ws',
   });
 
   final bool syncEnabled;
   final bool verboseLogging;
-  final String apiUrl;
+  final String baseUrl;
   final String websocketUrl;
 
   // Methods
   InstantConfig copyWith({
     bool? syncEnabled,
     bool? verboseLogging,
-    String? apiUrl,
+    String? baseUrl,
     String? websocketUrl,
   });
   
@@ -706,7 +706,7 @@ abstract class Schema {
 
 ## Signal Types
 
-InstantDB Flutter uses the `signals_flutter` package for reactivity:
+Flutter InstantDB uses the `signals_flutter` package for reactivity:
 
 ```dart
 // Core signal types

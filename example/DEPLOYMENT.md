@@ -1,6 +1,6 @@
-# InstantDB Flutter Example - Deployment Guide
+# Flutter InstantDB Example - Deployment Guide
 
-This guide walks you through deploying the InstantDB Flutter example app to Cloudflare Pages.
+This guide walks you through deploying the Flutter InstantDB example app to Cloudflare Pages.
 
 ## 🚀 Quick Start
 
@@ -297,4 +297,4 @@ If you encounter issues:
 1. Check the [troubleshooting section](#🔧-troubleshooting) above
 2. Review Cloudflare Pages logs: `just cf-logs`
 3. Test locally first: `just web-serve`
-4. Open an issue in the InstantDB Flutter repository
+4. Open an issue in the Flutter InstantDB repository

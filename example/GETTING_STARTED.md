@@ -1,6 +1,6 @@
-# Getting Started with InstantDB Flutter Example
+# Getting Started with Flutter InstantDB Example
 
-This guide will walk you through setting up the InstantDB Flutter example app with your own InstantDB cloud backend.
+This guide will walk you through setting up the Flutter InstantDB example app with your own InstantDB cloud backend.
 
 ## Prerequisites
 

@@ -48,13 +48,13 @@ class InstantConfig {
   const InstantConfig({
     this.syncEnabled = true,
     this.verboseLogging = false,
-    this.apiUrl = 'https://api.instantdb.com',
+    this.baseUrl = 'https://api.instantdb.com',
     this.websocketUrl = 'wss://api.instantdb.com/ws',
   });
 
   final bool syncEnabled;
   final bool verboseLogging;
-  final String apiUrl;
+  final String baseUrl;
   final String websocketUrl;
 }
 ```
@@ -62,7 +62,7 @@ class InstantConfig {
 **Properties:**
 - `syncEnabled` (`bool`): Enable real-time synchronization (default: `true`)
 - `verboseLogging` (`bool`): Enable detailed debug logging (default: `false`)
-- `apiUrl` (`String`): Custom API endpoint URL
+- `baseUrl` (`String`): Custom API endpoint URL
 - `websocketUrl` (`String`): Custom WebSocket endpoint URL
 
 ## Core Properties
