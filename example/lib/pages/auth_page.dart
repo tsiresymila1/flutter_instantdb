@@ -1,6 +1,7 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_instantdb/flutter_instantdb.dart';
-import 'dart:developer' as developer;
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -25,6 +26,45 @@ class _AuthPageState extends State<AuthPage> {
     super.dispose();
   }
 
+  Future<void> _signAsGuest() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final db = InstantProvider.of(context);
+      await db.auth.signInAsGuest();
+      developer.log('AuthPage: Signed as Guest successfully', name: 'AUTH');
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e, stackTrace) {
+      developer.log(
+        'AuthPage: Error signing as guest',
+        error: e,
+        stackTrace: stackTrace,
+        name: 'AUTH',
+      );
+      // Log additional details if it's an InstantException
+      if (e is InstantException) {
+        developer.log(
+          'AuthPage: InstantException details - message: ${e.message}, code: ${e.code}',
+          name: 'AUTH',
+        );
+        developer.log(
+          'AuthPage: Original error: ${e.originalError}',
+          name: 'AUTH',
+        );
+      }
+
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
   Future<void> _sendMagicCode() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
@@ -46,7 +86,7 @@ class _AuthPageState extends State<AuthPage> {
         name: 'AUTH',
       );
 
-      await db.auth.sendMagicCode(email);
+      await db.auth.sendMagicCode(email: email);
 
       developer.log('AuthPage: Magic code sent successfully', name: 'AUTH');
 
@@ -174,7 +214,6 @@ class _AuthPageState extends State<AuthPage> {
       stream: db.auth.onAuthStateChange,
       builder: (context, snapshot) {
         final user = snapshot.data;
-
         if (user != null) {
           // User is signed in
           return _buildSignedInView(user);
@@ -242,6 +281,21 @@ class _AuthPageState extends State<AuthPage> {
                         ),
                       )
                     : const Text('Send Code'),
+              ),
+              FilledButton(
+                onPressed: _isLoading ? null : _signAsGuest,
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                    : const Text('Sign as Guest'),
               ),
             ],
           ),
@@ -333,7 +387,7 @@ class _AuthPageState extends State<AuthPage> {
                 radius: 48,
                 backgroundColor: Colors.indigo,
                 child: Text(
-                  user.email.substring(0, 1).toUpperCase(),
+                  user.email,
                   style: const TextStyle(
                     fontSize: 36,
                     color: Colors.white,
@@ -363,6 +417,12 @@ class _AuthPageState extends State<AuthPage> {
                       _buildInfoRow('User ID', user.id),
                       const Divider(),
                       _buildInfoRow('Email', user.email),
+                      if (user.type != null) _buildInfoRow('Type', user.type!),
+                      if (user.isGuest != null)
+                        _buildInfoRow(
+                          'isGuest',
+                          user.isGuest! ? "true" : "false",
+                        ),
                       if (user.refreshToken != null) ...[
                         const Divider(),
                         _buildInfoRow(
@@ -376,6 +436,23 @@ class _AuthPageState extends State<AuthPage> {
                 ),
               ),
               const SizedBox(height: 24),
+              if (user.refreshToken != null)
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    await db.auth.verifyRefreshToken(
+                      refreshToken: user.refreshToken!,
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('token verified successfully'),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Verify refreshToken'),
+                ),
               OutlinedButton.icon(
                 onPressed: () async {
                   await db.auth.signOut();

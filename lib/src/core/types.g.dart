@@ -160,7 +160,9 @@ Map<String, dynamic> _$TransactionResultToJson(TransactionResult instance) =>
 
 AuthUser _$AuthUserFromJson(Map<String, dynamic> json) => AuthUser(
   id: json['id'] as String,
-  email: json['email'] as String,
+  email: json['email'] as String? ?? "",
+  type: json['type'] as String?,
+  isGuest: json['isGuest'] as bool?,
   refreshToken: json['refresh_token'] as String?,
   metadata: json['metadata'] as Map<String, dynamic>? ?? const {},
 );
@@ -168,6 +170,8 @@ AuthUser _$AuthUserFromJson(Map<String, dynamic> json) => AuthUser(
 Map<String, dynamic> _$AuthUserToJson(AuthUser instance) => <String, dynamic>{
   'id': instance.id,
   'email': instance.email,
+  'type': instance.type,
+  'isGuest': instance.isGuest,
   'refresh_token': instance.refreshToken,
   'metadata': instance.metadata,
 };

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:signals_flutter/signals_flutter.dart';
 
-import '../core/types.dart';
 import '../core/logging_config.dart';
+import '../core/types.dart';
 import '../storage/storage_interface.dart';
 import '../sync/sync_engine.dart';
 
@@ -497,42 +498,55 @@ class QueryEngine {
               break;
             case '\$gt':
               if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) <= 0)
+                  (fieldValue as Comparable).compareTo(compareValue) <= 0) {
                 return false;
+              }
+
               break;
             case '\$gte':
               if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) < 0)
+                  (fieldValue as Comparable).compareTo(compareValue) < 0) {
                 return false;
+              }
               break;
             case '\$lt':
               if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) >= 0)
+                  (fieldValue as Comparable).compareTo(compareValue) >= 0) {
                 return false;
+              }
+
               break;
             case '\$lte':
               if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) > 0)
+                  (fieldValue as Comparable).compareTo(compareValue) > 0) {
                 return false;
+              }
               break;
             case '\$in':
-              if (compareValue is List && !compareValue.contains(fieldValue))
+              if (compareValue is List && !compareValue.contains(fieldValue)) {
                 return false;
+              }
+
               break;
             case '\$nin':
-              if (compareValue is List && compareValue.contains(fieldValue))
+              if (compareValue is List && compareValue.contains(fieldValue)) {
                 return false;
+              }
+
               break;
             case '\$exists':
               final exists = doc.containsKey(field);
               if ((compareValue == true && !exists) ||
-                  (compareValue == false && exists))
+                  (compareValue == false && exists)) {
                 return false;
+              }
+
               break;
             case '\$isNull':
               if ((compareValue == true && fieldValue != null) ||
-                  (compareValue == false && fieldValue == null))
+                  (compareValue == false && fieldValue == null)) {
                 return false;
+              }
               break;
             default:
               // Unknown operator, skip

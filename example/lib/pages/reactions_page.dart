@@ -120,15 +120,19 @@ class _ReactionsPageState extends State<ReactionsPage> {
             Container(
               height: 80,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: _emojis.map((emoji) {
-                  return _EmojiButton(
-                    emoji: emoji,
-                    onTap: (globalPosition) =>
-                        _sendReaction(emoji, globalPosition),
-                  );
-                }).toList(),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  spacing: 4,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: _emojis.map((emoji) {
+                    return _EmojiButton(
+                      emoji: emoji,
+                      onTap: (globalPosition) =>
+                          _sendReaction(emoji, globalPosition),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
 

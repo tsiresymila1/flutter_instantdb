@@ -1,6 +1,6 @@
-# InstantDB Flutter Release Workflow
+# Flutter InstantDB  Release Workflow
 
-This document provides a comprehensive guide for releasing InstantDB Flutter to both GitHub Releases and pub.dev.
+This document provides a comprehensive guide for releasing Flutter InstantDB to both GitHub Releases and pub.dev.
 
 ## Table of Contents
 

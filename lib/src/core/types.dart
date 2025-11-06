@@ -28,6 +28,7 @@ class Triple {
   });
 
   factory Triple.fromJson(Map<String, dynamic> json) => _$TripleFromJson(json);
+
   Map<String, dynamic> toJson() => _$TripleToJson(this);
 
   Triple copyWith({
@@ -71,6 +72,7 @@ class TripleChange {
 
   factory TripleChange.fromJson(Map<String, dynamic> json) =>
       _$TripleChangeFromJson(json);
+
   Map<String, dynamic> toJson() => _$TripleChangeToJson(this);
 
   /// Create a clear change event
@@ -117,9 +119,11 @@ class QueryResult {
 
   factory QueryResult.fromJson(Map<String, dynamic> json) =>
       _$QueryResultFromJson(json);
+
   Map<String, dynamic> toJson() => _$QueryResultToJson(this);
 
   bool get hasData => data != null;
+
   bool get hasError => error != null;
 
   /// Convenience getter to access documents from the first collection in the result
@@ -131,7 +135,7 @@ class QueryResult {
     for (final value in data!.values) {
       if (value is List) {
         return List<Map<String, dynamic>>.from(
-          value.where((item) => item is Map<String, dynamic>),
+          value.whereType<Map<String, dynamic>>(),
         );
       }
     }
@@ -172,6 +176,7 @@ class InstantConfig {
 
   factory InstantConfig.fromJson(Map<String, dynamic> json) =>
       _$InstantConfigFromJson(json);
+
   Map<String, dynamic> toJson() => _$InstantConfigToJson(this);
 }
 
@@ -259,6 +264,7 @@ class Operation {
       );
     }
   }
+
   Map<String, dynamic> toJson() => _$OperationToJson(this);
 
   // Legacy constructor for backward compatibility
@@ -314,6 +320,7 @@ class Transaction {
 
   factory Transaction.fromJson(Map<String, dynamic> json) =>
       _$TransactionFromJson(json);
+
   Map<String, dynamic> toJson() => _$TransactionToJson(this);
 }
 
@@ -346,6 +353,7 @@ class TransactionResult {
 
   factory TransactionResult.fromJson(Map<String, dynamic> json) =>
       _$TransactionResultFromJson(json);
+
   Map<String, dynamic> toJson() => _$TransactionResultToJson(this);
 }
 
@@ -354,19 +362,24 @@ class TransactionResult {
 class AuthUser {
   final String id;
   final String email;
+  final String? type;
+  final bool? isGuest;
   @JsonKey(name: 'refresh_token')
   final String? refreshToken;
   final Map<String, dynamic> metadata;
 
   const AuthUser({
     required this.id,
-    required this.email,
+    this.email = "",
+    this.type,
+    this.isGuest,
     this.refreshToken,
     this.metadata = const {},
   });
 
   factory AuthUser.fromJson(Map<String, dynamic> json) =>
       _$AuthUserFromJson(json);
+
   Map<String, dynamic> toJson() => _$AuthUserToJson(this);
 }
 
@@ -385,6 +398,7 @@ class LookupRef {
 
   factory LookupRef.fromJson(Map<String, dynamic> json) =>
       _$LookupRefFromJson(json);
+
   Map<String, dynamic> toJson() => _$LookupRefToJson(this);
 }
 
