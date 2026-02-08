@@ -1,6 +1,12 @@
 # Flutter InstantDB
 
-A real-time, offline-first database client for Flutter with reactive bindings. This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com), enabling you to build real-time, collaborative applications with ease.
+Real-time, offline-first database for Flutter with reactive bindings. Build collaborative apps in minutes.
+
+- 📚 Docs: https://flutter-instandb.vercel.app
+- 🚀 Quick Start: https://flutter-instandb.vercel.app/getting-started/quick-start
+- 🧩 Example app: [example/](example/)
+
+This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com), enabling you to build real-time, collaborative applications with ease.
 
 ## Features
 
@@ -14,6 +20,32 @@ A real-time, offline-first database client for Flutter with reactive bindings. T
 - ✅ **Conflict resolution** - Automatic handling of concurrent data modifications
 - ✅ **Flutter widgets** - Purpose-built reactive widgets for common patterns
 
+## Requirements
+
+- Flutter SDK >= 3.8.0
+- Dart SDK >= 3.8.0
+- An InstantDB App ID (create one at [instantdb.com](https://instantdb.com))
+
+## Platform Support
+
+| Platform | Support | Notes |
+|----------|---------|------|
+| Android | ✅ | SQLite storage |
+| iOS | ✅ | SQLite storage |
+| Web | ✅ | SQLite (WASM) persisted in IndexedDB |
+| macOS | ✅ | SQLite storage |
+| Windows | ✅ | SQLite storage |
+| Linux | ✅ | SQLite storage |
+
+## Documentation
+
+- Getting Started: [Installation](https://flutter-instandb.vercel.app/getting-started/installation) · [Quick Start](https://flutter-instandb.vercel.app/getting-started/quick-start)
+- Concepts: [Database](https://flutter-instandb.vercel.app/concepts/database) · [Schema](https://flutter-instandb.vercel.app/concepts/schema)
+- API Reference: [InstantDB](https://flutter-instandb.vercel.app/api/instantdb) · [Queries](https://flutter-instandb.vercel.app/api/queries) · [Transactions](https://flutter-instandb.vercel.app/api/transactions) · [Presence](https://flutter-instandb.vercel.app/api/presence-api) · [Widgets](https://flutter-instandb.vercel.app/api/widgets) · [Types](https://flutter-instandb.vercel.app/api/types)
+- Authentication: [Users](https://flutter-instandb.vercel.app/auth/users) · [Sessions](https://flutter-instandb.vercel.app/auth/sessions) · [Permissions](https://flutter-instandb.vercel.app/auth/permissions)
+- Real-time: [Sync](https://flutter-instandb.vercel.app/realtime/sync) · [Presence](https://flutter-instandb.vercel.app/realtime/presence) · [Collaboration](https://flutter-instandb.vercel.app/realtime/collaboration)
+- Advanced: [Offline](https://flutter-instandb.vercel.app/advanced/offline) · [Performance](https://flutter-instandb.vercel.app/advanced/performance) · [Migration](https://flutter-instandb.vercel.app/advanced/migration) · [Troubleshooting](https://flutter-instandb.vercel.app/advanced/troubleshooting)
+
 ## Quick Start
 
 ### 1. Installation
@@ -22,7 +54,13 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-   flutter_instantdb: ^0.1.0
+  flutter_instantdb: ^1.1.2
+```
+
+Or install from the command line:
+
+```sh
+flutter pub add flutter_instantdb
 ```
 
 ### 2. Initialize InstantDB
@@ -93,17 +131,38 @@ class TodoList extends StatelessWidget {
 ### 5. Perform Mutations
 
 ```dart
-// Create a new todo using the new tx namespace (recommended)
+// Create a new todo using the tx namespace (recommended)
 final todoId = db.id();
-await db.transactChunk(
-  db.tx['todos'][todoId].update({
+await db.transact(
+  db.tx['todos'].create({
+    'id': todoId,
     'text': 'Learn Flutter InstantDB',
     'completed': false,
     'createdAt': DateTime.now().millisecondsSinceEpoch,
-  })
+  }),
 );
 
-// Or use the traditional approach
+// Update with the tx API
+await db.transact(
+  db.tx['todos'][todoId].update({'completed': true}),
+);
+
+// Deep merge for nested updates
+await db.transact(
+  db.tx['users'][userId].merge({
+    'preferences': {
+      'theme': 'dark',
+      'notifications': {'email': false}
+    }
+  }),
+);
+
+// Delete a todo
+await db.transact(
+  db.tx['todos'][todoId].delete(),
+);
+
+// Legacy API still works (create/update/delete)
 await db.transact([
   ...db.create('todos', {
     'id': db.id(), // Generates a proper UUID - required by InstantDB
@@ -111,26 +170,6 @@ await db.transact([
     'completed': false,
     'createdAt': DateTime.now().millisecondsSinceEpoch,
   }),
-]);
-
-// Update with the new tx API
-await db.transactChunk(
-  db.tx['todos'][todoId].update({'completed': true})
-);
-
-// Deep merge for nested updates
-await db.transactChunk(
-  db.tx['users'][userId].merge({
-    'preferences': {
-      'theme': 'dark',
-      'notifications': {'email': false}
-    }
-  })
-);
-
-// Delete a todo
-await db.transact([
-  db.delete(todoId),
 ]);
 ```
 
@@ -178,13 +217,13 @@ All mutations happen within transactions, which provide atomicity and enable opt
 ```dart
 // New tx namespace API (recommended)
 final postId = db.id();
-await db.transactChunk(
+await db.transact(
   db.tx['users'][userId]
-    .update({'name': 'New Name'})
-    .link({'posts': [postId]})
+      .update({'name': 'New Name'})
+      .merge(db.tx['users'][userId].link({'posts': [postId]})),
 );
 
-await db.transactChunk(
+await db.transact(
   db.tx['posts'][postId].update({
     'title': 'Hello World',
     'authorId': lookup('users', 'email', 'john@example.com'),

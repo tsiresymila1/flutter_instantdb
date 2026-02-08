@@ -3,7 +3,7 @@ description: "A real-time, offline-first database client for Flutter with reacti
 version: 1.1.2
 homepage: https://github.com/tsiresymila1/flutter_instantdb
 repository: https://github.com/tsiresymila1/flutter_instantdb
-documentation: https://instantdb-flutter-docs.pages.dev
+documentation: https://flutter-instantdb.vercel.app
 
 environment:
   sdk: ^3.8.0
