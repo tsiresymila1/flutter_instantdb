@@ -13,6 +13,7 @@ Triple _$TripleFromJson(Map<String, dynamic> json) => Triple(
   txId: json['txId'] as String,
   createdAt: DateTime.parse(json['createdAt'] as String),
   retracted: json['retracted'] as bool? ?? false,
+  isLocalOnly: json['isLocalOnly'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$TripleToJson(Triple instance) => <String, dynamic>{
@@ -22,6 +23,7 @@ Map<String, dynamic> _$TripleToJson(Triple instance) => <String, dynamic>{
   'txId': instance.txId,
   'createdAt': instance.createdAt.toIso8601String(),
   'retracted': instance.retracted,
+  'isLocalOnly': instance.isLocalOnly,
 };
 
 TripleChange _$TripleChangeFromJson(Map<String, dynamic> json) => TripleChange(

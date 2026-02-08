@@ -1,4 +1,4 @@
-/// Simple schema system for Flutter InstantDB.
+/// Simple schema system for InstantDB Flutter.
 /// This is a basic implementation - in production you'd want more sophisticated validation.
 library;
 
@@ -150,15 +150,15 @@ class Schema {
   static BooleanSchema boolean() => BooleanSchema();
 
   static ArraySchema array(
-    SchemaValidator itemSchema, {
-    int? minLength,
-    int? maxLength,
-  }) => ArraySchema(itemSchema, minLength: minLength, maxLength: maxLength);
+      SchemaValidator itemSchema, {
+        int? minLength,
+        int? maxLength,
+      }) => ArraySchema(itemSchema, minLength: minLength, maxLength: maxLength);
 
   static ObjectSchema object(
-    Map<String, SchemaValidator> properties, {
-    List<String> required = const [],
-  }) => ObjectSchema(properties, required: required);
+      Map<String, SchemaValidator> properties, {
+        List<String> required = const [],
+      }) => ObjectSchema(properties, required: required);
 
   static OptionalSchema optional(SchemaValidator schema) =>
       OptionalSchema(schema);
@@ -191,33 +191,52 @@ class EntityRef {
 /// Type of relationship link
 enum LinkType { oneToOne, oneToMany, manyToMany }
 
+/// Entity definition with schema and metadata
+class InstantEntity {
+  final SchemaValidator validator;
+  final bool localOnly;
+
+  const InstantEntity({required this.validator, this.localOnly = false});
+}
+
 /// Complete schema definition for an InstantDB app
 class InstantSchema {
-  final Map<String, SchemaValidator> entities;
+  final Map<String, InstantEntity> entities;
   final Map<String, Link> links;
 
   InstantSchema({required this.entities, this.links = const {}});
 
+  /// Check if an entity type is local-only
+  bool isLocalOnly(String entityType) {
+    return entities[entityType]?.localOnly ?? false;
+  }
+
   /// Validate an entity against its schema
   bool validateEntity(String entityType, Map<String, dynamic> data) {
-    final schema = entities[entityType];
-    if (schema == null) return false;
+    final entity = entities[entityType];
+    if (entity == null) return false;
 
-    return schema.validate(data);
+    return entity.validator.validate(data);
   }
 
   /// Get schema for an entity type
-  SchemaValidator? getEntitySchema(String entityType) => entities[entityType];
+  SchemaValidator? getEntitySchema(String entityType) =>
+      entities[entityType]?.validator;
 }
 
 /// Builder for InstantSchema
 class InstantSchemaBuilder {
-  final Map<String, SchemaValidator> _entities = {};
+  final Map<String, InstantEntity> _entities = {};
   final Map<String, Link> _links = {};
 
   /// Add an entity schema
-  InstantSchemaBuilder addEntity(String name, SchemaValidator schema) {
+  InstantSchemaBuilder addEntity(
+      String name,
+      SchemaValidator schema, {
+        bool localOnly = false,
+      }) {
     // Ensure required fields for InstantDB entities
+    SchemaValidator validator;
     if (schema is ObjectSchema) {
       final properties = Map<String, SchemaValidator>.from(schema.properties);
       properties['id'] ??= Schema.id();
@@ -227,12 +246,19 @@ class InstantSchemaBuilder {
       final required = List<String>.from(schema.required);
       if (!required.contains('id')) required.add('id');
 
-      _entities[name] = ObjectSchema(properties, required: required);
+      validator = ObjectSchema(properties, required: required);
     } else {
-      _entities[name] = schema;
+      validator = schema;
     }
 
+    _entities[name] = InstantEntity(validator: validator, localOnly: localOnly);
+
     return this;
+  }
+
+  /// Add a local-only entity schema (convenience method)
+  InstantSchemaBuilder addLocalEntity(String name, SchemaValidator schema) {
+    return addEntity(name, schema, localOnly: true);
   }
 
   /// Add a relationship link

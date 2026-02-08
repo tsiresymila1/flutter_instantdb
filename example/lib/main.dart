@@ -29,7 +29,6 @@ void main() async {
       verboseLogging: true, // Use the debug preference
     ),
   );
-
   runApp(InstantDBExamplesApp(db: db));
 }
 
@@ -44,7 +43,7 @@ class InstantDBExamplesApp extends StatelessWidget {
       db: db,
       child: MaterialApp(
         title: 'InstantDB Examples',
-        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+        theme: ThemeData( useMaterial3: true),
         home: const ExamplesRootScreen(),
       ),
     );

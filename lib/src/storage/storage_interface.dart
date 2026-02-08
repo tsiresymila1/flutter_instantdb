@@ -23,6 +23,7 @@ abstract class StorageInterface {
     int? offset,
     Map<String, dynamic>? aggregate,
     List<String>? groupBy,
+    bool syncedOnly = false,
   });
 
   /// Clear all data from the store

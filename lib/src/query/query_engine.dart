@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
-
 import 'package:signals_flutter/signals_flutter.dart';
 
-import '../core/logging_config.dart';
 import '../core/types.dart';
+import '../core/logging_config.dart';
 import '../storage/storage_interface.dart';
 import '../sync/sync_engine.dart';
 
@@ -12,11 +12,16 @@ import '../sync/sync_engine.dart';
 class QueryEngine {
   final StorageInterface _store;
   SyncEngine? _syncEngine;
-  final Map<String, Signal<QueryResult>> _queryCache = {};
+  // Use LinkedHashMap for LRU cache behavior
+  final LinkedHashMap<String, Signal<QueryResult>> _queryCache =
+  LinkedHashMap();
   late final StreamSubscription _storeSubscription;
   Timer? _batchTimer;
   final Set<String> _pendingQueryUpdates = {};
   final Set<String> _subscribedQueries = {};
+
+  // Maximum number of queries to cache (LRU eviction)
+  static const int _maxCacheSize = 50;
 
   // Logger for query engine
   static final _logger = InstantDBLogging.queryEngine;
@@ -75,8 +80,11 @@ class QueryEngine {
   }
 
   /// Execute a query and return a reactive signal
-  Signal<QueryResult> query(Map<String, dynamic> query) {
-    final queryKey = _generateQueryKey(query);
+  Signal<QueryResult> query(
+      Map<String, dynamic> query, {
+        bool syncedOnly = false,
+      }) {
+    final queryKey = _generateQueryKey(query, syncedOnly: syncedOnly);
 
     // Return cached query if exists
     if (_queryCache.containsKey(queryKey)) {
@@ -135,7 +143,7 @@ class QueryEngine {
 
     // Create new reactive query with initial cached data if available
     final resultSignal = signal(initialResult);
-    _queryCache[queryKey] = resultSignal;
+    _addToCache(queryKey, resultSignal);
 
     // Send query to InstantDB to establish subscription
     if (_syncEngine != null && !_subscribedQueries.contains(queryKey)) {
@@ -151,25 +159,33 @@ class QueryEngine {
     }
 
     // Execute query asynchronously
-    _executeQuery(query, resultSignal);
+    _executeQuery(query, resultSignal, syncedOnly: syncedOnly);
 
     return resultSignal;
   }
 
   Future<void> _executeQuery(
-    Map<String, dynamic> query,
-    Signal<QueryResult> resultSignal,
-  ) async {
+      Map<String, dynamic> query,
+      Signal<QueryResult> resultSignal, {
+        bool syncedOnly = false,
+      }) async {
     try {
-      final result = await _processQuery(query);
-      resultSignal.value = QueryResult.success(result);
+      final result = await _processQuery(query, syncedOnly: syncedOnly);
+      batch(() {
+        resultSignal.value = QueryResult.success(result);
+      });
     } catch (e, stackTrace) {
       InstantDBLogging.root.severe('Query execution error', e, stackTrace);
-      resultSignal.value = QueryResult.error(e.toString());
+      batch(() {
+        resultSignal.value = QueryResult.error(e.toString());
+      });
     }
   }
 
-  Future<Map<String, dynamic>> _processQuery(Map<String, dynamic> query) async {
+  Future<Map<String, dynamic>> _processQuery(
+      Map<String, dynamic> query, {
+        bool syncedOnly = false,
+      }) async {
     final results = <String, dynamic>{};
 
     for (final entry in query.entries) {
@@ -194,7 +210,11 @@ class QueryEngine {
       }
 
       // Execute entity query
-      final entities = await _queryEntities(entityType, entityQuery);
+      final entities = await _queryEntities(
+        entityType,
+        entityQuery,
+        syncedOnly: syncedOnly,
+      );
       results[entityType] = entities;
     }
 
@@ -202,9 +222,10 @@ class QueryEngine {
   }
 
   Future<List<Map<String, dynamic>>> _queryEntities(
-    String entityType,
-    Map<String, dynamic> query,
-  ) async {
+      String entityType,
+      Map<String, dynamic> query, {
+        bool syncedOnly = false,
+      }) async {
     // Check sync engine cache first for immediate data availability
     if (_syncEngine != null) {
       final cachedData = _syncEngine!.getCachedQueryResult(entityType);
@@ -258,6 +279,7 @@ class QueryEngine {
       offset: offset,
       aggregate: aggregate,
       groupBy: groupBy,
+      syncedOnly: syncedOnly,
     );
 
     // Process includes (nested queries)
@@ -269,9 +291,9 @@ class QueryEngine {
   }
 
   Future<List<Map<String, dynamic>>> _processIncludes(
-    List<Map<String, dynamic>> entities,
-    Map<String, dynamic> includes,
-  ) async {
+      List<Map<String, dynamic>> entities,
+      Map<String, dynamic> includes,
+      ) async {
     for (final entity in entities) {
       for (final includeEntry in includes.entries) {
         final relationName = includeEntry.key;
@@ -298,7 +320,7 @@ class QueryEngine {
             foreignKey = 'authorId'; // posts commonly use authorId
           } else {
             foreignKey =
-                '${singularParentType}Id'; // fallback to standard pattern
+            '${singularParentType}Id'; // fallback to standard pattern
           }
 
           final whereClause = <String, dynamic>{foreignKey: entity['id']};
@@ -388,10 +410,14 @@ class QueryEngine {
     _batchTimer = Timer(const Duration(milliseconds: 200), () {
       // Execute all pending query updates
       for (final queryKey in _pendingQueryUpdates) {
-        final query = _parseQueryKey(queryKey);
+        final syncedOnly = queryKey.endsWith(':synced');
+        final baseKey = syncedOnly
+            ? queryKey.substring(0, queryKey.length - 7)
+            : queryKey;
+        final query = jsonDecode(baseKey) as Map<String, dynamic>;
         final resultSignal = _queryCache[queryKey];
         if (resultSignal != null) {
-          _executeQuery(query, resultSignal);
+          _executeQuery(query, resultSignal, syncedOnly: syncedOnly);
         }
       }
       _pendingQueryUpdates.clear();
@@ -400,9 +426,9 @@ class QueryEngine {
 
   /// Apply query filters to cached data
   List<Map<String, dynamic>> _applyQueryFilters(
-    List<Map<String, dynamic>> data,
-    Map<String, dynamic> query,
-  ) {
+      List<Map<String, dynamic>> data,
+      Map<String, dynamic> query,
+      ) {
     var filteredData = List<Map<String, dynamic>>.from(data);
 
     // Apply where clause filters if present
@@ -448,11 +474,19 @@ class QueryEngine {
             if (aValue == null) return isDesc ? 1 : -1;
             if (bValue == null) return isDesc ? -1 : 1;
 
-            final comparison = Comparable.compare(
-              aValue as Comparable,
-              bValue as Comparable,
-            );
-            return isDesc ? -comparison : comparison;
+            // Type-safe comparison - only compare if both values are Comparable
+            if (aValue is Comparable && bValue is Comparable) {
+              try {
+                final comparison = Comparable.compare(aValue, bValue);
+                return isDesc ? -comparison : comparison;
+              } catch (e) {
+                // If comparison fails (incompatible types), treat as equal
+                _logger.warning('Failed to compare values: $e');
+                return 0;
+              }
+            }
+            // If not comparable, maintain original order
+            return 0;
           });
         }
       }
@@ -475,9 +509,9 @@ class QueryEngine {
 
   /// Evaluate where conditions for filtering cached data
   bool _evaluateWhereCondition(
-    Map<String, dynamic> doc,
-    Map<String, dynamic> where,
-  ) {
+      Map<String, dynamic> doc,
+      Map<String, dynamic> where,
+      ) {
     for (final entry in where.entries) {
       final field = entry.key;
       final condition = entry.value;
@@ -497,28 +531,74 @@ class QueryEngine {
               if (fieldValue == compareValue) return false;
               break;
             case '\$gt':
-              if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) <= 0) {
+              if (fieldValue == null) return false;
+              // Type-safe comparison
+              if (fieldValue is! Comparable || compareValue is! Comparable) {
+                _logger.warning(
+                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
+                );
                 return false;
               }
-
+              try {
+                if ((fieldValue).compareTo(compareValue) <= 0) {
+                  return false;
+                }
+              } catch (e) {
+                _logger.warning('Comparison failed for \$gt: $e');
+                return false;
+              }
               break;
             case '\$gte':
-              if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) < 0) {
+              if (fieldValue == null) return false;
+              // Type-safe comparison
+              if (fieldValue is! Comparable || compareValue is! Comparable) {
+                _logger.warning(
+                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
+                );
+                return false;
+              }
+              try {
+                if ((fieldValue).compareTo(compareValue) < 0) {
+                  return false;
+                }
+              } catch (e) {
+                _logger.warning('Comparison failed for \$gte: $e');
                 return false;
               }
               break;
             case '\$lt':
-              if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) >= 0) {
+              if (fieldValue == null) return false;
+              // Type-safe comparison
+              if (fieldValue is! Comparable || compareValue is! Comparable) {
+                _logger.warning(
+                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
+                );
                 return false;
               }
-
+              try {
+                if ((fieldValue).compareTo(compareValue) >= 0) {
+                  return false;
+                }
+              } catch (e) {
+                _logger.warning('Comparison failed for \$lt: $e');
+                return false;
+              }
               break;
             case '\$lte':
-              if (fieldValue == null ||
-                  (fieldValue as Comparable).compareTo(compareValue) > 0) {
+              if (fieldValue == null) return false;
+              // Type-safe comparison
+              if (fieldValue is! Comparable || compareValue is! Comparable) {
+                _logger.warning(
+                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
+                );
+                return false;
+              }
+              try {
+                if ((fieldValue).compareTo(compareValue) > 0) {
+                  return false;
+                }
+              } catch (e) {
+                _logger.warning('Comparison failed for \$lte: $e');
                 return false;
               }
               break;
@@ -526,13 +606,11 @@ class QueryEngine {
               if (compareValue is List && !compareValue.contains(fieldValue)) {
                 return false;
               }
-
               break;
             case '\$nin':
               if (compareValue is List && compareValue.contains(fieldValue)) {
                 return false;
               }
-
               break;
             case '\$exists':
               final exists = doc.containsKey(field);
@@ -540,7 +618,6 @@ class QueryEngine {
                   (compareValue == false && exists)) {
                 return false;
               }
-
               break;
             case '\$isNull':
               if ((compareValue == true && fieldValue != null) ||
@@ -549,7 +626,7 @@ class QueryEngine {
               }
               break;
             default:
-              // Unknown operator, skip
+            // Unknown operator, skip
               break;
           }
         }
@@ -582,8 +659,26 @@ class QueryEngine {
     return false;
   }
 
-  String _generateQueryKey(Map<String, dynamic> query) {
-    return jsonEncode(query);
+  /// Add query to cache with LRU eviction
+  void _addToCache(String key, Signal<QueryResult> signal) {
+    // If cache is full, remove the oldest entry (first entry in LinkedHashMap)
+    if (_queryCache.length >= _maxCacheSize) {
+      final oldestKey = _queryCache.keys.first;
+      _queryCache.remove(oldestKey);
+      _subscribedQueries.remove(oldestKey);
+      _logger.debug(
+        'QueryEngine: Cache full, evicted oldest query: ${oldestKey.substring(0, oldestKey.length.clamp(0, 50))}...',
+      );
+    }
+    _queryCache[key] = signal;
+  }
+
+  String _generateQueryKey(
+      Map<String, dynamic> query, {
+        bool syncedOnly = false,
+      }) {
+    final baseKey = jsonEncode(query);
+    return syncedOnly ? '$baseKey:synced' : baseKey;
   }
 
   Map<String, dynamic> _parseQueryKey(String queryKey) {
@@ -612,13 +707,13 @@ class QueryBuilder {
 
   /// Add an entity query
   QueryBuilder entity(
-    String entityType, {
-    Map<String, dynamic>? where,
-    Map<String, dynamic>? orderBy,
-    int? limit,
-    int? offset,
-    Map<String, dynamic>? include,
-  }) {
+      String entityType, {
+        Map<String, dynamic>? where,
+        Map<String, dynamic>? orderBy,
+        int? limit,
+        int? offset,
+        Map<String, dynamic>? include,
+      }) {
     final entityQuery = <String, dynamic>{};
 
     if (where != null) entityQuery['where'] = where;

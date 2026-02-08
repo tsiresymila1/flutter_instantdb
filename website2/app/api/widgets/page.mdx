@@ -1,0 +1,209 @@
+---
+title: Flutter Widgets
+description: Complete reference for Flutter InstantDB reactive widgets
+
+---
+
+
+Flutter InstantDB provides a set of reactive widgets that automatically update when data changes. These widgets integrate seamlessly with Flutter's widget tree and provide optimized performance.
+
+## Core Widgets
+
+### `InstantProvider`
+
+Provides the `InstantDB` instance to the widget tree using Flutter's `InheritedWidget` pattern. This should typically wrap your entire app.
+
+```dart
+class InstantProvider extends InheritedWidget {
+  const InstantProvider({
+    super.key,
+    required this.db,
+    required super.child,
+  });
+  
+  final InstantDB db;
+  
+  static InstantDB of(BuildContext context) {
+    // Returns the InstantDB instance
+  }
+}
+```
+
+**Parameters:**
+- `db` (`InstantDB`): The database instance to provide
+- `child` (`Widget`): The child widget tree
+
+**Example:**
+```dart
+void main() async {
+  final db = await InstantDB.init(appId: 'your-app-id');
+  runApp(InstantProvider(db: db, child: MyApp()));
+}
+```
+
+### `Watch`
+
+Part of the `signals_flutter` library (re-exported by `flutter_instantdb`). This widget rebuilds whenever any signal accessed inside its builder function changes value.
+
+```dart
+class Watch extends StatelessWidget {
+  const Watch(this.builder, {super.key});
+  
+  final Widget Function(BuildContext context) builder;
+}
+```
+
+**Example:**
+```dart
+Watch((context) {
+  final db = InstantProvider.of(context);
+  final isOnline = db.isOnline.value; // Accessing .value creates a dependency
+  return Text(isOnline ? 'Connected' : 'Disconnected');
+});
+```
+
+## Query Widgets
+
+### `InstantBuilder`
+
+The primary widget for building UI based on InstaQL queries. It handles loading and error states automatically.
+
+```dart
+class InstantBuilder extends StatelessWidget {
+  const InstantBuilder({
+    required this.query,
+    required this.builder,
+    this.errorBuilder,
+    this.loadingBuilder,
+  });
+}
+```
+
+**Properties:**
+- `query` (`Map<String, dynamic>`): The InstaQL query
+- `builder` (`Widget Function(BuildContext, Map<String, dynamic>)`): Called when data is available
+- `loadingBuilder` (`Widget Function(BuildContext)?`): Optional custom loading UI
+- `errorBuilder` (`Widget Function(BuildContext, String)?`): Optional custom error UI
+
+**Example:**
+```dart
+InstantBuilder(
+  query: {'goals': {}},
+  builder: (context, data) {
+    final goals = data['goals'] as List;
+    return ListView(children: [ ... ]);
+  },
+)
+```
+
+### `InstantBuilderTyped<T>`
+
+A generic version of `InstantBuilder` that includes a `transformer` function to convert raw map data into your own model classes.
+
+**Example:**
+```dart
+InstantBuilderTyped<List<Todo>>(
+  query: {'todos': {}},
+  transformer: (data) => (data['todos'] as List)
+      .map((json) => Todo.fromJson(json))
+      .toList(),
+  builder: (context, todos) {
+    return TodoList(todos: todos);
+  },
+)
+```
+
+### `InstantBuilder.list` / `InstantBuilder.single`
+
+Convenience static methods for common query patterns.
+
+```dart
+// Fetch a list of entities
+InstantBuilder.list(
+  entityType: 'todos',
+  where: {'completed': false},
+  builder: (context, todos) => ...,
+)
+
+// Fetch a single entity by ID
+InstantBuilder.single(
+  entityType: 'users',
+  id: 'user-123',
+  builder: (context, user) => ...,
+)
+```
+
+## Authentication Widgets
+
+### `AuthBuilder`
+
+Rebuilds when the authentication state changes.
+
+```dart
+AuthBuilder(
+  builder: (context, user) {
+    if (user == null) return Text('Not logged in');
+    return Text('Logged in as ${user.email}');
+  },
+)
+```
+
+### `AuthGuard`
+
+A higher-level widget that shows a `child` if the user is authenticated, or a `fallback` (or `loginBuilder`) if they are not.
+
+```dart
+AuthGuard(
+  fallback: LoadingScreen(),
+  loginBuilder: (context) => LoginScreen(),
+  child: DashboardScreen(),
+)
+```
+
+## Connection Widgets
+
+### `ConnectionStatusBuilder`
+
+Provides periodic updates on the database connection status.
+
+```dart
+ConnectionStatusBuilder(
+  builder: (context, isOnline) {
+    return Icon(
+      isOnline ? Icons.cloud_done : Icons.cloud_off,
+      color: isOnline ? Colors.green : Colors.red,
+    );
+  },
+)
+```
+
+## State Management Hooks
+
+### `useInstantQuery`
+
+A function that returns a `Signal<QueryResult>` for a given query. Useful inside `StatefulWidget` or other places where you want to manage the signal lifecycle yourself.
+
+```dart
+class MyWidget extends StatefulWidget {
+  @override
+  _MyWidgetState createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<MyWidget> {
+  late Signal<QueryResult> query;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    query = useInstantQuery(context, {'messages': {}});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Watch((context) {
+       final result = query.value;
+       // ... build UI
+    });
+  }
+}
+```

@@ -85,14 +85,14 @@ class InstantDB {
       _store = await TripleStore.init(
         appId: appId,
         persistenceDir: config.persistenceDir,
+        schema: schema,
       );
 
       // Initialize query engine
       _queryEngine = QueryEngine(_store);
-
-      // Initialize auth manager
+      // Initialize auth manager with session storage
+// Initialize auth manager
       _authManager = AuthManager(appId: appId, baseUrl: config.baseUrl!);
-
       // Initialize presence manager first (without sync engine)
       _presenceManager = PresenceManager(
         syncEngine: null, // Will be set later
@@ -106,6 +106,7 @@ class InstantDB {
         store: _store,
         authManager: _authManager,
         config: config,
+        schema: schema,
         presenceManager: config.syncEnabled ? _presenceManager : null,
       );
 
@@ -122,7 +123,10 @@ class InstantDB {
 
       // Connect sync engine events
       effect(() {
-        _isOnline.value = _syncEngine.connectionStatus.value;
+        final isConnected = _syncEngine.connectionStatus.value;
+        untracked(() {
+          _isOnline.value = isConnected;
+        });
       });
 
       // Start sync if enabled
@@ -149,17 +153,27 @@ class InstantDB {
   }
 
   /// Execute a query and return a reactive signal
-  Signal<QueryResult> query(Map<String, dynamic> query) {
+  ///
+  /// [syncedOnly] - If true, only returns entities that sync to cloud (excludes local-only entities)
+  Signal<QueryResult> query(
+      Map<String, dynamic> query, {
+        bool syncedOnly = false,
+      }) {
     if (!_isReady.value) {
       throw InstantException(
         message: 'InstantDB not ready. Call init() first.',
       );
     }
-    return _queryEngine.query(query);
+    return _queryEngine.query(query, syncedOnly: syncedOnly);
   }
 
   /// Execute a query once and return the current result
-  Future<QueryResult> queryOnce(Map<String, dynamic> query) async {
+  ///
+  /// [syncedOnly] - If true, only returns entities that sync to cloud (excludes local-only entities)
+  Future<QueryResult> queryOnce(
+      Map<String, dynamic> query, {
+        bool syncedOnly = false,
+      }) async {
     if (!_isReady.value) {
       throw InstantException(
         message: 'InstantDB not ready. Call init() first.',
@@ -167,7 +181,7 @@ class InstantDB {
     }
 
     // Execute the query and get the current value
-    final querySignal = _queryEngine.query(query);
+    final querySignal = _queryEngine.query(query, syncedOnly: syncedOnly);
 
     // Wait a bit for the query to execute if it's loading
     if (querySignal.value.isLoading) {
@@ -195,7 +209,7 @@ class InstantDB {
     } else {
       throw InstantException(
         message:
-            'transact() expects either List<Operation> or TransactionChunk, got ${transaction.runtimeType}',
+        'transact() expects either List<Operation> or TransactionChunk, got ${transaction.runtimeType}',
       );
     }
 
