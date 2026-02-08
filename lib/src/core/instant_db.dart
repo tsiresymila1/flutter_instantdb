@@ -91,7 +91,7 @@ class InstantDB {
       // Initialize query engine
       _queryEngine = QueryEngine(_store);
       // Initialize auth manager with session storage
-// Initialize auth manager
+      // Initialize auth manager
       _authManager = AuthManager(appId: appId, baseUrl: config.baseUrl!);
       // Initialize presence manager first (without sync engine)
       _presenceManager = PresenceManager(
@@ -156,9 +156,9 @@ class InstantDB {
   ///
   /// [syncedOnly] - If true, only returns entities that sync to cloud (excludes local-only entities)
   Signal<QueryResult> query(
-      Map<String, dynamic> query, {
-        bool syncedOnly = false,
-      }) {
+    Map<String, dynamic> query, {
+    bool syncedOnly = false,
+  }) {
     if (!_isReady.value) {
       throw InstantException(
         message: 'InstantDB not ready. Call init() first.',
@@ -171,9 +171,9 @@ class InstantDB {
   ///
   /// [syncedOnly] - If true, only returns entities that sync to cloud (excludes local-only entities)
   Future<QueryResult> queryOnce(
-      Map<String, dynamic> query, {
-        bool syncedOnly = false,
-      }) async {
+    Map<String, dynamic> query, {
+    bool syncedOnly = false,
+  }) async {
     if (!_isReady.value) {
       throw InstantException(
         message: 'InstantDB not ready. Call init() first.',
@@ -209,7 +209,7 @@ class InstantDB {
     } else {
       throw InstantException(
         message:
-        'transact() expects either List<Operation> or TransactionChunk, got ${transaction.runtimeType}',
+            'transact() expects either List<Operation> or TransactionChunk, got ${transaction.runtimeType}',
       );
     }
 

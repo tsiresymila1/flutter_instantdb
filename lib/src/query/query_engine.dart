@@ -14,7 +14,7 @@ class QueryEngine {
   SyncEngine? _syncEngine;
   // Use LinkedHashMap for LRU cache behavior
   final LinkedHashMap<String, Signal<QueryResult>> _queryCache =
-  LinkedHashMap();
+      LinkedHashMap();
   late final StreamSubscription _storeSubscription;
   Timer? _batchTimer;
   final Set<String> _pendingQueryUpdates = {};
@@ -81,9 +81,9 @@ class QueryEngine {
 
   /// Execute a query and return a reactive signal
   Signal<QueryResult> query(
-      Map<String, dynamic> query, {
-        bool syncedOnly = false,
-      }) {
+    Map<String, dynamic> query, {
+    bool syncedOnly = false,
+  }) {
     final queryKey = _generateQueryKey(query, syncedOnly: syncedOnly);
 
     // Return cached query if exists
@@ -165,10 +165,10 @@ class QueryEngine {
   }
 
   Future<void> _executeQuery(
-      Map<String, dynamic> query,
-      Signal<QueryResult> resultSignal, {
-        bool syncedOnly = false,
-      }) async {
+    Map<String, dynamic> query,
+    Signal<QueryResult> resultSignal, {
+    bool syncedOnly = false,
+  }) async {
     try {
       final result = await _processQuery(query, syncedOnly: syncedOnly);
       batch(() {
@@ -183,9 +183,9 @@ class QueryEngine {
   }
 
   Future<Map<String, dynamic>> _processQuery(
-      Map<String, dynamic> query, {
-        bool syncedOnly = false,
-      }) async {
+    Map<String, dynamic> query, {
+    bool syncedOnly = false,
+  }) async {
     final results = <String, dynamic>{};
 
     for (final entry in query.entries) {
@@ -222,10 +222,10 @@ class QueryEngine {
   }
 
   Future<List<Map<String, dynamic>>> _queryEntities(
-      String entityType,
-      Map<String, dynamic> query, {
-        bool syncedOnly = false,
-      }) async {
+    String entityType,
+    Map<String, dynamic> query, {
+    bool syncedOnly = false,
+  }) async {
     // Check sync engine cache first for immediate data availability
     if (_syncEngine != null) {
       final cachedData = _syncEngine!.getCachedQueryResult(entityType);
@@ -291,9 +291,9 @@ class QueryEngine {
   }
 
   Future<List<Map<String, dynamic>>> _processIncludes(
-      List<Map<String, dynamic>> entities,
-      Map<String, dynamic> includes,
-      ) async {
+    List<Map<String, dynamic>> entities,
+    Map<String, dynamic> includes,
+  ) async {
     for (final entity in entities) {
       for (final includeEntry in includes.entries) {
         final relationName = includeEntry.key;
@@ -320,7 +320,7 @@ class QueryEngine {
             foreignKey = 'authorId'; // posts commonly use authorId
           } else {
             foreignKey =
-            '${singularParentType}Id'; // fallback to standard pattern
+                '${singularParentType}Id'; // fallback to standard pattern
           }
 
           final whereClause = <String, dynamic>{foreignKey: entity['id']};
@@ -426,9 +426,9 @@ class QueryEngine {
 
   /// Apply query filters to cached data
   List<Map<String, dynamic>> _applyQueryFilters(
-      List<Map<String, dynamic>> data,
-      Map<String, dynamic> query,
-      ) {
+    List<Map<String, dynamic>> data,
+    Map<String, dynamic> query,
+  ) {
     var filteredData = List<Map<String, dynamic>>.from(data);
 
     // Apply where clause filters if present
@@ -509,9 +509,9 @@ class QueryEngine {
 
   /// Evaluate where conditions for filtering cached data
   bool _evaluateWhereCondition(
-      Map<String, dynamic> doc,
-      Map<String, dynamic> where,
-      ) {
+    Map<String, dynamic> doc,
+    Map<String, dynamic> where,
+  ) {
     for (final entry in where.entries) {
       final field = entry.key;
       final condition = entry.value;
@@ -626,7 +626,7 @@ class QueryEngine {
               }
               break;
             default:
-            // Unknown operator, skip
+              // Unknown operator, skip
               break;
           }
         }
@@ -674,9 +674,9 @@ class QueryEngine {
   }
 
   String _generateQueryKey(
-      Map<String, dynamic> query, {
-        bool syncedOnly = false,
-      }) {
+    Map<String, dynamic> query, {
+    bool syncedOnly = false,
+  }) {
     final baseKey = jsonEncode(query);
     return syncedOnly ? '$baseKey:synced' : baseKey;
   }
@@ -707,13 +707,13 @@ class QueryBuilder {
 
   /// Add an entity query
   QueryBuilder entity(
-      String entityType, {
-        Map<String, dynamic>? where,
-        Map<String, dynamic>? orderBy,
-        int? limit,
-        int? offset,
-        Map<String, dynamic>? include,
-      }) {
+    String entityType, {
+    Map<String, dynamic>? where,
+    Map<String, dynamic>? orderBy,
+    int? limit,
+    int? offset,
+    Map<String, dynamic>? include,
+  }) {
     final entityQuery = <String, dynamic>{};
 
     if (where != null) entityQuery['where'] = where;

@@ -55,11 +55,11 @@ class Triple {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is Triple &&
-              runtimeType == other.runtimeType &&
-              entityId == other.entityId &&
-              attribute == other.attribute &&
-              value == other.value;
+      other is Triple &&
+          runtimeType == other.runtimeType &&
+          entityId == other.entityId &&
+          attribute == other.attribute &&
+          value == other.value;
 
   @override
   int get hashCode => entityId.hashCode ^ attribute.hashCode ^ value.hashCode;

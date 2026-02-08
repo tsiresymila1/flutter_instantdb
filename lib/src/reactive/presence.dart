@@ -37,10 +37,10 @@ class PresenceData {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is PresenceData &&
-              runtimeType == other.runtimeType &&
-              userId == other.userId &&
-              _deepEquals(data, other.data);
+      other is PresenceData &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          _deepEquals(data, other.data);
 
   @override
   int get hashCode => userId.hashCode ^ data.hashCode;
@@ -121,11 +121,11 @@ class CursorData {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is CursorData &&
-              runtimeType == other.runtimeType &&
-              userId == other.userId &&
-              x == other.x &&
-              y == other.y;
+      other is CursorData &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          x == other.x &&
+          y == other.y;
 
   @override
   int get hashCode => userId.hashCode ^ x.hashCode ^ y.hashCode;
@@ -149,23 +149,23 @@ class PresenceManager {
   // Cursor tracking
   final Map<String, Map<String, CursorData>> _roomCursors = {};
   final LinkedHashMap<String, Signal<Map<String, CursorData>>> _cursorSignals =
-  LinkedHashMap();
+      LinkedHashMap();
 
   // Typing indicators
   final Map<String, Map<String, DateTime>> _roomTyping = {};
   final LinkedHashMap<String, Signal<Map<String, DateTime>>> _typingSignals =
-  LinkedHashMap();
+      LinkedHashMap();
 
   // Reactions
   final Map<String, List<ReactionData>> _roomReactions = {};
   final LinkedHashMap<String, Signal<List<ReactionData>>> _reactionSignals =
-  LinkedHashMap();
+      LinkedHashMap();
 
   // Topic pub/sub system
   final Map<String, Map<String, StreamController<Map<String, dynamic>>>>
   _roomTopics = {};
   final Map<String, Map<String, Stream<Map<String, dynamic>>>> _topicStreams =
-  {};
+      {};
 
   // Cleanup timers
   final Map<String, Timer> _cleanupTimers = {};
@@ -182,8 +182,8 @@ class PresenceManager {
     required AuthManager authManager,
     required dynamic db, // InstantDB instance
   }) : _syncEngine = syncEngine,
-        _authManager = authManager,
-        _db = db;
+       _authManager = authManager,
+       _db = db;
 
   /// Get user ID (authenticated or anonymous)
   String _getUserId() {
@@ -233,13 +233,13 @@ class PresenceManager {
 
   /// Update cursor position in a room
   Future<void> updateCursor(
-      String roomId, {
-        required double x,
-        required double y,
-        String? userName,
-        String? userColor,
-        Map<String, dynamic>? metadata,
-      }) async {
+    String roomId, {
+    required double x,
+    required double y,
+    String? userName,
+    String? userColor,
+    Map<String, dynamic>? metadata,
+  }) async {
     final userId = _getUserId();
 
     final cursorData = CursorData(
@@ -348,11 +348,11 @@ class PresenceManager {
 
   /// Send a reaction in a room
   Future<void> sendReaction(
-      String roomId,
-      String emoji, {
-        String? messageId,
-        Map<String, dynamic>? metadata,
-      }) async {
+    String roomId,
+    String emoji, {
+    String? messageId,
+    Map<String, dynamic>? metadata,
+  }) async {
     final userId = _getUserId();
 
     final reaction = ReactionData(
@@ -602,10 +602,10 @@ class PresenceManager {
 
   /// Send presence message with preventive room join check
   Future<void> _sendPresenceMessageWithRetry(
-      String roomId,
-      String type,
-      Map<String, dynamic> data,
-      ) async {
+    String roomId,
+    String type,
+    Map<String, dynamic> data,
+  ) async {
     const roomType = 'presence-room';
     final roomKey = '$roomType:$roomId';
 
@@ -630,10 +630,10 @@ class PresenceManager {
   }
 
   Future<void> _sendPresenceMessage(
-      String roomId,
-      String type,
-      Map<String, dynamic> data,
-      ) async {
+    String roomId,
+    String type,
+    Map<String, dynamic> data,
+  ) async {
     if (_syncEngine == null) {
       InstantDBLogging.root.warning(
         'PresenceManager: Cannot send presence message - sync engine not available',
@@ -780,8 +780,8 @@ class PresenceManager {
   void _startCleanupTimer(String roomId) {
     _cleanupTimers[roomId]?.cancel();
     _cleanupTimers[roomId] = Timer.periodic(const Duration(seconds: 30), (
-        timer,
-        ) {
+      timer,
+    ) {
       _cleanupStaleData(roomId);
     });
   }
@@ -792,17 +792,17 @@ class PresenceManager {
 
     // Clean up stale presence data
     _roomPresence[roomId]?.removeWhere(
-          (userId, presence) => presence.lastSeen.isBefore(staleThreshold),
+      (userId, presence) => presence.lastSeen.isBefore(staleThreshold),
     );
 
     // Clean up stale cursors
     _roomCursors[roomId]?.removeWhere(
-          (userId, cursor) => cursor.lastUpdated.isBefore(staleThreshold),
+      (userId, cursor) => cursor.lastUpdated.isBefore(staleThreshold),
     );
 
     // Clean up stale typing indicators
     _roomTyping[roomId]?.removeWhere(
-          (userId, timestamp) => timestamp.isBefore(staleThreshold),
+      (userId, timestamp) => timestamp.isBefore(staleThreshold),
     );
 
     // Update signals
@@ -819,10 +819,10 @@ class PresenceManager {
 
   /// Publish a message to a topic in a room
   Future<void> publishTopic(
-      String roomId,
-      String topic,
-      Map<String, dynamic> data,
-      ) async {
+    String roomId,
+    String topic,
+    Map<String, dynamic> data,
+  ) async {
     // Send to server
     if (_syncEngine != null) {
       await _ensureRoomJoined(roomId);
@@ -846,14 +846,14 @@ class PresenceManager {
 
   /// Get or create topic controller for room/topic
   StreamController<Map<String, dynamic>> _getRoomTopicController(
-      String roomId,
-      String topic,
-      ) {
+    String roomId,
+    String topic,
+  ) {
     _roomTopics.putIfAbsent(roomId, () => {});
 
     if (!_roomTopics[roomId]!.containsKey(topic)) {
       _roomTopics[roomId]![topic] =
-      StreamController<Map<String, dynamic>>.broadcast();
+          StreamController<Map<String, dynamic>>.broadcast();
       _topicStreams.putIfAbsent(roomId, () => {});
       _topicStreams[roomId]![topic] = _roomTopics[roomId]![topic]!.stream;
     }
@@ -863,9 +863,9 @@ class PresenceManager {
 
   /// Get or create topic stream for room/topic
   Stream<Map<String, dynamic>> _getRoomTopicStream(
-      String roomId,
-      String topic,
-      ) {
+    String roomId,
+    String topic,
+  ) {
     _getRoomTopicController(roomId, topic); // Ensure controller exists
     return _topicStreams[roomId]![topic]!;
   }
@@ -952,9 +952,9 @@ class PresenceManager {
 
   /// Handle refresh-presence messages containing all peer data
   void handleRefreshPresenceMessage(
-      String roomId,
-      Map<String, dynamic> peersData,
-      ) {
+    String roomId,
+    Map<String, dynamic> peersData,
+  ) {
     try {
       InstantDBLogging.root.debug(
         'PresenceManager: Processing refresh-presence for room $roomId with ${peersData.length} peers',
@@ -1029,7 +1029,7 @@ class PresenceManager {
             );
             final presenceDataMap = {
               'userId':
-              peerUserId ?? peerId, // Use the actual userId, not peer ID
+                  peerUserId ?? peerId, // Use the actual userId, not peer ID
               'data': userData,
             };
             _handleIncomingPresenceSet(roomId, presenceDataMap);
@@ -1312,9 +1312,9 @@ class ReactionData {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ReactionData &&
-              runtimeType == other.runtimeType &&
-              id == other.id;
+      other is ReactionData &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -1378,10 +1378,10 @@ class InstantRoom {
 
   /// Send a reaction in this room
   Future<void> sendReaction(
-      String emoji, {
-        String? messageId,
-        Map<String, dynamic>? metadata,
-      }) async {
+    String emoji, {
+    String? messageId,
+    Map<String, dynamic>? metadata,
+  }) async {
     return _presenceManager.sendReaction(
       roomId,
       emoji,

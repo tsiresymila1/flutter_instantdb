@@ -1,3 +1,6 @@
+## 1.1.2
+### 🎉 Docs
+Full update docs
 ## 1.1.1
 ### 🎉 Docs
 Partial update docs

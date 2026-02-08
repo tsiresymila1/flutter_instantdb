@@ -150,15 +150,15 @@ class Schema {
   static BooleanSchema boolean() => BooleanSchema();
 
   static ArraySchema array(
-      SchemaValidator itemSchema, {
-        int? minLength,
-        int? maxLength,
-      }) => ArraySchema(itemSchema, minLength: minLength, maxLength: maxLength);
+    SchemaValidator itemSchema, {
+    int? minLength,
+    int? maxLength,
+  }) => ArraySchema(itemSchema, minLength: minLength, maxLength: maxLength);
 
   static ObjectSchema object(
-      Map<String, SchemaValidator> properties, {
-        List<String> required = const [],
-      }) => ObjectSchema(properties, required: required);
+    Map<String, SchemaValidator> properties, {
+    List<String> required = const [],
+  }) => ObjectSchema(properties, required: required);
 
   static OptionalSchema optional(SchemaValidator schema) =>
       OptionalSchema(schema);
@@ -231,10 +231,10 @@ class InstantSchemaBuilder {
 
   /// Add an entity schema
   InstantSchemaBuilder addEntity(
-      String name,
-      SchemaValidator schema, {
-        bool localOnly = false,
-      }) {
+    String name,
+    SchemaValidator schema, {
+    bool localOnly = false,
+  }) {
     // Ensure required fields for InstantDB entities
     SchemaValidator validator;
     if (schema is ObjectSchema) {

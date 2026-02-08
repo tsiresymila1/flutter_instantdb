@@ -31,6 +31,7 @@ dependencies:
 
   # Environment variables for testing
   flutter_dotenv: ^6.0.0
+  args: ^2.7.0
 
 dev_dependencies:
   flutter_test:

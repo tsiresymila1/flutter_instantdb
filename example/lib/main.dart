@@ -43,7 +43,7 @@ class InstantDBExamplesApp extends StatelessWidget {
       db: db,
       child: MaterialApp(
         title: 'InstantDB Examples',
-        theme: ThemeData( useMaterial3: true),
+        theme: ThemeData(useMaterial3: true),
         home: const ExamplesRootScreen(),
       ),
     );

@@ -314,8 +314,8 @@ Future<void> _validateSchema({
   // Check for common schema patterns
   final hasSchema =
       content.contains('InstantSchema') ||
-          content.contains('i.schema') ||
-          content.contains('schema');
+      content.contains('i.schema') ||
+      content.contains('schema');
 
   if (!hasSchema) {
     _warn('Warning: File does not appear to contain a schema definition');

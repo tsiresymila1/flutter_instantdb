@@ -14,8 +14,8 @@ import '../reactive/presence.dart';
 
 // Platform-specific WebSocket imports
 import 'web_socket_stub.dart'
-if (dart.library.io) 'web_socket_io.dart'
-if (dart.library.html) 'web_socket_web.dart';
+    if (dart.library.io) 'web_socket_io.dart'
+    if (dart.library.html) 'web_socket_web.dart';
 
 /// Sync engine for real-time communication with InstantDB server
 class SyncEngine {
@@ -57,7 +57,7 @@ class SyncEngine {
 
   // Queue for queries that need to be sent after authentication
   final Queue<Map<String, dynamic>> _pendingQueries =
-  Queue<Map<String, dynamic>>();
+      Queue<Map<String, dynamic>>();
 
   // Track last processed data to avoid duplicates
   final Map<String, String> _lastProcessedData = {};
@@ -77,11 +77,11 @@ class SyncEngine {
     this.schema,
     PresenceManager? presenceManager,
   }) : _store = store,
-        _authManager = authManager,
-        _presenceManager = presenceManager,
-        _dio = Dio(
-          BaseOptions(baseUrl: config.baseUrl!, headers: {'X-App-ID': appId}),
-        );
+       _authManager = authManager,
+       _presenceManager = presenceManager,
+       _dio = Dio(
+         BaseOptions(baseUrl: config.baseUrl!, headers: {'X-App-ID': appId}),
+       );
 
   /// Start the sync engine
   Future<void> start() async {
@@ -275,7 +275,7 @@ class SyncEngine {
       // Listen for messages with enhanced logging
       _logger.debug('Setting up WebSocket message listeners');
       _messageSubscription = _webSocket.stream.listen(
-            (message) {
+        (message) {
           final messageStr = message.toString();
           _wsLogger.debug('Received message (${messageStr.length} chars)');
           _handleRemoteMessage(message);
@@ -401,7 +401,7 @@ class SyncEngine {
             if (_attributeCache['todos'] != null &&
                 !_attributeCache['todos']!.containsKey('completed')) {
               _attributeCache['todos']!['completed'] =
-              'd4787d60-b7fe-4dbc-a7cb-683cbdd2c0a9';
+                  'd4787d60-b7fe-4dbc-a7cb-683cbdd2c0a9';
               InstantDBLogging.root.debug(
                 'Added hardcoded mapping for todos.completed',
               );
@@ -469,7 +469,7 @@ class SyncEngine {
           break;
 
         case 'transact':
-        // Handle incoming transactions from other clients
+          // Handle incoming transactions from other clients
           _logger.info('Received transact from remote client');
           _wsLogger.fine('Transact keys: ${data.keys.toList()}');
           _wsLogger.fine('Full transact: ${jsonEncode(data)}');
@@ -485,7 +485,7 @@ class SyncEngine {
           break;
 
         case 'error':
-        // Log the full error data for debugging
+          // Log the full error data for debugging
           InstantDBLogging.root.debug('Error message data: $data');
           final errorMessage = data['message'] ?? data['error'];
           if (errorMessage != null) {
@@ -498,7 +498,7 @@ class SyncEngine {
           break;
 
         case 'transact-ok':
-        // Check for errors in the response
+          // Check for errors in the response
           if (data.containsKey('error')) {
             final errorMsg = data['error'] as String;
             final clientEventId = data['client-event-id']?.toString();
@@ -524,7 +524,7 @@ class SyncEngine {
 
         case 'query-update':
         case 'invalidate-query':
-        // Handle query invalidation messages
+          // Handle query invalidation messages
           InstantDBLogging.root.debug(
             'Received query update/invalidation message: ${jsonEncode(data)}',
           );
@@ -532,7 +532,7 @@ class SyncEngine {
           break;
 
         case 'refresh':
-        // Handle refresh messages which contain updated data
+          // Handle refresh messages which contain updated data
           InstantDBLogging.root.debug(
             'Received refresh message with updated data',
           );
@@ -545,7 +545,7 @@ class SyncEngine {
         case 'add-query-ok':
         case 'query-response':
         case 'query-result':
-        // Handle query response with initial data
+          // Handle query response with initial data
           InstantDBLogging.root.debug(
             'Received query response: ${jsonEncode(data)}',
           );
@@ -553,23 +553,23 @@ class SyncEngine {
           break;
 
         case 'refresh-query':
-        // Handle refresh-query message which might contain updated data
+          // Handle refresh-query message which might contain updated data
           InstantDBLogging.root.debug(
             'Received refresh-query message: ${jsonEncode(data)}',
           );
           _handleRefreshQuery(data);
           break;
 
-      // Note: Since we don't send subscribe or listen-query, we won't receive these
+        // Note: Since we don't send subscribe or listen-query, we won't receive these
 
         case 'refresh-ok':
-        // Handle refresh-ok messages which contain updated query results
+          // Handle refresh-ok messages which contain updated query results
           InstantDBLogging.root.debug('Processing refresh-ok');
           _handleRefreshOk(data);
           break;
 
         case 'join-room-ok':
-        // Handle successful room join
+          // Handle successful room join
           final roomType = data['room-type']?.toString();
           final roomId = data['room-id']?.toString();
           InstantDBLogging.root.info(
@@ -579,7 +579,7 @@ class SyncEngine {
           break;
 
         case 'join-room-error':
-        // Handle failed room join
+          // Handle failed room join
           final roomType = data['room-type']?.toString();
           final roomId = data['room-id']?.toString();
           final error = data['error']?.toString() ?? 'Unknown error';
@@ -589,7 +589,7 @@ class SyncEngine {
           break;
 
         case 'leave-room-ok':
-        // Handle successful room leave
+          // Handle successful room leave
           final roomType = data['room-type']?.toString();
           final roomId = data['room-id']?.toString();
           InstantDBLogging.root.info(
@@ -598,7 +598,7 @@ class SyncEngine {
           break;
 
         case 'presence':
-        // Handle incoming presence messages (reactions, cursors, typing indicators)
+          // Handle incoming presence messages (reactions, cursors, typing indicators)
           InstantDBLogging.root.debug(
             'Received presence message: ${jsonEncode(data)}',
           );
@@ -606,7 +606,7 @@ class SyncEngine {
           break;
 
         case 'refresh-presence':
-        // Handle refresh-presence messages containing all peer presence data
+          // Handle refresh-presence messages containing all peer presence data
           InstantDBLogging.root.debug(
             'Received refresh-presence message for room: ${data['room-id']}',
           );
@@ -614,7 +614,7 @@ class SyncEngine {
           break;
 
         case 'set-presence-ok':
-        // Handle successful presence update acknowledgment
+          // Handle successful presence update acknowledgment
           final roomId = data['room-id'] as String? ?? 'unknown';
           final clientEventId = data['client-event-id'] as String?;
           InstantDBLogging.root.debug(
@@ -827,7 +827,7 @@ class SyncEngine {
             break;
 
           case 'add-attr':
-          // This is an attribute registration, update our cache
+            // This is an attribute registration, update our cache
             if (step.length >= 2 && step[1] is Map) {
               final attrData = step[1] as Map<String, dynamic>;
               if (attrData['id'] != null &&
@@ -1102,11 +1102,11 @@ class SyncEngine {
     final syncTransaction = syncableOps.length == transaction.operations.length
         ? transaction
         : Transaction(
-      id: transaction.id,
-      operations: syncableOps,
-      timestamp: transaction.timestamp,
-      status: transaction.status,
-    );
+            id: transaction.id,
+            operations: syncableOps,
+            timestamp: transaction.timestamp,
+            status: transaction.status,
+          );
 
     // Clear cache for affected collections when a local transaction is sent
     final affectedCollections = <String>{};
@@ -1424,9 +1424,9 @@ class SyncEngine {
   // Real-time updates are received as 'transact' messages from other clients.
 
   void _handleQueryResponse(
-      Map<String, dynamic> data, {
-        bool skipDuplicateCheck = false,
-      }) async {
+    Map<String, dynamic> data, {
+    bool skipDuplicateCheck = false,
+  }) async {
     // Only log if not from refresh-ok or if it's one of the first few
     if (!skipDuplicateCheck || _refreshOkCount <= 3) {
       InstantDBLogging.root.debug('Processing query response');
@@ -1480,9 +1480,9 @@ class SyncEngine {
 
   /// Enhanced datalog conversion method that handles multiple format variations
   Map<String, List<Map<String, dynamic>>> _tryConvertDatalogToCollectionFormat(
-      dynamic resultData, {
-        String? queryEntityType,
-      }) {
+    dynamic resultData, {
+    String? queryEntityType,
+  }) {
     final convertedData = <String, List<Map<String, dynamic>>>{};
 
     if (resultData is! Map<String, dynamic>) {
@@ -1592,8 +1592,8 @@ class SyncEngine {
 
   /// Parse join-rows into entity objects
   List<Map<String, dynamic>> _parseJoinRowsToEntities(
-      List<List<dynamic>> joinRows,
-      ) {
+    List<List<dynamic>> joinRows,
+  ) {
     final entityMap = <String, Map<String, dynamic>>{};
     _wsLogger.info('Parsing ${joinRows.length} join-rows into entities');
 
@@ -1653,10 +1653,10 @@ class SyncEngine {
 
   /// Group entities by type for collection format
   void _groupEntitiesByType(
-      List<Map<String, dynamic>> entities,
-      Map<String, List<Map<String, dynamic>>> convertedData, {
-        String? defaultType,
-      }) {
+    List<Map<String, dynamic>> entities,
+    Map<String, List<Map<String, dynamic>>> convertedData, {
+    String? defaultType,
+  }) {
     final typeCount = <String, int>{};
     for (final entity in entities) {
       // Use __type field if present, otherwise use the query's entity type, fallback to 'todos'
@@ -1675,13 +1675,13 @@ class SyncEngine {
 
   /// Process collection data with enhanced delete detection
   Future<void> _processCollectionData(
-      Map<String, List<Map<String, dynamic>>> collectionData,
-      bool skipDuplicateCheck,
-      ) async {
+    Map<String, List<Map<String, dynamic>>> collectionData,
+    bool skipDuplicateCheck,
+  ) async {
     if (!skipDuplicateCheck || _refreshOkCount <= 3) {
       final totalEntities = collectionData.values.fold<int>(
         0,
-            (sum, list) => sum + list.length,
+        (sum, list) => sum + list.length,
       );
       _wsLogger.debug(
         'Processing $totalEntities entities across ${collectionData.length} entity types',
