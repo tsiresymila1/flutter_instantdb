@@ -24,6 +24,11 @@
 - Added persistent `db.getLocalId(name)` — a stable id per name that survives restarts (matches `useLocalId`).
 - Deprecated `db.isOnline` (use `connectionStatus`; online == `authenticated`) and `db.getAnonymousUserId()` (use `getLocalId`). Both still work.
 
+### Files & storage
+- Added `db.storage` (`InstantStorage`): `uploadFile(path, bytes, {contentType, contentDisposition})`, `getDownloadUrl(path)`, `delete(path)`.
+- Added the `InstantFile` model.
+- `$files` is queryable like any namespace (`db.query({r'$files': {}})`); local file refs can be removed with `db.tx[r'$files'][id].delete()`.
+
 ## 1.1.2+1
 ### 🎉 Docs
 Update docs

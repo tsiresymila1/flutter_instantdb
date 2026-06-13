@@ -826,6 +826,28 @@ if (user?.refreshToken != null) {
 }
 ```
 
+## Files & storage
+
+```dart
+import 'dart:typed_data';
+
+// Upload
+final file = await db.storage.uploadFile(
+  'photos/avatar.png',
+  bytes, // Uint8List
+  contentType: 'image/png',
+);
+
+// Signed download URL
+final url = await db.storage.getDownloadUrl('photos/avatar.png');
+
+// Delete
+await db.storage.delete('photos/avatar.png');
+
+// Query file records (synced from the server)
+final files = await db.queryOnce({r'$files': {}});
+```
+
 ## Schema Validation
 
 Define and validate your data schemas:
