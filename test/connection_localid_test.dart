@@ -40,6 +40,25 @@ void main() {
       await db.dispose();
     });
 
+    test('concurrent first-calls for same name return one stable id', () async {
+      final dir =
+          'test_localid_concurrent_${DateTime.now().microsecondsSinceEpoch}';
+      final db = await InstantDB.init(
+        appId: 'test-app-id',
+        config: InstantConfig(syncEnabled: false, persistenceDir: dir),
+      );
+
+      final ids = await Future.wait([
+        db.getLocalId('device'),
+        db.getLocalId('device'),
+        db.getLocalId('device'),
+      ]);
+
+      expect(ids.toSet(), hasLength(1));
+
+      await db.dispose();
+    });
+
     test('id persists across re-init with same persistenceDir', () async {
       final dir = 'test_localid_persist_${DateTime.now().microsecondsSinceEpoch}';
 
