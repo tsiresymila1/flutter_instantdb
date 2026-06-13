@@ -54,23 +54,42 @@ class EntityBuilder {
       ),
     ]);
   }
+
+  /// Target an entity by a unique attribute (upsert-by-lookup), chainable like
+  /// `tx.profiles.lookup('email', 'a@b.com').update({...})`.
+  EntityInstanceBuilder lookup(String attribute, dynamic value) {
+    return EntityInstanceBuilder.lookup(entityType, attribute, value);
+  }
 }
 
 /// Builder for operations on a specific entity instance
 class EntityInstanceBuilder {
   final String entityType;
   final String entityId;
+  final LookupRef? lookupRef;
 
-  EntityInstanceBuilder(this.entityType, this.entityId);
+  EntityInstanceBuilder(this.entityType, this.entityId) : lookupRef = null;
 
-  /// Update entity with new data
-  TransactionChunk update(Map<String, dynamic> data) {
+  /// Construct a builder whose target is resolved by a unique attribute.
+  EntityInstanceBuilder.lookup(this.entityType, String attribute, dynamic value)
+      : entityId = '',
+        lookupRef = LookupRef(
+          entityType: entityType,
+          attribute: attribute,
+          value: value,
+        );
+
+  /// Update entity with new data. Pass `opts: TxOpts(upsert: false)` for
+  /// strict mode (do not create the entity if it does not exist).
+  TransactionChunk update(Map<String, dynamic> data, {TxOpts? opts}) {
     return TransactionChunk([
       Operation(
         type: OperationType.update,
         entityType: entityType,
         entityId: entityId,
         data: data,
+        options: opts?.toOptions(),
+        lookupRef: lookupRef,
       ),
     ]);
   }
@@ -92,6 +111,7 @@ class EntityInstanceBuilder {
               entityType: entityType,
               entityId: entityId,
               data: {relationName: targetId},
+              lookupRef: lookupRef,
             ),
           );
         }
@@ -103,6 +123,7 @@ class EntityInstanceBuilder {
             entityType: entityType,
             entityId: entityId,
             data: {relationName: targetIds},
+            lookupRef: lookupRef,
           ),
         );
       }
@@ -128,6 +149,7 @@ class EntityInstanceBuilder {
               entityType: entityType,
               entityId: entityId,
               data: {relationName: targetId},
+              lookupRef: lookupRef,
             ),
           );
         }
@@ -139,6 +161,7 @@ class EntityInstanceBuilder {
             entityType: entityType,
             entityId: entityId,
             data: {relationName: targetIds},
+            lookupRef: lookupRef,
           ),
         );
       }
@@ -147,14 +170,17 @@ class EntityInstanceBuilder {
     return TransactionChunk(operations);
   }
 
-  /// Merge data with existing entity (deep merge for nested objects)
-  TransactionChunk merge(Map<String, dynamic> data) {
+  /// Deep-merge data into the existing entity. Pass `opts: TxOpts(upsert:false)`
+  /// for strict mode.
+  TransactionChunk merge(Map<String, dynamic> data, {TxOpts? opts}) {
     return TransactionChunk([
       Operation(
         type: OperationType.merge,
         entityType: entityType,
         entityId: entityId,
         data: data,
+        options: opts?.toOptions(),
+        lookupRef: lookupRef,
       ),
     ]);
   }
@@ -166,6 +192,7 @@ class EntityInstanceBuilder {
         type: OperationType.delete,
         entityType: entityType,
         entityId: entityId,
+        lookupRef: lookupRef,
       ),
     ]);
   }

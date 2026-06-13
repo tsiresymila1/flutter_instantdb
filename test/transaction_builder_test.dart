@@ -34,4 +34,48 @@ void main() {
       expect(op.lookupRef?.attribute, equals('slug'));
     });
   });
+
+  group('EntityBuilder.lookup chainable', () {
+    final tx = TransactionBuilder();
+
+    test('lookup().update() sets lookupRef target and data', () {
+      final chunk = tx['profiles'].lookup('email', 'a@b.com')
+          .update({'name': 'A'});
+      final op = chunk.operations.single;
+      expect(op.type, OperationType.update);
+      expect(op.entityType, 'profiles');
+      expect(op.lookupRef?.attribute, 'email');
+      expect(op.lookupRef?.value, 'a@b.com');
+      expect(op.data, {'name': 'A'});
+    });
+
+    test('lookup().delete() sets lookupRef target', () {
+      final chunk = tx['profiles'].lookup('email', 'a@b.com').delete();
+      final op = chunk.operations.single;
+      expect(op.type, OperationType.delete);
+      expect(op.lookupRef?.attribute, 'email');
+    });
+  });
+
+  group('upsert option', () {
+    final tx = TransactionBuilder();
+
+    test('update with upsert:false records option', () {
+      final chunk = tx['goals']['g1']
+          .update({'title': 'x'}, opts: const TxOpts(upsert: false));
+      expect(chunk.operations.single.options?['upsert'], isFalse);
+    });
+
+    test('update without opts has no upsert option (defaults upsert)', () {
+      final chunk = tx['goals']['g1'].update({'title': 'x'});
+      final opts = chunk.operations.single.options;
+      expect(opts == null || opts['upsert'] != false, isTrue);
+    });
+
+    test('merge with upsert:false records option', () {
+      final chunk = tx['games']['gm1']
+          .merge({'state': {'a': 1}}, opts: const TxOpts(upsert: false));
+      expect(chunk.operations.single.options?['upsert'], isFalse);
+    });
+  });
 }
