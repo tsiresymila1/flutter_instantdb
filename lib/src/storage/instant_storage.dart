@@ -27,7 +27,7 @@ class InstantFile {
         url: json['url'] as String?,
         size: json['size'] is int ? json['size'] as int : null,
         contentType:
-            (json['content-type'] ?? json['contentType']) as String?,
+            (json['content-type'] ?? json['contentType'])?.toString(),
       );
 }
 
@@ -45,7 +45,12 @@ class InstantStorage {
     required AuthManager authManager,
     Dio? dio,
   })  : _authManager = authManager,
-        _dio = dio ?? Dio(BaseOptions(baseUrl: baseUrl));
+        _dio = dio ??
+            Dio(BaseOptions(
+              baseUrl: baseUrl,
+              connectTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+            ));
 
   String? get _token => _authManager.refreshToken;
 
@@ -78,9 +83,15 @@ class InstantStorage {
         ),
       );
       final data = response.data;
-      final record = (data is Map && data['data'] is Map)
+      final Map? record = (data is Map && data['data'] is Map)
           ? data['data'] as Map
-          : (data as Map);
+          : (data is Map ? data : null);
+      if (record == null) {
+        throw InstantException(
+          message: 'Unexpected upload response shape',
+          code: 'storage_error',
+        );
+      }
       return InstantFile.fromJson(Map<String, dynamic>.from(record));
     } on DioException catch (e) {
       throw _error(e, 'Failed to upload file');
@@ -100,6 +111,12 @@ class InstantStorage {
               ? (data['data'] as Map)['url']
               : data['data'] ?? data['url'])
           : data;
+      if (url == null || url.toString().isEmpty) {
+        throw InstantException(
+          message: 'No download url in response',
+          code: 'storage_error',
+        );
+      }
       return url.toString();
     } on DioException catch (e) {
       throw _error(e, 'Failed to get download url');

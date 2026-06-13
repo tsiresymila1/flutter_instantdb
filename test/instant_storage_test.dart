@@ -75,14 +75,16 @@ void main() {
 
       final captured = verify(() => dio.post(
             captureAny(),
-            data: any(named: 'data'),
+            data: captureAny(named: 'data'),
             options: captureAny(named: 'options'),
           )).captured;
       expect(captured[0], '/storage/upload');
-      final opts = captured[1] as Options;
+      expect(captured[1], isA<Stream<List<int>>>());
+      final opts = captured[2] as Options;
       expect(opts.headers?['app_id'], 'app1');
       expect(opts.headers?['path'], 'photos/x.png');
       expect(opts.headers?['content-type'], 'image/png');
+      expect(opts.headers?[Headers.contentLengthHeader], 3);
     });
   });
 
