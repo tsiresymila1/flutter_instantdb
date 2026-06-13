@@ -152,6 +152,17 @@ class InstantDB {
     return _anonymousUserId!;
   }
 
+  /// Get (creating on first use) a stable, persisted local id for [name],
+  /// matching @instantdb useLocalId. Survives restarts.
+  Future<String> getLocalId(String name) {
+    if (!_isReady.value) {
+      throw InstantException(
+        message: 'InstantDB not ready. Call init() first.',
+      );
+    }
+    return _store.getLocalId(name);
+  }
+
   /// Execute a query and return a reactive signal
   ///
   /// [syncedOnly] - If true, only returns entities that sync to cloud (excludes local-only entities)

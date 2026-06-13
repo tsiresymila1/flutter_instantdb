@@ -186,6 +186,28 @@ class TripleStore implements StorageInterface {
     return results.map((row) => row['entity_id'] as String).toList();
   }
 
+  @override
+  Future<String> getLocalId(String name) async {
+    final key = 'localId:$name';
+    final existing = await _db.query(
+      'metadata',
+      columns: ['value'],
+      where: 'key = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) {
+      return existing.first['value'] as String;
+    }
+    final id = const Uuid().v4();
+    await _db.insert(
+      'metadata',
+      {'key': key, 'value': id},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return id;
+  }
+
   /// Get entity type for a specific entity ID
   @override
   Future<String?> getEntityType(String entityId) async {

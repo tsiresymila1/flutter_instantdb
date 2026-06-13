@@ -43,6 +43,10 @@ abstract class StorageInterface {
   /// by unique attribute). Delete ops with no match are dropped.
   Future<List<Operation>> resolveTargetLookups(List<Operation> operations);
 
+  /// Get (creating on first use) a stable, persisted local id for [name].
+  /// Same name returns the same id across restarts; different names differ.
+  Future<String> getLocalId(String name);
+
   /// Close the store and clean up resources
   Future<void> close();
 }
