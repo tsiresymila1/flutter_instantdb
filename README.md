@@ -305,6 +305,20 @@ Future<void> addTodo(BuildContext context, String text) async {
 }
 ```
 
+```dart
+// Upsert by unique attribute
+await db.transact(
+  db.tx['profiles'].lookup('email', 'a@b.com').update({'name': 'Alice'}),
+);
+
+// Strict update (no create) + rule params
+await db.transact(
+  db.tx['goals'][goalId]
+      .update({'title': 'Get fit'}, opts: const TxOpts(upsert: false))
+      .ruleParams({'token': token}),
+);
+```
+
 ### Real-time Sync
 
 When sync is enabled, changes are automatically synchronized across all connected clients:
