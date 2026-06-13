@@ -1,6 +1,10 @@
 
 ## Unreleased
 
+### Relational reads (nested-1)
+- Fixed `include` to resolve `link()`-created relations: an entity's relation triples are read directly and the targets fetched by id (with nested `where`/`order`/`limit` and recursive includes). The previous foreign-key-convention heuristic remains as a fallback.
+- To-many links now reconstruct as a list of related entities/ids.
+
 ### Typed model codegen (Phase 6b)
 - Added `@InstantModel`/`@InstantField` annotations and the `InstantModelTable<Self, Row>` base.
 - Added a `flutter_instantdb_generator` package (build_runner) that emits a typed table + `getAll`/`watchAll` extension from an annotated model class, returning typed `List<Model>`.
