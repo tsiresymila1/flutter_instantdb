@@ -1,6 +1,11 @@
 
 ## Unreleased
 
+### Typed model codegen (Phase 6b)
+- Added `@InstantModel`/`@InstantField` annotations and the `InstantModelTable<Self, Row>` base.
+- Added a `flutter_instantdb_generator` package (build_runner) that emits a typed table + `getAll`/`watchAll` extension from an annotated model class, returning typed `List<Model>`.
+- Flat models (primitive fields) for now; relation/nested fields are deferred (non-nullable relations are rejected with guidance).
+
 ### Typed query DSL (Phase 6a)
 - Added a type-safe query builder: `Col<T>`, `Filter` (combine with `&`/`|`), `Order`, `InstantTable<Self>`, `TypedQuery<E>`.
 - Added `db.queryTyped(...)` (reactive) and `db.queryOnceTyped(...)` (one-shot), compiling to the existing InstaQL maps.

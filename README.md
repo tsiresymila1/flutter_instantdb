@@ -715,6 +715,33 @@ final result = await db.queryOnceTyped(
 );
 ```
 
+## Typed models (codegen)
+
+Add the generator to your dev dependencies and annotate a model:
+
+```dart
+import 'package:flutter_instantdb/flutter_instantdb.dart';
+part 'todo.instant.dart';
+
+@InstantModel('todos')
+class Todo {
+  final String id;
+  final String title;
+  final int priority;
+  const Todo({required this.id, required this.title, required this.priority});
+}
+```
+
+Run `dart run build_runner build`, then:
+
+```dart
+final todos = await TodoTable()
+    .query()
+    .where((t) => t.priority.gte(8))
+    .order((t) => t.priority.desc())
+    .getAll(db); // List<Todo>
+```
+
 ## Authentication
 
 InstantDB includes built-in authentication with magic code (passwordless) and guest authentication:
