@@ -38,8 +38,15 @@ class InstantDB {
   /// Whether the database is ready for use
   ReadonlySignal<bool> get isReady => _isReady.readonly();
 
-  /// Whether the database is online and syncing
+  /// Whether the database is online and syncing.
+  @Deprecated(
+    'Use connectionStatus; online == ConnectionStatus.authenticated',
+  )
   ReadonlySignal<bool> get isOnline => _isOnline.readonly();
+
+  /// Reactive connection lifecycle status (connecting/opened/authenticated/
+  /// closed/errored). Online == ConnectionStatus.authenticated.
+  ReadonlySignal<ConnectionStatus> get connectionStatus => _syncEngine.status;
 
   /// Authentication manager
   AuthManager get auth => _authManager;
@@ -146,7 +153,8 @@ class InstantDB {
   /// Generate a new unique ID
   String id() => _uuid.v4();
 
-  /// Get the consistent anonymous user ID for this database instance
+  /// Get the consistent anonymous user ID for this database instance.
+  @Deprecated('Use getLocalId(name) for a persistent local id')
   String getAnonymousUserId() {
     _anonymousUserId ??= _uuid.v4();
     return _anonymousUserId!;

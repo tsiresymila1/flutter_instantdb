@@ -230,6 +230,21 @@ class ConnectionStatusBuilder extends StatelessWidget {
   }
 }
 
+/// Widget that rebuilds with the full connection lifecycle status.
+class ConnectionStateBuilder extends StatelessWidget {
+  final Widget Function(BuildContext context, ConnectionStatus status) builder;
+
+  const ConnectionStateBuilder({super.key, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    final db = InstantProvider.of(context);
+    return Watch((context) {
+      return builder(context, db.connectionStatus.value);
+    });
+  }
+}
+
 /// Extension for common data transformations
 extension InstantBuilderExtensions on InstantBuilder {
   /// Create a builder for a list of entities
