@@ -270,7 +270,20 @@ class TripleStore implements StorageInterface {
       final entity = <String, dynamic>{'id': entityId};
 
       for (final triple in triples) {
-        entity[triple.attribute] = triple.value;
+        final attr = triple.attribute;
+        // 'id' is already set from entityId above; skip to avoid creating
+        // a spurious list when the legacy 'add' operation stores id as a triple.
+        if (attr == 'id') continue;
+        if (entity.containsKey(attr)) {
+          final existing = entity[attr];
+          if (existing is List) {
+            existing.add(triple.value);
+          } else {
+            entity[attr] = <dynamic>[existing, triple.value];
+          }
+        } else {
+          entity[attr] = triple.value;
+        }
       }
 
       entities[entityId] = entity;
