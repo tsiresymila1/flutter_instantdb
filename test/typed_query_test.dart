@@ -113,6 +113,14 @@ void main() {
         'offset': 2,
       });
     });
+
+    test('builders are immutable: base query is not mutated', () {
+      final base = Todos().query();
+      final a = base.where((t) => t.priority.gte(1)).first(2);
+      // base must remain empty; a must carry its options
+      expect(base.toQuery(), {'todos': {r'$': <String, dynamic>{}}});
+      expect(a.toQuery()['todos'][r'$']['first'], 2);
+    });
   });
 }
 

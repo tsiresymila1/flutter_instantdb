@@ -69,85 +69,125 @@ abstract class InstantTable<Self extends InstantTable<Self>> {
   TypedQuery<Self> query() => TypedQuery<Self>(this as Self);
 }
 
-/// A fluent, type-safe query over a single namespace. Compiles to the InstaQL
-/// `{entityType: {r'$': {...}}}` map the engine consumes.
+/// An immutable, fluent, type-safe query over a single namespace. Compiles to
+/// the InstaQL `{entityType: {r'$': {...}}}` map the engine consumes.
+///
+/// Every fluent method returns a **new** [TypedQuery] instance with the updated
+/// field; the original query is never mutated. This makes it safe to branch a
+/// base query and reuse/alias it freely.
 class TypedQuery<E extends InstantTable<E>> {
   final E table;
 
-  Filter? _where;
-  Order? _order;
-  int? _first;
-  int? _last;
-  int? _offset;
-  int? _limit;
-  String? _after;
-  String? _before;
-  bool? _afterInclusive;
-  bool? _beforeInclusive;
-  List<Col<dynamic>>? _fields;
+  final Filter? _where;
+  final Order? _order;
+  final int? _first;
+  final int? _last;
+  final int? _offset;
+  final int? _limit;
+  final String? _after;
+  final String? _before;
+  final bool? _afterInclusive;
+  final bool? _beforeInclusive;
+  final List<Col<dynamic>>? _fields;
 
-  TypedQuery(this.table);
+  TypedQuery(this.table)
+      : _where = null,
+        _order = null,
+        _first = null,
+        _last = null,
+        _offset = null,
+        _limit = null,
+        _after = null,
+        _before = null,
+        _afterInclusive = null,
+        _beforeInclusive = null,
+        _fields = null;
 
-  TypedQuery<E> where(Filter Function(E t) build) {
-    _where = build(table);
-    return this;
+  TypedQuery._(
+    this.table, {
+    required Filter? where,
+    required Order? order,
+    required int? first,
+    required int? last,
+    required int? offset,
+    required int? limit,
+    required String? after,
+    required String? before,
+    required bool? afterInclusive,
+    required bool? beforeInclusive,
+    required List<Col<dynamic>>? fields,
+  })  : _where = where,
+        _order = order,
+        _first = first,
+        _last = last,
+        _offset = offset,
+        _limit = limit,
+        _after = after,
+        _before = before,
+        _afterInclusive = afterInclusive,
+        _beforeInclusive = beforeInclusive,
+        _fields = fields;
+
+  TypedQuery<E> _copyWith({
+    Filter? where,
+    Order? order,
+    int? first,
+    int? last,
+    int? offset,
+    int? limit,
+    String? after,
+    String? before,
+    bool? afterInclusive,
+    bool? beforeInclusive,
+    List<Col<dynamic>>? fields,
+  }) {
+    return TypedQuery._(
+      table,
+      where: where ?? _where,
+      order: order ?? _order,
+      first: first ?? _first,
+      last: last ?? _last,
+      offset: offset ?? _offset,
+      limit: limit ?? _limit,
+      after: after ?? _after,
+      before: before ?? _before,
+      afterInclusive: afterInclusive ?? _afterInclusive,
+      beforeInclusive: beforeInclusive ?? _beforeInclusive,
+      fields: fields ?? _fields,
+    );
   }
 
-  TypedQuery<E> order(Order Function(E t) build) {
-    _order = build(table);
-    return this;
-  }
+  TypedQuery<E> where(Filter Function(E t) build) =>
+      _copyWith(where: build(table));
 
-  TypedQuery<E> select(List<Col<dynamic>> Function(E t) build) {
-    _fields = build(table);
-    return this;
-  }
+  TypedQuery<E> order(Order Function(E t) build) =>
+      _copyWith(order: build(table));
 
-  TypedQuery<E> first(int n) {
-    _first = n;
-    return this;
-  }
+  TypedQuery<E> select(List<Col<dynamic>> Function(E t) build) =>
+      _copyWith(fields: build(table));
 
-  TypedQuery<E> last(int n) {
-    _last = n;
-    return this;
-  }
+  TypedQuery<E> first(int n) => _copyWith(first: n);
 
-  TypedQuery<E> offset(int n) {
-    _offset = n;
-    return this;
-  }
+  TypedQuery<E> last(int n) => _copyWith(last: n);
 
-  TypedQuery<E> limit(int n) {
-    _limit = n;
-    return this;
-  }
+  TypedQuery<E> offset(int n) => _copyWith(offset: n);
 
-  TypedQuery<E> after(String cursor) {
-    _after = cursor;
-    return this;
-  }
+  TypedQuery<E> limit(int n) => _copyWith(limit: n);
 
-  TypedQuery<E> before(String cursor) {
-    _before = cursor;
-    return this;
-  }
+  TypedQuery<E> after(String cursor) => _copyWith(after: cursor);
 
-  TypedQuery<E> afterInclusive(bool value) {
-    _afterInclusive = value;
-    return this;
-  }
+  TypedQuery<E> before(String cursor) => _copyWith(before: cursor);
 
-  TypedQuery<E> beforeInclusive(bool value) {
-    _beforeInclusive = value;
-    return this;
-  }
+  TypedQuery<E> afterInclusive(bool value) => _copyWith(afterInclusive: value);
+
+  TypedQuery<E> beforeInclusive(bool value) =>
+      _copyWith(beforeInclusive: value);
 
   /// Compile to the InstaQL map.
   Map<String, dynamic> toQuery() {
     final options = <String, dynamic>{
-      if (_where != null) 'where': _where!.toMap(),
-      if (_order != null) 'order': _order!.toMap(),
+      if (_where != null) 'where': _where.toMap(),
+      if (_order != null) 'order': _order.toMap(),
       if (_first != null) 'first': _first,
       if (_last != null) 'last': _last,
       if (_after != null) 'after': _after,
@@ -156,7 +196,7 @@ class TypedQuery<E extends InstantTable<E>> {
       if (_beforeInclusive != null) 'beforeInclusive': _beforeInclusive,
       if (_limit != null) 'limit': _limit,
       if (_offset != null) 'offset': _offset,
-      if (_fields != null) 'fields': _fields!.map((c) => c.name).toList(),
+      if (_fields != null) 'fields': _fields.map((c) => c.name).toList(),
     };
     return {
       table.entityType: {r'$': options},
