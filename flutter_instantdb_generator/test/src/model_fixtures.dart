@@ -99,3 +99,15 @@ class BadModel {
   final Profile owner; // non-nullable relation -> error
   const BadModel({required this.id, required this.owner});
 }
+
+@ShouldThrow(
+  'Field "title" on MismatchModel has no matching named constructor parameter. '
+  'The generated fromRow needs `MismatchModel({required ... title})`.',
+)
+@InstantModel('mismatch')
+class MismatchModel {
+  final String id;
+  final String title;
+  const MismatchModel({required this.id, required String heading})
+      : title = heading;
+}

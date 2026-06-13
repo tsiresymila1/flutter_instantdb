@@ -62,6 +62,9 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
     return null;
   }
 
+  static String _escape(String s) =>
+      s.replaceAll('\\', '\\\\').replaceAll("'", "\\'");
+
   String _generateForClass(ClassElement element, DartObject annotation) {
     final modelName = element.name;
     final tableName = '${modelName}Table';
@@ -69,20 +72,46 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
 
     final fields = _modelFields(element);
 
+    ConstructorElement? ctor;
+    for (final c in element.constructors) {
+      if (!c.isFactory) {
+        ctor = c;
+        break;
+      }
+    }
+    if (ctor == null) {
+      throw InvalidGenerationSourceError(
+        '${element.name} has no generative constructor.',
+        element: element,
+      );
+    }
+    final namedParams =
+        ctor.parameters.where((p) => p.isNamed).map((p) => p.name).toSet();
+    for (final f in fields) {
+      if (!namedParams.contains(f.fieldName)) {
+        throw InvalidGenerationSourceError(
+          'Field "${f.fieldName}" on ${element.name} has no matching named '
+          'constructor parameter. The generated fromRow needs `${element.name}('
+          '{required ... ${f.fieldName}})`.',
+          element: element,
+        );
+      }
+    }
+
     final cols = StringBuffer();
     final ctorArgs = StringBuffer();
     for (final f in fields) {
       cols.writeln(
-        "  final ${f.fieldName} = const Col<${f.dartType}>('${f.attr}');",
+        "  final ${f.fieldName} = const Col<${f.dartType}>('${_escape(f.attr)}');",
       );
       ctorArgs.writeln(
-        "        ${f.fieldName}: m['${f.attr}'] as ${f.dartType}${f.nullable ? '?' : ''},",
+        "        ${f.fieldName}: m['${_escape(f.attr)}'] as ${f.dartType}${f.nullable ? '?' : ''},",
       );
     }
 
     return '''
 class $tableName extends InstantModelTable<$tableName, $modelName> {
-  $tableName() : super('$entityType');
+  $tableName() : super('${_escape(entityType)}');
 
 ${cols.toString().trimRight()}
 
