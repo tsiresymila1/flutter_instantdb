@@ -1,0 +1,8 @@
+builders:
+  instant:
+    import: 'package:flutter_instantdb_generator/builder.dart'
+    builder_factories: ['instantBuilder']
+    build_extensions: {'.dart': ['.instant.dart']}
+    auto_apply: dependents
+    build_to: source
+    applies_builders: ['source_gen|combining_builder']
