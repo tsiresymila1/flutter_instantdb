@@ -60,4 +60,66 @@ void main() {
       expect(Col<int>('createdAt').desc().toMap(), {'createdAt': 'desc'});
     });
   });
+
+  group('TypedQuery.toQuery', () {
+    test('empty query yields just the namespace with empty options', () {
+      expect(Todos().query().toQuery(), {
+        'todos': {r'$': <String, dynamic>{}},
+      });
+    });
+
+    test('where + order + first + fields compile to the \$ clause', () {
+      final q = Todos()
+          .query()
+          .where((t) => t.priority.gte(8) & t.title.ilike('%x%'))
+          .order((t) => t.createdAt.desc())
+          .first(20)
+          .select((t) => [t.title, t.priority]);
+
+      expect(q.toQuery(), {
+        'todos': {
+          r'$': {
+            'where': {
+              'and': [
+                {'priority': {r'$gte': 8}},
+                {'title': {r'$ilike': '%x%'}},
+              ],
+            },
+            'order': {'createdAt': 'desc'},
+            'first': 20,
+            'fields': ['title', 'priority'],
+          },
+        },
+      });
+    });
+
+    test('pagination + limit/offset options', () {
+      final q = Todos()
+          .query()
+          .after('cursor1')
+          .last(5)
+          .before('cursor9')
+          .afterInclusive(true)
+          .beforeInclusive(true)
+          .limit(3)
+          .offset(2);
+      expect(q.toQuery()['todos'][r'$'], {
+        'after': 'cursor1',
+        'last': 5,
+        'before': 'cursor9',
+        'afterInclusive': true,
+        'beforeInclusive': true,
+        'limit': 3,
+        'offset': 2,
+      });
+    });
+  });
+}
+
+/// Test table used by the TypedQuery tests above.
+class Todos extends InstantTable<Todos> {
+  Todos() : super('todos');
+  final title = Col<String>('title');
+  final priority = Col<int>('priority');
+  final createdAt = Col<int>('createdAt');
 }

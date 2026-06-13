@@ -1,5 +1,5 @@
-/// Typed query DSL for InstantDB. Compiles to the InstaQL string-maps that the
-/// query engine already consumes. Pure Dart — no DB dependency.
+// Typed query DSL for InstantDB. Compiles to the InstaQL string-maps that the
+// query engine already consumes. Pure Dart — no DB dependency.
 
 /// A where-clause expression. Combine leaves with `&` (and) / `|` (or).
 class Filter {
@@ -58,4 +58,108 @@ extension ComparableCol<T extends Comparable<dynamic>> on Col<T> {
 extension StringCol on Col<String> {
   Filter like(String pattern) => Filter.field(name, {r'$like': pattern});
   Filter ilike(String pattern) => Filter.field(name, {r'$ilike': pattern});
+}
+
+/// Base class for a typed entity handle. Uses the self-referential generic so
+/// `query()` returns a `TypedQuery<Self>` with correctly-typed columns.
+abstract class InstantTable<Self extends InstantTable<Self>> {
+  final String entityType;
+  InstantTable(this.entityType);
+
+  TypedQuery<Self> query() => TypedQuery<Self>(this as Self);
+}
+
+/// A fluent, type-safe query over a single namespace. Compiles to the InstaQL
+/// `{entityType: {r'$': {...}}}` map the engine consumes.
+class TypedQuery<E extends InstantTable<E>> {
+  final E table;
+
+  Filter? _where;
+  Order? _order;
+  int? _first;
+  int? _last;
+  int? _offset;
+  int? _limit;
+  String? _after;
+  String? _before;
+  bool? _afterInclusive;
+  bool? _beforeInclusive;
+  List<Col<dynamic>>? _fields;
+
+  TypedQuery(this.table);
+
+  TypedQuery<E> where(Filter Function(E t) build) {
+    _where = build(table);
+    return this;
+  }
+
+  TypedQuery<E> order(Order Function(E t) build) {
+    _order = build(table);
+    return this;
+  }
+
+  TypedQuery<E> select(List<Col<dynamic>> Function(E t) build) {
+    _fields = build(table);
+    return this;
+  }
+
+  TypedQuery<E> first(int n) {
+    _first = n;
+    return this;
+  }
+
+  TypedQuery<E> last(int n) {
+    _last = n;
+    return this;
+  }
+
+  TypedQuery<E> offset(int n) {
+    _offset = n;
+    return this;
+  }
+
+  TypedQuery<E> limit(int n) {
+    _limit = n;
+    return this;
+  }
+
+  TypedQuery<E> after(String cursor) {
+    _after = cursor;
+    return this;
+  }
+
+  TypedQuery<E> before(String cursor) {
+    _before = cursor;
+    return this;
+  }
+
+  TypedQuery<E> afterInclusive(bool value) {
+    _afterInclusive = value;
+    return this;
+  }
+
+  TypedQuery<E> beforeInclusive(bool value) {
+    _beforeInclusive = value;
+    return this;
+  }
+
+  /// Compile to the InstaQL map.
+  Map<String, dynamic> toQuery() {
+    final options = <String, dynamic>{
+      if (_where != null) 'where': _where!.toMap(),
+      if (_order != null) 'order': _order!.toMap(),
+      if (_first != null) 'first': _first,
+      if (_last != null) 'last': _last,
+      if (_after != null) 'after': _after,
+      if (_before != null) 'before': _before,
+      if (_afterInclusive != null) 'afterInclusive': _afterInclusive,
+      if (_beforeInclusive != null) 'beforeInclusive': _beforeInclusive,
+      if (_limit != null) 'limit': _limit,
+      if (_offset != null) 'offset': _offset,
+      if (_fields != null) 'fields': _fields!.map((c) => c.name).toList(),
+    };
+    return {
+      table.entityType: {r'$': options},
+    };
+  }
 }
