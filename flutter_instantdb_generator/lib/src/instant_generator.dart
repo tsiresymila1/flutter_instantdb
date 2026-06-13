@@ -96,7 +96,7 @@ extension ${modelName}QueryX on TypedQuery<$tableName> {
   Future<List<$modelName>> getAll(InstantDB db) async =>
       (await db.queryOnceTyped(this)).documents.map($tableName().fromRow).toList();
 
-  Signal<List<$modelName>> watchAll(InstantDB db) {
+  ReadonlySignal<List<$modelName>> watchAll(InstantDB db) {
     final src = db.queryTyped(this);
     return computed(() => src.value.documents.map($tableName().fromRow).toList());
   }

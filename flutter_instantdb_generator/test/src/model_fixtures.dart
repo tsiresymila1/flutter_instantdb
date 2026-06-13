@@ -34,7 +34,7 @@ extension TodoQueryX on TypedQuery<TodoTable> {
           .map(TodoTable().fromRow)
           .toList();
 
-  Signal<List<Todo>> watchAll(InstantDB db) {
+  ReadonlySignal<List<Todo>> watchAll(InstantDB db) {
     final src = db.queryTyped(this);
     return computed(
         () => src.value.documents.map(TodoTable().fromRow).toList());
@@ -72,7 +72,7 @@ extension ProfileQueryX on TypedQuery<ProfileTable> {
           .map(ProfileTable().fromRow)
           .toList();
 
-  Signal<List<Profile>> watchAll(InstantDB db) {
+  ReadonlySignal<List<Profile>> watchAll(InstantDB db) {
     final src = db.queryTyped(this);
     return computed(
         () => src.value.documents.map(ProfileTable().fromRow).toList());
