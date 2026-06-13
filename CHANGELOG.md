@@ -1,6 +1,11 @@
 
 ## Unreleased
 
+### Typed query DSL (Phase 6a)
+- Added a type-safe query builder: `Col<T>`, `Filter` (combine with `&`/`|`), `Order`, `InstantTable<Self>`, `TypedQuery<E>`.
+- Added `db.queryTyped(...)` (reactive) and `db.queryOnceTyped(...)` (one-shot), compiling to the existing InstaQL maps.
+- Compile-time safety: `$like`/`$ilike` only on `Col<String>`, comparisons only on `Col<Comparable>`, value types checked against the column type.
+
 ### Query operators (InstaQL parity)
 - Added `$like` (case-sensitive) and `$ilike` (case-insensitive) string match operators with SQL `%`/`_` wildcards.
 - Added `$not` operator (alias of `$ne`).

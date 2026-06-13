@@ -696,6 +696,25 @@ db.query({
 }
 ```
 
+## Typed queries
+
+```dart
+class Todos extends InstantTable<Todos> {
+  Todos() : super('todos');
+  final title = Col<String>('title');
+  final priority = Col<int>('priority');
+  final createdAt = Col<int>('createdAt');
+}
+
+final result = await db.queryOnceTyped(
+  Todos()
+    .query()
+    .where((t) => t.title.ilike('%urgent%') & t.priority.gte(8))
+    .order((t) => t.createdAt.desc())
+    .first(20),
+);
+```
+
 ## Authentication
 
 InstantDB includes built-in authentication with magic code (passwordless) and guest authentication:
