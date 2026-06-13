@@ -206,12 +206,19 @@ class Operation {
   final Map<String, dynamic>? data;
   final Map<String, dynamic>? options;
 
+  /// Target lookup reference (find/upsert entity by unique attribute) instead
+  /// of a concrete [entityId]. Resolved at transact time. Not serialized — by
+  /// the time an Operation is sent or persisted it carries a concrete id.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final LookupRef? lookupRef;
+
   const Operation({
     required this.type,
     required this.entityType,
     required this.entityId,
     this.data,
     this.options,
+    this.lookupRef,
   });
 
   factory Operation.fromJson(Map<String, dynamic> json) {
@@ -408,6 +415,33 @@ class TransactionChunk {
   TransactionChunk merge(TransactionChunk other) {
     return TransactionChunk([...operations, ...other.operations]);
   }
+
+  /// Attach permission rule parameters to every operation in this chunk.
+  /// Mirrors `db.tx.ns[id].update({...}).ruleParams({...})` from @instantdb/core.
+  TransactionChunk ruleParams(Map<String, dynamic> args) {
+    final updated = operations
+        .map((op) => Operation(
+              type: op.type,
+              entityType: op.entityType,
+              entityId: op.entityId,
+              data: op.data,
+              options: {...?op.options, 'ruleParams': args},
+              lookupRef: op.lookupRef,
+            ))
+        .toList();
+    return TransactionChunk(updated);
+  }
+}
+
+/// Options for write operations (update/merge). Mirrors the second argument
+/// of `update`/`merge` in @instantdb/core.
+class TxOpts {
+  /// When false, the write is strict: it does not create the entity if it does
+  /// not already exist. Defaults to true (upsert).
+  final bool upsert;
+  const TxOpts({this.upsert = true});
+
+  Map<String, dynamic> toOptions() => {'upsert': upsert};
 }
 
 /// Exception thrown by InstantDB operations
