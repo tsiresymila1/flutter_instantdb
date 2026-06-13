@@ -43,4 +43,91 @@ void main() {
       expect(goal['title'], 'Solo'); // not a list
     });
   });
+
+  group('Include via relation triples (change B)', () {
+    late InstantDB db;
+
+    setUpAll(() {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    });
+
+    setUp(() async {
+      db = await InstantDB.init(
+        appId: 'test-app-id',
+        config: InstantConfig(
+          syncEnabled: false,
+          persistenceDir: 'test_inc_${DateTime.now().microsecondsSinceEpoch}',
+        ),
+      );
+    });
+
+    tearDown(() async => db.dispose());
+
+    Future<void> seed() async {
+      await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
+      await db.transact(db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
+      await db.transact(db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
+      await db.transact(db.tx['goals']['g1'].link({'todos': ['t1', 't2']}));
+    }
+
+    test('to-many include populates full related entities', () async {
+      await seed();
+      final r = await db.queryOnce({'goals': {'include': {'todos': {}}}});
+      final goal = r.documents.firstWhere((g) => g['id'] == 'g1');
+      final todos = (goal['todos'] as List).cast<Map<String, dynamic>>();
+      expect(todos.length, 2);
+      expect(todos.map((t) => t['title']).toSet(), {'Run', 'Lift'});
+    });
+
+    test('nested where/order/limit filters the related set', () async {
+      await seed();
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {
+              'where': {'n': {r'$gte': 2}},
+              'order': {'n': 'asc'},
+              'limit': 1,
+            },
+          },
+        },
+      });
+      final goal = r.documents.firstWhere((g) => g['id'] == 'g1');
+      final todos = (goal['todos'] as List).cast<Map<String, dynamic>>();
+      expect(todos.length, 1);
+      expect(todos.single['title'], 'Lift');
+    });
+
+    test('to-one link resolves to a single-element related list', () async {
+      await db.transact(db.tx['posts']['p1'].update({'title': 'Hello'}));
+      await db.transact(db.tx['users']['u1'].update({'name': 'Ana'}));
+      await db.transact(db.tx['posts']['p1'].link({'owner': 'u1'}));
+
+      final r = await db.queryOnce({'posts': {'include': {'owner': {}}}});
+      final post = r.documents.firstWhere((p) => p['id'] == 'p1');
+      final owner = (post['owner'] as List).cast<Map<String, dynamic>>();
+      expect(owner.single['name'], 'Ana');
+    });
+
+    test('deep nested include populates two levels', () async {
+      await db.transact(db.tx['goals']['g9'].update({'title': 'G'}));
+      await db.transact(db.tx['todos']['td9'].update({'title': 'T'}));
+      await db.transact(db.tx['tags']['tg9'].update({'label': 'urgent'}));
+      await db.transact(db.tx['todos']['td9'].link({'tags': ['tg9']}));
+      await db.transact(db.tx['goals']['g9'].link({'todos': ['td9']}));
+
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {'include': {'tags': {}}},
+          },
+        },
+      });
+      final goal = r.documents.firstWhere((g) => g['id'] == 'g9');
+      final todos = (goal['todos'] as List).cast<Map<String, dynamic>>();
+      final tags = (todos.single['tags'] as List).cast<Map<String, dynamic>>();
+      expect(tags.single['label'], 'urgent');
+    });
+  });
 }

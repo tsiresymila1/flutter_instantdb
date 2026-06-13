@@ -347,6 +347,33 @@ class QueryEngine {
             ? Map<String, dynamic>.from(includeEntry.value as Map)
             : null;
 
+        // Forward link: the parent already holds the relation triples (target
+        // ids) — resolve by fetching those targets directly. Falls through to
+        // the FK-convention heuristics below only when there is no such value.
+        final relValue = entity[relationName];
+        if (relValue != null) {
+          final ids = relValue is List
+              ? relValue.map((e) => e.toString()).toList()
+              : [relValue.toString()];
+
+          final related = <Map<String, dynamic>>[];
+          for (final id in ids) {
+            related.addAll(await _store.queryEntities(entityId: id));
+          }
+
+          var out = related;
+          if (relationQuery != null) {
+            out = _applyQueryFilters(related, relationQuery);
+          }
+          final nestedInclude =
+              relationQuery?['include'] as Map<String, dynamic>?;
+          if (nestedInclude != null) {
+            out = await _processIncludes(out, nestedInclude);
+          }
+          entity[relationName] = out;
+          continue;
+        }
+
         // Simple relation resolution based on naming conventions
         if (relationName.endsWith('s')) {
           // One-to-many relation (e.g., "posts")
