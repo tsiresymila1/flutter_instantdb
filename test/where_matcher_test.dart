@@ -45,4 +45,35 @@ void main() {
       expect(evaluateWhere({'n': 'abc'}, {'n': {r'$gt': 5}}), isFalse);
     });
   });
+
+  group('evaluateWhere - string match operators', () {
+    test(r'$like is case-sensitive, % = any run', () {
+      expect(evaluateWhere({'t': 'You got promoted!'},
+          {'t': {r'$like': '%promoted!'}}), isTrue);
+      expect(evaluateWhere({'t': 'Code a bunch'},
+          {'t': {r'$like': '%promoted!'}}), isFalse);
+      expect(evaluateWhere({'t': 'Hello'},
+          {'t': {r'$like': 'hello'}}), isFalse); // case-sensitive
+    });
+
+    test(r'$like with _ matches single char', () {
+      expect(evaluateWhere({'t': 'cat'}, {'t': {r'$like': 'c_t'}}), isTrue);
+      expect(evaluateWhere({'t': 'cart'}, {'t': {r'$like': 'c_t'}}), isFalse);
+    });
+
+    test(r'$ilike is case-insensitive', () {
+      expect(evaluateWhere({'t': 'Hello'},
+          {'t': {r'$ilike': '%ELLO'}}), isTrue);
+    });
+
+    test(r'$like on null field returns false', () {
+      expect(evaluateWhere({'t': null}, {'t': {r'$like': '%x'}}), isFalse);
+      expect(evaluateWhere({}, {'t': {r'$like': '%x'}}), isFalse);
+    });
+
+    test(r'$not is alias of $ne', () {
+      expect(evaluateWhere({'t': 'a'}, {'t': {r'$not': 'a'}}), isFalse);
+      expect(evaluateWhere({'t': 'a'}, {'t': {r'$not': 'b'}}), isTrue);
+    });
+  });
 }
