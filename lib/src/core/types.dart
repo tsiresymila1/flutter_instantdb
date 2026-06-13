@@ -149,6 +149,24 @@ enum StorageBackend {
   sqlite,
 }
 
+/// Connection lifecycle status, matching @instantdb/core ConnectionStatus.
+enum ConnectionStatus {
+  /// Socket is being established.
+  connecting,
+
+  /// Socket is open but not yet authenticated (pre `init-ok`).
+  opened,
+
+  /// Socket is open and authenticated (post `init-ok`) — fully online.
+  authenticated,
+
+  /// Socket is closed.
+  closed,
+
+  /// Socket errored.
+  errored,
+}
+
 /// Configuration for InstantDB client
 @JsonSerializable()
 class InstantConfig {
