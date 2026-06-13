@@ -218,9 +218,14 @@ class InstantDB {
       'InstantDB: Creating transaction $txId with ${operations.length} operations - StorageBackend: SQLite',
     );
 
+    // Resolve any lookup-target operations (tx.ns.lookup(attr, value)...) into
+    // concrete entity ids (creating the entity for write ops when absent) so
+    // local apply and sync both receive concrete ids.
+    final resolvedOperations = await _store.resolveTargetLookups(operations);
+
     final tx = Transaction(
       id: txId,
-      operations: operations,
+      operations: resolvedOperations,
       timestamp: DateTime.now(),
     );
 

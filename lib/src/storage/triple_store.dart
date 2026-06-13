@@ -887,6 +887,10 @@ class TripleStore implements StorageInterface {
     final entityType = operation.entityType;
     if (entityType.isEmpty || entityType == 'unknown') return;
 
+    // If the operation's own data already carries __type, the main apply loop
+    // will insert it — avoid a duplicate insert here.
+    if (operation.data?.containsKey('__type') ?? false) return;
+
     final existing = await txn.query(
       'triples',
       where: 'entity_id = ? AND attribute = ? AND retracted = FALSE',
