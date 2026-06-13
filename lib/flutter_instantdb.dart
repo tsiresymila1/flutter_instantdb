@@ -13,6 +13,7 @@ export 'src/reactive/presence.dart';
 
 // Query engine exports
 export 'src/query/query_engine.dart';
+export 'src/query/infinite_query.dart';
 
 // Re-exports from signals_flutter for convenience
 export 'package:signals_flutter/signals_flutter.dart'

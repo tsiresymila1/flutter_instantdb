@@ -10,6 +10,7 @@ import 'transaction_builder.dart';
 import '../storage/storage_interface.dart';
 import '../storage/triple_store.dart';
 import '../query/query_engine.dart';
+import '../query/infinite_query.dart';
 import '../sync/sync_engine.dart';
 import '../auth/auth_manager.dart';
 import '../schema/schema.dart';
@@ -208,6 +209,26 @@ class InstantDB {
     }
 
     return querySignal.value;
+  }
+
+  /// Create an accumulating infinite query over a single namespace. [pageSize]
+  /// becomes the `first` count; [entityType] is the namespace to paginate.
+  InstantInfiniteQuery infiniteQuery(
+    Map<String, dynamic> query, {
+    required String entityType,
+    int pageSize = 20,
+  }) {
+    if (!_isReady.value) {
+      throw InstantException(
+        message: 'InstantDB not ready. Call init() first.',
+      );
+    }
+    return InstantInfiniteQuery(
+      runOnce: (q) => queryOnce(q),
+      baseQuery: query,
+      entityType: entityType,
+      pageSize: pageSize,
+    );
   }
 
   /// Execute a transaction with operations or transaction chunk

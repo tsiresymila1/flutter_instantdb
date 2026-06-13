@@ -3,6 +3,7 @@ import 'package:signals_flutter/signals_flutter.dart';
 
 import '../core/types.dart';
 import '../core/instant_db.dart';
+import '../query/infinite_query.dart';
 
 /// Main reactive widget for InstantDB queries
 class InstantBuilder extends StatefulWidget {
@@ -315,5 +316,28 @@ extension InstantBuilderExtensions on InstantBuilder {
       errorBuilder: errorBuilder,
       loadingBuilder: loadingBuilder,
     );
+  }
+}
+
+/// Widget that rebuilds as an [InstantInfiniteQuery] accumulates pages.
+class InstantInfiniteBuilder extends StatelessWidget {
+  final InstantInfiniteQuery query;
+  final Widget Function(
+    BuildContext context,
+    List<Map<String, dynamic>> items,
+    bool hasMore,
+  ) builder;
+
+  const InstantInfiniteBuilder({
+    super.key,
+    required this.query,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Watch((context) {
+      return builder(context, query.items.value, query.hasMore.value);
+    });
   }
 }

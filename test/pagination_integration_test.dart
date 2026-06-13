@@ -67,5 +67,28 @@ void main() {
         expect(doc.keys.toSet().difference({'id', 'n'}), isEmpty);
       }
     });
+
+    test('infiniteQuery accumulates pages via loadMore', () async {
+      final inf = db.infiniteQuery({
+        'todos': {
+          '\$': {'order': {'n': 'asc'}, 'first': 2},
+        },
+      }, pageSize: 2, entityType: 'todos');
+
+      // initial page (queryOnce has an internal ~100ms settle delay)
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(inf.items.value.length, 2);
+
+      await inf.loadMore();
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(inf.items.value.length, 4);
+
+      await inf.loadMore();
+      await Future.delayed(const Duration(milliseconds: 150));
+      expect(inf.items.value.length, 5);
+      expect(inf.hasMore.value, isFalse);
+
+      inf.dispose();
+    });
   });
 }
