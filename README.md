@@ -273,6 +273,23 @@ Watch((context) {
 });
 ```
 
+#### Cursor pagination & infinite scroll
+
+```dart
+// Cursor pagination
+final page = await db.queryOnce({
+  'todos': { r'$': { 'order': {'n': 'asc'}, 'first': 20 } },
+});
+final next = page.pageInfo?['todos']?['endCursor'];
+
+// Infinite scroll
+final feed = db.infiniteQuery(
+  {'todos': {r'$': {'order': {'n': 'asc'}}}},
+  entityType: 'todos', pageSize: 20,
+);
+await feed.loadMore();
+```
+
 ### Transactions
 
 All mutations happen within transactions, which provide atomicity and enable optimistic updates. Access the database using `InstantProvider.of(context)`:

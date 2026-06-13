@@ -8,6 +8,12 @@
 - Added dot-notation nested-field matching (e.g. `where: { 'todos.title': 'Run' }`).
 - Existing `$nin` / `$exists` / `$eq` extensions remain supported.
 
+### Query pagination & fields
+- Added cursor pagination: `first`/`after`/`last`/`before` (+ `afterInclusive`/`beforeInclusive`) under a namespace's `$` options.
+- Added `pageInfo` on `QueryResult` (`startCursor`/`endCursor`/`hasNextPage`/`hasPreviousPage` per namespace).
+- Added `fields` projection: `$: { fields: ['title', 'status'] }` (id always included).
+- Added `db.infiniteQuery(...)` accumulator + `InstantInfiniteBuilder` widget.
+
 ### Transactions (InstaML parity)
 - Added chainable `lookup` target: `db.tx.profiles.lookup('email', 'a@b.com').update({...})` — upsert by unique attribute (also works with `merge`, `delete`, `link`, `unlink`).
 - Added `{upsert: false}` strict mode: `db.tx.goals[id].update({...}, opts: TxOpts(upsert: false))` does not create the entity if it does not exist.
