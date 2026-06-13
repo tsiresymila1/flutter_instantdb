@@ -18,6 +18,9 @@ export 'src/reactive/presence.dart';
 export 'src/query/query_engine.dart';
 export 'src/query/infinite_query.dart';
 
+// Typed query DSL exports
+export 'src/typed/typed_query.dart';
+
 // Re-exports from signals_flutter for convenience
 export 'package:signals_flutter/signals_flutter.dart'
     show Signal, ReadonlySignal, signal, computed, effect, Watch;

@@ -16,6 +16,7 @@ import '../auth/auth_manager.dart';
 import '../storage/instant_storage.dart';
 import '../schema/schema.dart';
 import '../reactive/presence.dart';
+import '../typed/typed_query.dart';
 
 /// Main InstantDB client
 class InstantDB {
@@ -219,6 +220,24 @@ class InstantDB {
     }
 
     return querySignal.value;
+  }
+
+  /// Reactive typed query (see TypedQuery). Compiles to the InstaQL map and
+  /// delegates to [query].
+  Signal<QueryResult> queryTyped(
+    TypedQuery query, {
+    bool syncedOnly = false,
+  }) {
+    return this.query(query.toQuery(), syncedOnly: syncedOnly);
+  }
+
+  /// One-shot typed query. Compiles to the InstaQL map and delegates to
+  /// [queryOnce].
+  Future<QueryResult> queryOnceTyped(
+    TypedQuery query, {
+    bool syncedOnly = false,
+  }) {
+    return queryOnce(query.toQuery(), syncedOnly: syncedOnly);
   }
 
   /// Create an accumulating infinite query over a single namespace. [pageSize]
