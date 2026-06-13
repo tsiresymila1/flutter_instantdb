@@ -356,6 +356,10 @@ class QueryEngine {
               ? relValue.map((e) => e.toString()).toList()
               : [relValue.toString()];
 
+          // Fetched one id at a time. The store serializes DB access on a
+          // single connection, so this is effectively sequential regardless; a
+          // batched `entity_id IN (...)` lookup could replace it if relation
+          // sets grow large.
           final related = <Map<String, dynamic>>[];
           for (final id in ids) {
             related.addAll(await _store.queryEntities(entityId: id));
@@ -363,6 +367,9 @@ class QueryEngine {
 
           var out = related;
           if (relationQuery != null) {
+            // Nested where/order/limit/offset only. Cursor pagination
+            // (first/after/last/before) and fields projection on relations are
+            // not applied here (deferred — see nested-1 spec).
             out = _applyQueryFilters(related, relationQuery);
           }
           final nestedInclude =
