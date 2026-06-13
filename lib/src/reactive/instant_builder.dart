@@ -214,7 +214,11 @@ class AuthGuard extends StatelessWidget {
   }
 }
 
-/// Widget that shows connection status
+/// Widget that shows connection status as a bool.
+@Deprecated(
+  'Use ConnectionStateBuilder for the full ConnectionStatus enum; '
+  'online == ConnectionStatus.authenticated',
+)
 class ConnectionStatusBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, bool isOnline) builder;
 
@@ -225,6 +229,7 @@ class ConnectionStatusBuilder extends StatelessWidget {
     final db = InstantProvider.of(context);
 
     return Watch((context) {
+      // ignore: deprecated_member_use
       final isOnline = db.isOnline.value;
       return builder(context, isOnline);
     });
