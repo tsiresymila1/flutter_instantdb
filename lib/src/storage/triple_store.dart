@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart' hide Transaction;
+import 'package:uuid/uuid.dart';
 
 import '../core/types.dart';
 import '../core/logging_config.dart';
@@ -498,6 +499,66 @@ class TripleStore implements StorageInterface {
     return results;
   }
 
+  @override
+  Future<List<Operation>> resolveTargetLookups(
+    List<Operation> operations,
+  ) async {
+    final resolved = <Operation>[];
+    for (final op in operations) {
+      final ref = op.lookupRef;
+      if (ref == null) {
+        resolved.add(op);
+        continue;
+      }
+
+      final existingId = await resolveLookup(
+        ref.entityType,
+        ref.attribute,
+        ref.value,
+      );
+
+      if (existingId != null) {
+        resolved.add(_withEntityId(op, existingId));
+        continue;
+      }
+
+      // No existing entity for this unique attribute.
+      if (op.type == OperationType.delete) {
+        // Nothing to delete — drop the op.
+        continue;
+      }
+
+      // Upsert: allocate a new id and ensure the type + lookup attribute are
+      // persisted so the entity is findable next time.
+      final newId = const Uuid().v4();
+      final data = <String, dynamic>{
+        ...?op.data,
+        '__type': ref.entityType,
+        ref.attribute: ref.value,
+      };
+      resolved.add(
+        Operation(
+          type: op.type == OperationType.merge
+              ? OperationType.merge
+              : OperationType.update,
+          entityType: ref.entityType,
+          entityId: newId,
+          data: data,
+          options: op.options,
+        ),
+      );
+    }
+    return resolved;
+  }
+
+  Operation _withEntityId(Operation op, String id) => Operation(
+        type: op.type,
+        entityType: op.entityType.isNotEmpty ? op.entityType : op.lookupRef!.entityType,
+        entityId: id,
+        data: op.data,
+        options: op.options,
+      );
+
   int _compareEntities(
     Map<String, dynamic> a,
     Map<String, dynamic> b,
@@ -803,6 +864,48 @@ class TripleStore implements StorageInterface {
     return resolvedOperations;
   }
 
+  Future<bool> _entityExists(DatabaseExecutor txn, String entityId) async {
+    final rows = await txn.query(
+      'triples',
+      where: 'entity_id = ? AND retracted = FALSE',
+      whereArgs: [entityId],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  /// Persist a `__type` triple for the entity if its type is known and not
+  /// already recorded. This makes upserted entities discoverable by type
+  /// queries (update/merge are upserts by default).
+  Future<void> _ensureEntityType(
+    DatabaseExecutor txn,
+    Operation operation,
+    String txId,
+    DateTime now,
+    bool isLocalOnly,
+  ) async {
+    final entityType = operation.entityType;
+    if (entityType.isEmpty || entityType == 'unknown') return;
+
+    final existing = await txn.query(
+      'triples',
+      where: 'entity_id = ? AND attribute = ? AND retracted = FALSE',
+      whereArgs: [operation.entityId, '__type'],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) return;
+
+    await txn.insert('triples', {
+      'entity_id': operation.entityId,
+      'attribute': '__type',
+      'value': jsonEncode(entityType),
+      'tx_id': txId,
+      'created_at': now.millisecondsSinceEpoch,
+      'retracted': 0,
+      'is_local_only': isLocalOnly ? 1 : 0,
+    });
+  }
+
   Future<List<TripleChange>> _applyOperationWithChanges(
     DatabaseExecutor txn,
     Operation operation,
@@ -847,6 +950,13 @@ class TripleStore implements StorageInterface {
         break;
 
       case OperationType.update:
+        if (operation.options?['upsert'] == false &&
+            !await _entityExists(txn, operation.entityId)) {
+          break; // strict mode: do not create a missing entity
+        }
+        // Ensure the entity type is recorded so the (possibly newly upserted)
+        // entity is discoverable by type queries.
+        await _ensureEntityType(txn, operation, txId, now, isLocalOnly);
         // Update operation with data map
         if (operation.data != null) {
           for (final entry in operation.data!.entries) {
@@ -887,6 +997,11 @@ class TripleStore implements StorageInterface {
         break;
 
       case OperationType.merge:
+        if (operation.options?['upsert'] == false &&
+            !await _entityExists(txn, operation.entityId)) {
+          break;
+        }
+        await _ensureEntityType(txn, operation, txId, now, isLocalOnly);
         // Merge operation - deep merge with existing data
         final existingTriples = await txn.query(
           'triples',

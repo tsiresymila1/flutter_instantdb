@@ -38,6 +38,11 @@ abstract class StorageInterface {
   /// Get entity type for a specific entity ID
   Future<String?> getEntityType(String entityId);
 
+  /// Resolve operations whose target is a [LookupRef] into concrete entity ids.
+  /// For write ops with no existing match, a new entity id is allocated (upsert
+  /// by unique attribute). Delete ops with no match are dropped.
+  Future<List<Operation>> resolveTargetLookups(List<Operation> operations);
+
   /// Close the store and clean up resources
   Future<void> close();
 }
