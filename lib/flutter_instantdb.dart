@@ -20,6 +20,8 @@ export 'src/query/infinite_query.dart';
 
 // Typed query DSL exports
 export 'src/typed/typed_query.dart';
+export 'src/typed/annotations.dart';
+export 'src/typed/model_table.dart';
 
 // Re-exports from signals_flutter for convenience
 export 'package:signals_flutter/signals_flutter.dart'
