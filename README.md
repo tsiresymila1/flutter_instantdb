@@ -2,8 +2,8 @@
 
 Real-time, offline-first database for Flutter with reactive bindings. Build collaborative apps in minutes.
 
-- 📚 Docs: https://flutter-instandb.vercel.app
-- 🚀 Quick Start: https://flutter-instandb.vercel.app/getting-started/quick-start
+- 📚 Docs: https://flutter-instantdb.vercel.app
+- 🚀 Quick Start: https://flutter-instantdb.vercel.app/getting-started/quick-start
 - 🧩 Example app: [example/](example/)
 
 This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com), enabling you to build real-time, collaborative applications with ease.
@@ -39,12 +39,12 @@ This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com),
 
 ## Documentation
 
-- Getting Started: [Installation](https://flutter-instandb.vercel.app/getting-started/installation) · [Quick Start](https://flutter-instandb.vercel.app/getting-started/quick-start)
-- Concepts: [Database](https://flutter-instandb.vercel.app/concepts/database) · [Schema](https://flutter-instandb.vercel.app/concepts/schema)
-- API Reference: [InstantDB](https://flutter-instandb.vercel.app/api/instantdb) · [Queries](https://flutter-instandb.vercel.app/api/queries) · [Transactions](https://flutter-instandb.vercel.app/api/transactions) · [Presence](https://flutter-instandb.vercel.app/api/presence-api) · [Widgets](https://flutter-instandb.vercel.app/api/widgets) · [Types](https://flutter-instandb.vercel.app/api/types)
-- Authentication: [Users](https://flutter-instandb.vercel.app/auth/users) · [Sessions](https://flutter-instandb.vercel.app/auth/sessions) · [Permissions](https://flutter-instandb.vercel.app/auth/permissions)
-- Real-time: [Sync](https://flutter-instandb.vercel.app/realtime/sync) · [Presence](https://flutter-instandb.vercel.app/realtime/presence) · [Collaboration](https://flutter-instandb.vercel.app/realtime/collaboration)
-- Advanced: [Offline](https://flutter-instandb.vercel.app/advanced/offline) · [Performance](https://flutter-instandb.vercel.app/advanced/performance) · [Migration](https://flutter-instandb.vercel.app/advanced/migration) · [Troubleshooting](https://flutter-instandb.vercel.app/advanced/troubleshooting)
+- Getting Started: [Installation](https://flutter-instantdb.vercel.app/getting-started/installation) · [Quick Start](https://flutter-instantdb.vercel.app/getting-started/quick-start)
+- Concepts: [Database](https://flutter-instantdb.vercel.app/concepts/database) · [Schema](https://flutter-instantdb.vercel.app/concepts/schema)
+- API Reference: [InstantDB](https://flutter-instantdb.vercel.app/api/instantdb) · [Queries](https://flutter-instantdb.vercel.app/api/queries) · [Transactions](https://flutter-instantdb.vercel.app/api/transactions) · [Presence](https://flutter-instantdb.vercel.app/api/presence-api) · [Widgets](https://flutter-instantdb.vercel.app/api/widgets) · [Types](https://flutter-instantdb.vercel.app/api/types)
+- Authentication: [Users](https://flutter-instantdb.vercel.app/auth/users) · [Sessions](https://flutter-instantdb.vercel.app/auth/sessions) · [Permissions](https://flutter-instantdb.vercel.app/auth/permissions)
+- Real-time: [Sync](https://flutter-instantdb.vercel.app/realtime/sync) · [Presence](https://flutter-instantdb.vercel.app/realtime/presence) · [Collaboration](https://flutter-instantdb.vercel.app/realtime/collaboration)
+- Advanced: [Offline](https://flutter-instantdb.vercel.app/advanced/offline) · [Performance](https://flutter-instantdb.vercel.app/advanced/performance) · [Migration](https://flutter-instantdb.vercel.app/advanced/migration) · [Troubleshooting](https://flutter-instantdb.vercel.app/advanced/troubleshooting)
 
 ## Quick Start
 
@@ -66,15 +66,28 @@ flutter pub add flutter_instantdb
 ### 2. Initialize InstantDB
 
 ```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_instantdb/flutter_instantdb.dart';
 
-// Initialize your database
-final db = await InstantDB.init(
-  appId: 'your-app-id', // Get this from instantdb.com
-  config: const InstantConfig(
-    syncEnabled: true,
-  ),
-);
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables (optional, but recommended)
+  await dotenv.load(fileName: '.env');
+
+  // Initialize your database
+  final appId = dotenv.env['INSTANTDB_API_ID']!;
+  final db = await InstantDB.init(
+    appId: appId, // Or use your App ID directly: 'your-app-id'
+    config: InstantConfig(
+      syncEnabled: true, // Enable real-time sync
+      verboseLogging: true, // Enable debug logging in development
+    ),
+  );
+
+  runApp(MyApp(db: db));
+}
 ```
 
 ### 3. Define Your Schema (Optional)
@@ -95,35 +108,80 @@ final schema = InstantSchemaBuilder()
 ### 4. Build Reactive UI
 
 ```dart
-class TodoList extends StatelessWidget {
+// Wrap your app with InstantProvider
+class MyApp extends StatelessWidget {
+  final InstantDB db;
+
+  const MyApp({super.key, required this.db});
+
   @override
   Widget build(BuildContext context) {
     return InstantProvider(
       db: db,
-      child: InstantBuilderTyped<List<Map<String, dynamic>>>(
-        query: {
-          'todos': {
-            'orderBy': {'createdAt': 'desc'},
-          },
-        },
-        transformer: (data) => (data['todos'] as List).cast<Map<String, dynamic>>(),
-        builder: (context, todos) {
-          return ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
-              return ListTile(
-                title: Text(todo['text']),
-                leading: Checkbox(
-                  value: todo['completed'],
-                  onChanged: (value) => _toggleTodo(todo['id']),
-                ),
-              );
-            },
-          );
-        },
+      child: MaterialApp(
+        title: 'My App',
+        home: const TodosPage(),
       ),
     );
+  }
+}
+
+// Access the database using InstantProvider.of(context)
+class TodosPage extends StatelessWidget {
+  const TodosPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return InstantBuilderTyped<List<Map<String, dynamic>>>(
+      query: {'todos': {}},
+      transformer: (data) {
+        final todos = (data['todos'] as List).cast<Map<String, dynamic>>();
+        // Sort client-side by createdAt in descending order
+        todos.sort((a, b) {
+          final aTime = a['createdAt'] as int? ?? 0;
+          final bTime = b['createdAt'] as int? ?? 0;
+          return bTime.compareTo(aTime);
+        });
+        return todos;
+      },
+      loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+      errorBuilder: (context, error) => Center(child: Text('Error: $error')),
+      builder: (context, todos) {
+        if (todos.isEmpty) {
+          return const Center(child: Text('No todos yet'));
+        }
+
+        return ListView.builder(
+          itemCount: todos.length,
+          itemBuilder: (context, index) {
+            final todo = todos[index];
+            return ListTile(
+              title: Text(todo['text'] ?? ''),
+              leading: Checkbox(
+                value: todo['completed'] == true,
+                onChanged: (value) => _toggleTodo(context, todo),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => _deleteTodo(context, todo['id']),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _toggleTodo(BuildContext context, Map<String, dynamic> todo) async {
+    final db = InstantProvider.of(context);
+    await db.transact(
+      db.tx['todos'][todo['id']].update({'completed': !todo['completed']}),
+    );
+  }
+
+  Future<void> _deleteTodo(BuildContext context, String todoId) async {
+    final db = InstantProvider.of(context);
+    await db.transact(db.tx['todos'][todoId].delete());
   }
 }
 ```
@@ -131,114 +189,120 @@ class TodoList extends StatelessWidget {
 ### 5. Perform Mutations
 
 ```dart
-// Create a new todo using the tx namespace (recommended)
-final todoId = db.id();
-await db.transact(
-  db.tx['todos'].create({
-    'id': todoId,
-    'text': 'Learn Flutter InstantDB',
-    'completed': false,
-    'createdAt': DateTime.now().millisecondsSinceEpoch,
-  }),
-);
+Future<void> addTodo(BuildContext context, String text) async {
+  final db = InstantProvider.of(context);
 
-// Update with the tx API
-await db.transact(
-  db.tx['todos'][todoId].update({'completed': true}),
-);
+  // Create a new todo using the traditional transaction API
+  final todoId = db.id(); // Generates a proper UUID - required by InstantDB
+  await db.transact([
+    ...db.create('todos', {
+      'id': todoId,
+      'text': text,
+      'completed': false,
+      'createdAt': DateTime.now().millisecondsSinceEpoch,
+    }),
+  ]);
+}
+
+Future<void> toggleTodo(BuildContext context, Map<String, dynamic> todo) async {
+  final db = InstantProvider.of(context);
+
+  // Update using the tx namespace API (aligned with React InstantDB)
+  await db.transact(
+    db.tx['todos'][todo['id']].update({'completed': !todo['completed']}),
+  );
+}
+
+Future<void> deleteTodo(BuildContext context, String todoId) async {
+  final db = InstantProvider.of(context);
+
+  // Delete using the tx namespace API
+  await db.transact(db.tx['todos'][todoId].delete());
+}
 
 // Deep merge for nested updates
-await db.transact(
-  db.tx['users'][userId].merge({
-    'preferences': {
-      'theme': 'dark',
-      'notifications': {'email': false}
-    }
-  }),
-);
-
-// Delete a todo
-await db.transact(
-  db.tx['todos'][todoId].delete(),
-);
-
-// Legacy API still works (create/update/delete)
-await db.transact([
-  ...db.create('todos', {
-    'id': db.id(), // Generates a proper UUID - required by InstantDB
-    'text': 'Learn Flutter InstantDB',
-    'completed': false,
-    'createdAt': DateTime.now().millisecondsSinceEpoch,
-  }),
-]);
+Future<void> updateUserPreferences(BuildContext context, String userId) async {
+  final db = InstantProvider.of(context);
+  await db.transact(
+    db.tx['users'][userId].merge({
+      'preferences': {
+        'theme': 'dark',
+        'notifications': {'email': false}
+      }
+    }),
+  );
+}
 ```
 
 ## Core Concepts
 
 ### Reactive Queries
 
-Flutter InstantDB uses [Signals](https://pub.dev/packages/signals_flutter) for reactivity. Queries return `Signal<QueryResult>` objects that automatically update when underlying data changes.
+Flutter InstantDB uses [Signals](https://pub.dev/packages/signals_flutter) for reactivity. Use `InstantBuilder` widgets for reactive UI updates, or `queryOnce` for one-time data fetching.
 
 ```dart
-// Simple query with the new subscribeQuery alias (recommended)
-final querySignal = db.subscribeQuery({
-  'users': {
-    'where': {'active': true},
+// In a widget, use InstantBuilder for reactive queries
+InstantBuilder(
+  query: {'todos': {}},
+  loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+  errorBuilder: (context, error) => Center(child: Text('Error: $error')),
+  builder: (context, data) {
+    final todos = (data['todos'] as List? ?? []);
+    return Text('Total: ${todos.length} todos');
   },
-});
+);
 
-// One-time query (no subscriptions)
-final result = await db.queryOnce({'users': {}});
+// One-time query (no subscriptions) - useful for operations like clearing all items
+Future<void> clearAllTodos(BuildContext context) async {
+  final db = InstantProvider.of(context);
+  final queryResult = await db.queryOnce({'todos': {}});
 
-// Advanced query with new operators
-final advancedQuery = db.subscribeQuery({
-  'users': {
-    'where': {
-      'age': {'\$gte': 18, '\$lt': 65}, // Age between 18-65
-      'email': {'\$like': '%@company.com'}, // Company emails
-      'status': {'\$ne': 'inactive'}, // Not inactive
-    },
-    'orderBy': {'createdAt': 'desc'},
-    'limit': 20,
-  },
-});
+  if (queryResult.data != null && queryResult.data!['todos'] is List) {
+    final todos = (queryResult.data!['todos'] as List).cast<Map<String, dynamic>>();
+    for (final todo in todos) {
+      await db.transact(db.tx['todos'][todo['id']].delete());
+    }
+  }
+}
 
-// React to changes
+// Using Watch widget for reactive updates with signals
 Watch((context) {
-  final result = querySignal.value;
-  return Text('Users: ${result.data?['users']?.length ?? 0}');
+  final db = InstantProvider.of(context);
+  final cursors = room.getCursors().value;
+  return Text('Active cursors: ${cursors.length}');
 });
 ```
 
 ### Transactions
 
-All mutations happen within transactions, which provide atomicity and enable optimistic updates. Use the new `tx` namespace for cleaner, more intuitive syntax:
+All mutations happen within transactions, which provide atomicity and enable optimistic updates. Access the database using `InstantProvider.of(context)`:
 
 ```dart
-// New tx namespace API (recommended)
-final postId = db.id();
-await db.transact(
-  db.tx['users'][userId]
-      .update({'name': 'New Name'})
-      .merge(db.tx['users'][userId].link({'posts': [postId]})),
-);
+// Using tx namespace API for updates and deletes (aligned with React InstantDB)
+Future<void> toggleTodo(BuildContext context, Map<String, dynamic> todo) async {
+  final db = InstantProvider.of(context);
+  await db.transact(
+    db.tx['todos'][todo['id']].update({'completed': !todo['completed']}),
+  );
+}
 
-await db.transact(
-  db.tx['posts'][postId].update({
-    'title': 'Hello World',
-    'authorId': lookup('users', 'email', 'john@example.com'),
-  })
-);
+Future<void> deleteTodo(BuildContext context, String todoId) async {
+  final db = InstantProvider.of(context);
+  await db.transact(db.tx['todos'][todoId].delete());
+}
 
-// Traditional approach still works
-await db.transact([
-  db.update(userId, {'name': 'New Name'}),
-  ...db.create('posts', {
-    'id': db.id(),
-    'title': 'Hello World',
-    'authorId': userId,
-  }),
-]);
+// Using traditional API for creating new entities
+Future<void> addTodo(BuildContext context, String text) async {
+  final db = InstantProvider.of(context);
+  await db.transact([
+    ...db.create('todos', {
+      'id': db.id(), // Always use db.id() for proper UUID generation
+      'text': text,
+      'completed': false,
+      'createdAt': DateTime.now().millisecondsSinceEpoch,
+    }),
+  ]);
+}
 ```
 
 ### Real-time Sync
@@ -248,18 +312,29 @@ When sync is enabled, changes are automatically synchronized across all connecte
 ```dart
 // Enable sync during initialization
 final db = await InstantDB.init(
-  appId: 'your-app-id',
-  config: const InstantConfig(
-    syncEnabled: true,
-    verboseLogging: false, // Set to true for detailed debug output
+  appId: appId,
+  config: InstantConfig(
+    syncEnabled: true, // Enable real-time sync
+    verboseLogging: true, // Enable debug logging in development
   ),
 );
 
-// Monitor connection status
+// Monitor connection status in your AppBar
 ConnectionStatusBuilder(
   builder: (context, isOnline) {
-    return Icon(
-      isOnline ? Icons.cloud_done : Icons.cloud_off,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          isOnline ? Icons.cloud_done : Icons.cloud_off,
+          color: Colors.white70,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          isOnline ? 'Online' : 'Offline',
+          style: const TextStyle(fontSize: 12, color: Colors.white70),
+        ),
+      ],
     );
   },
 )
@@ -278,47 +353,173 @@ All CRUD operations (Create, Read, Update, Delete) sync reliably across multiple
 
 ### Presence System
 
-InstantDB includes a real-time presence system for collaborative features. Use the new room-based API for better organization:
+InstantDB includes a real-time presence system for collaborative features. Use the room-based API for better organization:
 
 ```dart
-// Join a room to get a scoped API (recommended)
-final room = db.presence.joinRoom('room-id', initialPresence: {
-  'username': 'Alice',
-  'status': 'online',
-});
+class CursorsPage extends StatefulWidget {
+  const CursorsPage({super.key});
 
-// Room-scoped operations
-await room.updateCursor(x: 100, y: 200);
-await room.setTyping(true);
-await room.sendReaction('❤️', metadata: {'x': 100, 'y': 200});
-await room.setPresence({'mood': 'happy'});
+  @override
+  State<CursorsPage> createState() => _CursorsPageState();
+}
 
-// Topic-based messaging within rooms
-await room.publishTopic('chat', {'message': 'Hello everyone!'});
-room.subscribeTopic('chat').listen((data) {
-  print('New message: ${data['message']}');
-});
+class _CursorsPageState extends State<CursorsPage> {
+  String? _userId;
+  InstantRoom? _room;
 
-// Listen to room updates
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_userId == null) {
+      _initializeUser();
+      _joinRoom();
+    }
+  }
+
+  void _initializeUser() {
+    final db = InstantProvider.of(context);
+    final currentUser = db.auth.currentUser.value;
+    _userId = currentUser?.id ?? db.getAnonymousUserId();
+  }
+
+  void _joinRoom() {
+    final db = InstantProvider.of(context);
+    // Join a room to get a scoped API
+    _room = db.presence.joinRoom('cursors-room');
+  }
+
+  void _updateCursor(Offset position) {
+    if (_room == null) return;
+    // Update cursor position using the room-based API
+    _room!.updateCursor(x: position.dx, y: position.dy);
+  }
+
+  void _removeCursor() {
+    _room?.removeCursor();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onHover: (event) => _updateCursor(event.localPosition),
+      onExit: (_) => _removeCursor(),
+      child: Stack(
+        children: [
+          // Display all cursors using Watch for reactivity
+          Watch((context) {
+            if (_room == null) return const SizedBox.shrink();
+
+            final cursors = _room!.getCursors().value;
+
+            return Stack(
+              children: cursors.entries.map((entry) {
+                final userId = entry.key;
+                final cursor = entry.value;
+                return Positioned(
+                  left: cursor.x,
+                  top: cursor.y,
+                  child: CursorWidget(userId: userId, isMe: userId == _userId),
+                );
+              }).toList(),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+```
+
+**Typing Indicators:**
+
+```dart
+class ChatPage extends StatefulWidget {
+  const ChatPage({super.key});
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  InstantRoom? _room;
+  Timer? _typingTimer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final db = InstantProvider.of(context);
+    // Join room with initial presence
+    _room = db.presence.joinRoom(
+      'chat-room',
+      initialPresence: {'userName': 'Alice', 'status': 'online'},
+    );
+  }
+
+  void _startTyping() {
+    _typingTimer?.cancel();
+    _room?.setTyping(true);
+    // Auto-stop typing after 3 seconds of inactivity
+    _typingTimer = Timer(const Duration(seconds: 3), _stopTyping);
+  }
+
+  void _stopTyping() {
+    _room?.setTyping(false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Typing indicators
+        Watch((context) {
+          if (_room == null) return const SizedBox.shrink();
+
+          final typingUsers = _room!.getTyping().value;
+          if (typingUsers.isEmpty) return const SizedBox.shrink();
+
+          return Text('${typingUsers.length} user(s) typing...');
+        }),
+        // Message input
+        TextField(
+          onChanged: (_) => _startTyping(),
+          onSubmitted: (_) => _stopTyping(),
+        ),
+      ],
+    );
+  }
+}
+```
+
+**Reactions:**
+
+```dart
+void sendReaction(BuildContext context, String emoji, Offset position) {
+  final db = InstantProvider.of(context);
+  final room = db.presence.joinRoom('reactions-room');
+
+  // Send reaction with position metadata
+  room.sendReaction(
+    emoji,
+    metadata: {'x': position.dx, 'y': position.dy},
+  );
+}
+
+// Display reactions
 Watch((context) {
-  final cursors = room.getCursors().value;
-  final typingUsers = room.getTyping().value;
-  final reactions = room.getReactions().value;
-  final presence = room.getPresence().value;
+  if (room == null) return const SizedBox.shrink();
 
-  return YourCollaborativeWidget(
-    cursors: cursors,
-    typingUsers: typingUsers,
-    reactions: reactions,
-    presence: presence,
+  final reactions = room!.getReactions().value;
+
+  return Stack(
+    children: reactions.map((reaction) {
+      return Positioned(
+        left: (reaction.metadata?['x'] ?? 0.0).toDouble(),
+        top: (reaction.metadata?['y'] ?? 0.0).toDouble(),
+        child: Text(reaction.emoji, style: const TextStyle(fontSize: 32)),
+      );
+    }).toList(),
   );
 });
-
-// Direct API still works for simple use cases
-await db.presence.updateCursor('room-id', x: 100, y: 200);
-await db.presence.setTyping('room-id', true);
-await db.presence.sendReaction('room-id', '❤️');
-await db.presence.leaveRoom('room-id');
 ```
 
 ## Widget Reference
@@ -434,6 +635,18 @@ InstantDB uses a declarative query language with advanced operators:
   }
 }
 
+// String match + logical combinators
+db.query({
+  'todos': {
+    'where': {
+      'or': [
+        {'title': {r'$ilike': '%urgent%'}},
+        {'priority': {r'$gte': 8}},
+      ],
+    },
+  },
+});
+
 // Lookup references (reference by attribute instead of ID)
 {
   'posts': {
@@ -446,44 +659,132 @@ InstantDB uses a declarative query language with advanced operators:
 
 ## Authentication
 
-InstantDB includes built-in authentication with convenient helper methods:
+InstantDB includes built-in authentication with magic code (passwordless) and guest authentication:
 
 ```dart
-// Sign up
-final user = await db.auth.signUp(
-  email: 'user@example.com',
-  password: 'password',
-);
+class AuthPage extends StatefulWidget {
+  const AuthPage({super.key});
 
-// Sign in
-final user = await db.auth.signIn(
-  email: 'user@example.com',
-  password: 'password',
-);
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
 
-// Sign out
-await db.auth.signOut();
+class _AuthPageState extends State<AuthPage> {
+  final _emailController = TextEditingController();
+  final _codeController = TextEditingController();
+  bool _codeSent = false;
+  String? _userEmail;
 
-// Get current auth state (new convenience methods)
-final currentUser = db.getAuth(); // One-time check
-final authSignal = db.subscribeAuth(); // Reactive updates
+  // Send magic code to email
+  Future<void> _sendMagicCode() async {
+    final email = _emailController.text.trim();
+    final db = InstantProvider.of(context);
 
-// Listen to auth state changes
-db.auth.onAuthStateChange.listen((user) {
-  if (user != null) {
-    // User signed in
-  } else {
-    // User signed out
+    await db.auth.sendMagicCode(email: email);
+
+    setState(() {
+      _codeSent = true;
+      _userEmail = email;
+    });
   }
-});
 
-// Use in reactive widgets
-Watch((context) {
-  final user = db.subscribeAuth().value;
-  return user != null
-    ? Text('Welcome ${user.email}')
-    : Text('Please sign in');
-});
+  // Verify the magic code
+  Future<void> _verifyCode() async {
+    final code = _codeController.text.trim();
+    final db = InstantProvider.of(context);
+
+    await db.auth.verifyMagicCode(email: _userEmail!, code: code);
+    // User is now signed in!
+  }
+
+  // Sign in as guest
+  Future<void> _signAsGuest() async {
+    final db = InstantProvider.of(context);
+    await db.auth.signInAsGuest();
+  }
+
+  // Sign out
+  Future<void> _signOut() async {
+    final db = InstantProvider.of(context);
+    await db.auth.signOut();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final db = InstantProvider.of(context);
+
+    // Listen to auth state changes with StreamBuilder
+    return StreamBuilder<AuthUser?>(
+      stream: db.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        final user = snapshot.data;
+
+        if (user != null) {
+          return Column(
+            children: [
+              Text('Signed in as ${user.email}'),
+              Text('User ID: ${user.id}'),
+              if (user.isGuest == true) Text('(Guest user)'),
+              ElevatedButton(
+                onPressed: _signOut,
+                child: const Text('Sign Out'),
+              ),
+            ],
+          );
+        }
+
+        if (_codeSent) {
+          return Column(
+            children: [
+              Text('Code sent to $_userEmail'),
+              TextField(
+                controller: _codeController,
+                decoration: const InputDecoration(labelText: 'Verification Code'),
+              ),
+              ElevatedButton(
+                onPressed: _verifyCode,
+                child: const Text('Verify Code'),
+              ),
+            ],
+          );
+        }
+
+        return Column(
+          children: [
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+            ),
+            ElevatedButton(
+              onPressed: _sendMagicCode,
+              child: const Text('Send Magic Code'),
+            ),
+            ElevatedButton(
+              onPressed: _signAsGuest,
+              child: const Text('Continue as Guest'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+```
+
+**Getting Current User:**
+
+```dart
+// One-time check
+final db = InstantProvider.of(context);
+final currentUser = db.auth.currentUser.value;
+
+// For anonymous/guest users
+final anonymousId = db.getAnonymousUserId();
+
+// Verify refresh token
+if (user?.refreshToken != null) {
+  await db.auth.verifyRefreshToken(refreshToken: user!.refreshToken!);
+}
 ```
 
 ## Schema Validation
