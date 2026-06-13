@@ -7,6 +7,7 @@ import '../core/types.dart';
 import '../core/logging_config.dart';
 import '../storage/storage_interface.dart';
 import '../sync/sync_engine.dart';
+import 'where_matcher.dart';
 
 /// Query engine that executes InstaQL queries reactively
 class QueryEngine {
@@ -512,131 +513,7 @@ class QueryEngine {
     Map<String, dynamic> doc,
     Map<String, dynamic> where,
   ) {
-    for (final entry in where.entries) {
-      final field = entry.key;
-      final condition = entry.value;
-      final fieldValue = doc[field];
-
-      if (condition is Map) {
-        // Handle operators like $eq, $ne, $gt, $lt, etc.
-        for (final op in condition.entries) {
-          final operator = op.key;
-          final compareValue = op.value;
-
-          switch (operator) {
-            case '\$eq':
-              if (fieldValue != compareValue) return false;
-              break;
-            case '\$ne':
-              if (fieldValue == compareValue) return false;
-              break;
-            case '\$gt':
-              if (fieldValue == null) return false;
-              // Type-safe comparison
-              if (fieldValue is! Comparable || compareValue is! Comparable) {
-                _logger.warning(
-                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
-                );
-                return false;
-              }
-              try {
-                if ((fieldValue).compareTo(compareValue) <= 0) {
-                  return false;
-                }
-              } catch (e) {
-                _logger.warning('Comparison failed for \$gt: $e');
-                return false;
-              }
-              break;
-            case '\$gte':
-              if (fieldValue == null) return false;
-              // Type-safe comparison
-              if (fieldValue is! Comparable || compareValue is! Comparable) {
-                _logger.warning(
-                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
-                );
-                return false;
-              }
-              try {
-                if ((fieldValue).compareTo(compareValue) < 0) {
-                  return false;
-                }
-              } catch (e) {
-                _logger.warning('Comparison failed for \$gte: $e');
-                return false;
-              }
-              break;
-            case '\$lt':
-              if (fieldValue == null) return false;
-              // Type-safe comparison
-              if (fieldValue is! Comparable || compareValue is! Comparable) {
-                _logger.warning(
-                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
-                );
-                return false;
-              }
-              try {
-                if ((fieldValue).compareTo(compareValue) >= 0) {
-                  return false;
-                }
-              } catch (e) {
-                _logger.warning('Comparison failed for \$lt: $e');
-                return false;
-              }
-              break;
-            case '\$lte':
-              if (fieldValue == null) return false;
-              // Type-safe comparison
-              if (fieldValue is! Comparable || compareValue is! Comparable) {
-                _logger.warning(
-                  'Cannot compare non-comparable types: ${fieldValue.runtimeType} and ${compareValue.runtimeType}',
-                );
-                return false;
-              }
-              try {
-                if ((fieldValue).compareTo(compareValue) > 0) {
-                  return false;
-                }
-              } catch (e) {
-                _logger.warning('Comparison failed for \$lte: $e');
-                return false;
-              }
-              break;
-            case '\$in':
-              if (compareValue is List && !compareValue.contains(fieldValue)) {
-                return false;
-              }
-              break;
-            case '\$nin':
-              if (compareValue is List && compareValue.contains(fieldValue)) {
-                return false;
-              }
-              break;
-            case '\$exists':
-              final exists = doc.containsKey(field);
-              if ((compareValue == true && !exists) ||
-                  (compareValue == false && exists)) {
-                return false;
-              }
-              break;
-            case '\$isNull':
-              if ((compareValue == true && fieldValue != null) ||
-                  (compareValue == false && fieldValue == null)) {
-                return false;
-              }
-              break;
-            default:
-              // Unknown operator, skip
-              break;
-          }
-        }
-      } else {
-        // Direct equality check
-        if (fieldValue != condition) return false;
-      }
-    }
-
-    return true;
+    return evaluateWhere(doc, where);
   }
 
   bool _queryAffectedByChange(Map<String, dynamic> query, TripleChange change) {
