@@ -76,4 +76,32 @@ void main() {
       expect(evaluateWhere({'t': 'a'}, {'t': {r'$not': 'b'}}), isTrue);
     });
   });
+
+  group('evaluateWhere - logical combinators', () {
+    test('and requires all sub-clauses', () {
+      final w = {'and': [{'a': 1}, {'b': 2}]};
+      expect(evaluateWhere({'a': 1, 'b': 2}, w), isTrue);
+      expect(evaluateWhere({'a': 1, 'b': 9}, w), isFalse);
+    });
+
+    test('or requires at least one sub-clause', () {
+      final w = {'or': [{'a': 1}, {'b': 2}]};
+      expect(evaluateWhere({'a': 1, 'b': 9}, w), isTrue);
+      expect(evaluateWhere({'a': 9, 'b': 2}, w), isTrue);
+      expect(evaluateWhere({'a': 9, 'b': 9}, w), isFalse);
+    });
+
+    test('logical keys AND with sibling field keys', () {
+      final w = {'status': 'open', 'or': [{'p': 1}, {'p': 2}]};
+      expect(evaluateWhere({'status': 'open', 'p': 1}, w), isTrue);
+      expect(evaluateWhere({'status': 'closed', 'p': 1}, w), isFalse);
+    });
+
+    test('nested and/or', () {
+      final w = {'or': [{'and': [{'a': 1}, {'b': 2}]}, {'c': 3}]};
+      expect(evaluateWhere({'a': 1, 'b': 2}, w), isTrue);
+      expect(evaluateWhere({'c': 3}, w), isTrue);
+      expect(evaluateWhere({'a': 1, 'b': 9, 'c': 9}, w), isFalse);
+    });
+  });
 }
