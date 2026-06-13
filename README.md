@@ -352,6 +352,14 @@ ConnectionStatusBuilder(
     );
   },
 )
+
+// Reactive connection lifecycle (connecting/opened/authenticated/closed/errored)
+ConnectionStateBuilder(
+  builder: (context, status) => Text(status.name),
+);
+
+// Stable per-name local id (survives restarts)
+final deviceId = await db.getLocalId('device');
 ```
 
 #### Enhanced Sync Features

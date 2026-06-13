@@ -13,6 +13,11 @@
 - Added `{upsert: false}` strict mode: `db.tx.goals[id].update({...}, opts: TxOpts(upsert: false))` does not create the entity if it does not exist.
 - Added `ruleParams`: `db.tx.docs[id].update({...}).ruleParams({...})`, forwarded to the server for permission rules.
 
+### Connection status & local id
+- Added `ConnectionStatus` enum (`connecting`/`opened`/`authenticated`/`closed`/`errored`) exposed via `db.connectionStatus` and the new `ConnectionStateBuilder` widget.
+- Added persistent `db.getLocalId(name)` — a stable id per name that survives restarts (matches `useLocalId`).
+- Deprecated `db.isOnline` (use `connectionStatus`; online == `authenticated`) and `db.getAnonymousUserId()` (use `getLocalId`). Both still work.
+
 ## 1.1.2+1
 ### 🎉 Docs
 Update docs
