@@ -8,6 +8,7 @@ import '../core/logging_config.dart';
 import '../storage/storage_interface.dart';
 import '../sync/sync_engine.dart';
 import 'where_matcher.dart';
+import 'pagination.dart';
 
 /// Query engine that executes InstaQL queries reactively
 class QueryEngine {
@@ -20,6 +21,9 @@ class QueryEngine {
   Timer? _batchTimer;
   final Set<String> _pendingQueryUpdates = {};
   final Set<String> _subscribedQueries = {};
+
+  // pageInfo from the most recent _queryEntities call, keyed by entity type.
+  final Map<String, Map<String, dynamic>> _lastPageInfo = {};
 
   // Maximum number of queries to cache (LRU eviction)
   static const int _maxCacheSize = 50;
@@ -173,7 +177,10 @@ class QueryEngine {
     try {
       final result = await _processQuery(query, syncedOnly: syncedOnly);
       batch(() {
-        resultSignal.value = QueryResult.success(result);
+        resultSignal.value = QueryResult.success(
+          result.data,
+          pageInfo: result.pageInfo.isEmpty ? null : result.pageInfo,
+        );
       });
     } catch (e, stackTrace) {
       InstantDBLogging.root.severe('Query execution error', e, stackTrace);
@@ -183,11 +190,13 @@ class QueryEngine {
     }
   }
 
-  Future<Map<String, dynamic>> _processQuery(
+  Future<({Map<String, dynamic> data, Map<String, dynamic> pageInfo})>
+      _processQuery(
     Map<String, dynamic> query, {
     bool syncedOnly = false,
   }) async {
     final results = <String, dynamic>{};
+    final pageInfo = <String, dynamic>{};
 
     for (final entry in query.entries) {
       final entityType = entry.key;
@@ -217,9 +226,11 @@ class QueryEngine {
         syncedOnly: syncedOnly,
       );
       results[entityType] = entities;
+      final pi = _lastPageInfo[entityType];
+      if (pi != null) pageInfo[entityType] = pi;
     }
 
-    return results;
+    return (data: results, pageInfo: pageInfo);
   }
 
   Future<List<Map<String, dynamic>>> _queryEntities(
@@ -265,9 +276,24 @@ class QueryEngine {
       orderBy = [orderByInput];
     }
 
-    final limit = query['limit'] as int?;
-    final offset = query['offset'] as int?;
     final include = query['include'] as Map<String, dynamic>?;
+    final fields = (query['fields'] as List?)?.cast<String>();
+    final first = query['first'] as int?;
+    final last = query['last'] as int?;
+    final after = query['after'] as String?;
+    final before = query['before'] as String?;
+    final afterInclusive = query['afterInclusive'] == true;
+    final beforeInclusive = query['beforeInclusive'] == true;
+    final usePaginate = fields != null ||
+        first != null ||
+        last != null ||
+        after != null ||
+        before != null;
+
+    // When cursor/fields are present, fetch the full ordered set (no store-side
+    // limit/offset) so the window + pageInfo are computed correctly.
+    final limit = usePaginate ? null : query['limit'] as int?;
+    final offset = usePaginate ? null : query['offset'] as int?;
     final aggregate = query['\$aggregate'] as Map<String, dynamic>?;
     final groupBy = query['\$groupBy'] as List<String>?;
 
@@ -286,6 +312,25 @@ class QueryEngine {
     // Process includes (nested queries)
     if (include != null) {
       entities = await _processIncludes(entities, include);
+    }
+
+    if (usePaginate) {
+      final page = paginate(
+        entities,
+        first: first,
+        last: last,
+        after: after,
+        before: before,
+        afterInclusive: afterInclusive,
+        beforeInclusive: beforeInclusive,
+        offset: query['offset'] as int?,
+        limit: query['limit'] as int?,
+        fields: fields,
+      );
+      _lastPageInfo[entityType] = page.pageInfo;
+      return page.items;
+    } else {
+      _lastPageInfo.remove(entityType);
     }
 
     return entities;
