@@ -4,6 +4,9 @@ export 'src/core/types.dart';
 export 'src/core/transaction_builder.dart';
 export 'src/core/logging_config.dart';
 
+// Storage exports
+export 'src/storage/instant_storage.dart';
+
 // Schema exports
 export 'src/schema/schema.dart';
 

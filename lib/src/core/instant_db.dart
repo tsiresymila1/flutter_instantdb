@@ -13,6 +13,7 @@ import '../query/query_engine.dart';
 import '../query/infinite_query.dart';
 import '../sync/sync_engine.dart';
 import '../auth/auth_manager.dart';
+import '../storage/instant_storage.dart';
 import '../schema/schema.dart';
 import '../reactive/presence.dart';
 
@@ -26,6 +27,7 @@ class InstantDB {
   late final QueryEngine _queryEngine;
   late final SyncEngine _syncEngine;
   late final AuthManager _authManager;
+  late final InstantStorage _storage;
   late final PresenceManager _presenceManager;
 
   final Signal<bool> _isReady = signal(false);
@@ -51,6 +53,9 @@ class InstantDB {
 
   /// Authentication manager
   AuthManager get auth => _authManager;
+
+  /// File storage client (upload/download/delete).
+  InstantStorage get storage => _storage;
 
   /// Query engine for reactive queries
   QueryEngine get queries => _queryEngine;
@@ -101,6 +106,11 @@ class InstantDB {
       // Initialize auth manager with session storage
       // Initialize auth manager
       _authManager = AuthManager(appId: appId, baseUrl: config.baseUrl!);
+      _storage = InstantStorage(
+        appId: appId,
+        baseUrl: config.baseUrl!,
+        authManager: _authManager,
+      );
       // Initialize presence manager first (without sync engine)
       _presenceManager = PresenceManager(
         syncEngine: null, // Will be set later
