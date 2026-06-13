@@ -104,4 +104,23 @@ void main() {
       expect(evaluateWhere({'a': 1, 'b': 9, 'c': 9}, w), isFalse);
     });
   });
+
+  group('evaluateWhere - dot-notation nested fields', () {
+    test('matches nested map value', () {
+      final doc = {'meta': {'priority': 'high'}};
+      expect(evaluateWhere(doc, {'meta.priority': 'high'}), isTrue);
+      expect(evaluateWhere(doc, {'meta.priority': 'low'}), isFalse);
+    });
+
+    test('matches if any element in a nested list satisfies', () {
+      final doc = {'todos': [{'title': 'Run'}, {'title': 'Code'}]};
+      expect(evaluateWhere(doc, {'todos.title': 'Code'}), isTrue);
+      expect(evaluateWhere(doc, {'todos.title': 'Swim'}), isFalse);
+    });
+
+    test('missing nested path does not throw', () {
+      expect(evaluateWhere({'a': 1}, {'x.y.z': 'v'}), isFalse);
+      expect(evaluateWhere({'a': 1}, {'x.y': {r'$isNull': true}}), isTrue);
+    });
+  });
 }
