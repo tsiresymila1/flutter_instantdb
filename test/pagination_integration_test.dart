@@ -2,6 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:flutter_instantdb/flutter_instantdb.dart';
 
+Future<void> waitFor(
+  bool Function() condition, {
+  Duration timeout = const Duration(seconds: 5),
+}) async {
+  final sw = Stopwatch()..start();
+  while (!condition() && sw.elapsed < timeout) {
+    await Future.delayed(const Duration(milliseconds: 10));
+  }
+}
+
 void main() {
   group('Pagination + fields integration', () {
     late InstantDB db;
@@ -75,16 +85,15 @@ void main() {
         },
       }, pageSize: 2, entityType: 'todos');
 
-      // initial page (queryOnce has an internal ~100ms settle delay)
-      await Future.delayed(const Duration(milliseconds: 150));
+      await waitFor(() => inf.items.value.length >= 2);
       expect(inf.items.value.length, 2);
 
       await inf.loadMore();
-      await Future.delayed(const Duration(milliseconds: 150));
+      await waitFor(() => inf.items.value.length >= 4);
       expect(inf.items.value.length, 4);
 
       await inf.loadMore();
-      await Future.delayed(const Duration(milliseconds: 150));
+      await waitFor(() => inf.items.value.length >= 5);
       expect(inf.items.value.length, 5);
       expect(inf.hasMore.value, isFalse);
 

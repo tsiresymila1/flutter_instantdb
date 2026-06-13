@@ -16,6 +16,7 @@ class InstantInfiniteQuery {
   final Signal<bool> hasMore = signal(true);
 
   String? _endCursor;
+  bool _disposed = false;
 
   InstantInfiniteQuery({
     required Future<QueryResult> Function(Map<String, dynamic>) runOnce,
@@ -54,6 +55,7 @@ class InstantInfiniteQuery {
   Future<void> _loadFirst() async {
     isLoading.value = true;
     final result = await _runOnce(_queryWith());
+    if (_disposed) return;
     final docs = _docsOf(result);
     items.value = docs;
     _updateCursor(result);
@@ -66,6 +68,7 @@ class InstantInfiniteQuery {
     if (!hasMore.value || isLoading.value || _endCursor == null) return;
     isLoading.value = true;
     final result = await _runOnce(_queryWith(after: _endCursor));
+    if (_disposed) return;
     final docs = _docsOf(result);
     items.value = [...items.value, ...docs];
     _updateCursor(result);
@@ -89,6 +92,7 @@ class InstantInfiniteQuery {
   }
 
   void dispose() {
+    _disposed = true;
     items.dispose();
     isLoading.dispose();
     hasMore.dispose();

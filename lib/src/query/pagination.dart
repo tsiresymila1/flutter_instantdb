@@ -44,6 +44,7 @@ PageResult paginate(
   var startIdx = 0;
   var endIdx = total; // exclusive
 
+  // Unknown cursors (id not found in the ordered set) are ignored: the window keeps its default bound.
   if (after != null) {
     final i = _indexOfId(ordered, after);
     if (i >= 0) startIdx = afterInclusive ? i : i + 1;
