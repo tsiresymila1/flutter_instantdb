@@ -1358,9 +1358,19 @@ class SyncEngine {
               }
             }
 
+            // Forward permission rule params if any operation carries them.
+            Map<String, dynamic>? ruleParams;
+            for (final op in transaction.operations) {
+              final rp = op.options?['ruleParams'];
+              if (rp is Map<String, dynamic>) {
+                ruleParams = {...?ruleParams, ...rp};
+              }
+            }
+
             final transactionMessage = {
               'op': 'transact',
               'tx-steps': txSteps,
+              if (ruleParams != null) 'rule-params': ruleParams,
               'created': DateTime.now().millisecondsSinceEpoch,
               'order': 1,
               'client-event-id': clientEventId,
