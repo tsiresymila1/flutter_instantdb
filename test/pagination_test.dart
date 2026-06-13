@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_instantdb/src/query/pagination.dart';
+import 'package:flutter_instantdb/flutter_instantdb.dart';
 
 List<Map<String, dynamic>> rows(int n) =>
     List.generate(n, (i) => {'id': 'e$i', 'n': i});
@@ -79,6 +80,18 @@ void main() {
       expect(r.pageInfo['endCursor'], isNull);
       expect(r.pageInfo['hasNextPage'], isFalse);
       expect(r.pageInfo['hasPreviousPage'], isFalse);
+    });
+  });
+
+  group('QueryResult.pageInfo', () {
+    test('success carries optional pageInfo', () {
+      final r = QueryResult.success({'todos': []},
+          pageInfo: {'todos': {'hasNextPage': true}});
+      expect(r.pageInfo?['todos']['hasNextPage'], isTrue);
+    });
+
+    test('success without pageInfo is null', () {
+      expect(QueryResult.success({'todos': []}).pageInfo, isNull);
     });
   });
 }

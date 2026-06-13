@@ -109,12 +109,26 @@ class QueryResult {
   final Map<String, dynamic>? data;
   final String? error;
 
-  const QueryResult({required this.isLoading, this.data, this.error});
+  /// Per-namespace pagination info: `{ namespace: { startCursor, endCursor,
+  /// hasNextPage, hasPreviousPage } }`. Null when the query did not paginate.
+  /// Runtime-only — not serialized.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final Map<String, dynamic>? pageInfo;
+
+  const QueryResult({
+    required this.isLoading,
+    this.data,
+    this.error,
+    this.pageInfo,
+  });
 
   factory QueryResult.loading() => const QueryResult(isLoading: true);
 
-  factory QueryResult.success(Map<String, dynamic> data) =>
-      QueryResult(isLoading: false, data: data);
+  factory QueryResult.success(
+    Map<String, dynamic> data, {
+    Map<String, dynamic>? pageInfo,
+  }) =>
+      QueryResult(isLoading: false, data: data, pageInfo: pageInfo);
 
   factory QueryResult.error(String error) =>
       QueryResult(isLoading: false, error: error);
