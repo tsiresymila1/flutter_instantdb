@@ -39,6 +39,7 @@ class SyncEngine {
   Timer? _reconnectTimer;
 
   final Signal<bool> _connectionStatus = signal(false);
+  final Signal<ConnectionStatus> _status = signal(ConnectionStatus.closed);
   final Queue<Transaction> _syncQueue = Queue<Transaction>();
   bool _isProcessingQueue = false;
   final _uuid = const Uuid();
@@ -68,6 +69,9 @@ class SyncEngine {
 
   /// Connection status signal
   ReadonlySignal<bool> get connectionStatus => _connectionStatus.readonly();
+
+  /// Reactive connection lifecycle status.
+  ReadonlySignal<ConnectionStatus> get status => _status.readonly();
 
   SyncEngine({
     required this.appId,
@@ -110,6 +114,7 @@ class SyncEngine {
     }
     batch(() {
       _connectionStatus.value = false;
+      _status.value = ConnectionStatus.closed;
     });
   }
 
@@ -231,6 +236,7 @@ class SyncEngine {
 
   Future<void> _connectWebSocket() async {
     try {
+      _status.value = ConnectionStatus.connecting;
       // Construct WebSocket URL with app_id as query parameter
       final baseUri = Uri.parse(config.baseUrl!);
       final wsScheme = baseUri.scheme == 'https' ? 'wss' : 'ws';
@@ -247,6 +253,7 @@ class SyncEngine {
 
       // Use platform-specific WebSocket implementation
       _webSocket = await WebSocketManager.connect(wsUri.toString());
+      _status.value = ConnectionStatus.opened;
 
       connectStopwatch.stop();
       _logger.info(
@@ -293,6 +300,7 @@ class SyncEngine {
     } catch (e) {
       InstantDBLogging.root.severe('WebSocket connection error', e);
       _connectionStatus.value = false;
+      _status.value = ConnectionStatus.errored;
       _scheduleReconnect();
     }
   }
@@ -367,6 +375,7 @@ class SyncEngine {
           InstantDBLogging.root.info('WebSocket authenticated successfully');
           batch(() {
             _connectionStatus.value = true;
+            _status.value = ConnectionStatus.authenticated;
           });
           // Store session ID for future messages
           _sessionId = data['session-id']?.toString();
@@ -648,6 +657,7 @@ class SyncEngine {
     InstantDBLogging.root.severe('WebSocket error: $error');
     batch(() {
       _connectionStatus.value = false;
+      _status.value = ConnectionStatus.errored;
     });
     _scheduleReconnect();
   }
@@ -656,6 +666,7 @@ class SyncEngine {
     InstantDBLogging.root.info('WebSocket connection closed');
     batch(() {
       _connectionStatus.value = false;
+      _status.value = ConnectionStatus.closed;
     });
     _scheduleReconnect();
   }
