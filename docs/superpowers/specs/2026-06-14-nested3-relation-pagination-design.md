@@ -1,6 +1,6 @@
 # nested-3 — Cursor pagination & `fields` projection on relations
 
-Status: design. Lifts the limitation deferred by nested-1/nested-2: the engine's
+Status: implemented. Lifts the limitation deferred by nested-1/nested-2: the engine's
 `_processIncludes` only applied `where`/`order`/`limit`/`offset` to a nested
 related set. nested-3 also applies **cursor pagination**
 (`first`/`last`/`after`/`before`/`afterInclusive`/`beforeInclusive`) and

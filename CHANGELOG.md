@@ -1,11 +1,18 @@
 
 ## Unreleased
 
+### Relation pagination (nested-3)
+- **Engine**: nested `include` maps now support cursor pagination (`first`/`last`/`after`/`before`/`afterInclusive`/`beforeInclusive`) and `fields` projection on the related set (forward-triple path). The cursor window is computed via `paginate()` — `limit`/`offset` are stripped from the `_applyQueryFilters` pass when any cursor/fields key is present, preventing double-windowing.
+- **Typed DSL**: `TypedQuery._includeOptions()` now serializes `first`/`last`/`after`/`before`/`afterInclusive`/`beforeInclusive` and `limit`/`offset`. `fields` is intentionally not serialized on the typed path.
+- **Guard**: `TypedQuery.include()` now throws `ArgumentError` if the relation sub-query carries `.select()` (fields projection). The generated `fromRow` hard-casts every field, so a projected map would cause a `TypeError`. Use the untyped map API for projected relations.
+- **Deferred**: per-relation `pageInfo` (needs a typed relation-page wrapper — targeted at nested-4).
+- **Known interaction (untyped only)**: `fields` projection on a relation strips all attributes from nested maps before deeper `include` recursion runs. If a projected relation also has a deeper `include`, the nested relation attribute is dropped unless it is among the projected fields. Rare combination; typed path forbids relation `fields`.
+
 ### Typed relations (nested-2)
 - Added `@InstantLink` annotation for marking relation fields on `@InstantModel` classes. Cardinality is inferred from the field type (`List<T>` → to-many, `T` → to-one); the target must itself be an `@InstantModel`.
 - Generator now emits a typed accessor getter per `@InstantLink` field (e.g. `TypedQuery<TodoTable> get todos => ...`) and a recursively-typed `fromRow` arm that maps included relation maps to `List<T>` (to-many) or `T?` (to-one). Un-included relations safely yield `[]` / `null` via `whereType<Map>` guard.
 - Added `TypedQuery<E>.include((t) => t.relation.where(...).limit(n))` — serializes to the nested-1 engine's `include` map inside the `$` options, supporting nested `where`/`order`/`limit`/`offset` and recursive includes. Immutable: the source query is never mutated.
-- Deferred: typed cursor pagination and `fields` projection on relation sub-queries (the engine ignores them on nested sets in nested-1 anyway).
+- Implemented in nested-3: typed cursor pagination on relation sub-queries; typed `fields` projection on relations is intentionally forbidden (see nested-3 section above).
 
 ### Relational reads (nested-1)
 - Fixed `include` to resolve `link()`-created relations: an entity's relation triples are read directly and the targets fetched by id (with nested `where`/`order`/`limit` and recursive includes). The previous foreign-key-convention heuristic remains as a fallback.

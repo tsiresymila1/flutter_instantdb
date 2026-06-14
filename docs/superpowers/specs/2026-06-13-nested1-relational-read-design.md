@@ -114,7 +114,8 @@ if (relValue != null) {
   (no entity-type needed), so the relation's target namespace is irrelevant.
 - The nested query's `where`/`order`/`limit`/`offset` are applied with the
   existing `_applyQueryFilters` (already used by the cache path). Nested `fields`
-  projection and cursor pagination on relations are deferred.
+  projection and cursor pagination on relations were deferred here — implemented
+  in nested-3 (see `docs/superpowers/specs/2026-06-14-nested3-relation-pagination-design.md`).
 - Deeper `include`s recurse through the same method.
 - If the parent holds no value for `relationName`, control falls through to the
   **unchanged** FK-convention branches → no regression for convention-based data.
@@ -141,7 +142,7 @@ New `test/relational_include_test.dart`:
 - **to-one link**: `link({owner: u1})` → `owner` resolves to the single entity
   (list of one; document the shape).
 - **nested where/order/limit**: `include: {todos: {where:{done:true}, order:{n:'asc'}, limit:1}}`
-  filters/orders/limits the related set (nested `fields`/cursors out of scope).
+  filters/orders/limits the related set (nested `fields`/cursors added in nested-3).
 - **deep nested**: goal → todos → tags, two levels of include populate.
 - **reconstruction**: a linked entity exposes the relation attribute as a list;
   a scalar attribute stays scalar (regression guard for change A).
