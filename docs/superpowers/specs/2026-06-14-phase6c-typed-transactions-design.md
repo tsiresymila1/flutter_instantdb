@@ -1,6 +1,6 @@
 # phase 6c — Typed transactions
 
-Status: design. The typed layer (phase6a query DSL, 6b codegen, nested-1..4
+Status: implemented. The typed layer (phase6a query DSL, 6b codegen, nested-1..4
 relational reads) covers READS. Writes are still untyped string-maps
 (`db.tx['todos'][id].update({...})`). 6c adds compile-time-checked typed writes.
 

@@ -164,6 +164,9 @@ No FK-branch change (legacy path not threaded). No typed/generator change.
 
 ## Next
 
-**6c — typed transactions** (typed `create`/`update`/`lookup`) is the next major
-gap (named in phase6a/6b "Next"). A fully-typed `RelationPage<T>` accessor for
-per-relation pageInfo remains a later generator follow-up.
+**6c — typed transactions** (typed `create`/`update`/`lookup`) is now implemented
+(`db.txFor(table)` + `set<T>(Col<T>, T)`; see the 6c spec). **6d** is the next
+major gap: whole-model writes (`createModel(Todo(...))` via a generated `toMap`),
+typed relation `link`, and a generated `Table().tx(db)` convenience. A fully-typed
+`RelationPage<T>` accessor for per-relation pageInfo remains a later generator
+follow-up.

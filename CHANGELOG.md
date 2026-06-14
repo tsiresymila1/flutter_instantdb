@@ -1,6 +1,12 @@
 
 ## Unreleased
 
+### Typed transactions (6c)
+- **Typed write builder**: `db.txFor(table)` returns a `TypedTx<E>` whose fluent `set<T>(Col<T>, T)` binds each value's type to its column — wrong-typed writes (`set(t.priority, 'x')`) no longer compile. Cascade-friendly (`..set(..)..set(..)`).
+- **Ops**: `create({id})`, `update(id)`, `merge(id)`, `delete(id)`, `link(id, relation, target)`, `unlink(id, relation, target)`, plus typed `lookup(Col, value)` upsert-by-unique-attribute. `opts(TxOpts(...))` controls upsert/strict on update/merge. All delegate to the existing untyped `EntityBuilder`/`EntityInstanceBuilder` — no op-construction is reimplemented.
+- **Core seam**: new `abstract interface class ToTransaction { TransactionChunk toTransactionChunk(); }` in core; `TransactionChunk implements ToTransaction`, and `db.transact` now accepts any `ToTransaction` (so `db.transact(db.txFor(t).create()..set(...))` works) while `List<Operation>` and existing `TransactionChunk` callers are unchanged. No core→typed import.
+- **Deferred to 6d**: whole-model writes (`createModel(Todo(...))` via a generated `toMap`), typed relation `link` (the relation name is an untyped `String` in v1), and a generated `Table().tx(db)` convenience.
+
 ### Per-relation pageInfo (nested-4)
 - **Engine**: cursor-paginated nested `include` relations now surface `pageInfo` at `QueryResult.pageInfo['<parentType>.<relation>']` (e.g. `result.pageInfo['goals.todos']`). Deeper nesting produces dotted keys (`'goals.todos.tags'`). The existing read API is unchanged — composite keys (containing `.`) coexist with top-level namespace keys in the same `pageInfo` map.
 - **Mechanism**: a pageInfo sink (the fresh per-query `pageInfo` map) and a dotted `pathPrefix` are threaded through `_processIncludes` on the forward-triple path. Writes go directly into the map — no `_lastPageInfo` shared state, no race for nested relations.
