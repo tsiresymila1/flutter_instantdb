@@ -1,6 +1,12 @@
 
 ## Unreleased
 
+### Typed relations (nested-2)
+- Added `@InstantLink` annotation for marking relation fields on `@InstantModel` classes. Cardinality is inferred from the field type (`List<T>` → to-many, `T` → to-one); the target must itself be an `@InstantModel`.
+- Generator now emits a typed accessor getter per `@InstantLink` field (e.g. `TypedQuery<TodoTable> get todos => ...`) and a recursively-typed `fromRow` arm that maps included relation maps to `List<T>` (to-many) or `T?` (to-one). Un-included relations safely yield `[]` / `null` via `whereType<Map>` guard.
+- Added `TypedQuery<E>.include((t) => t.relation.where(...).limit(n))` — serializes to the nested-1 engine's `include` map inside the `$` options, supporting nested `where`/`order`/`limit`/`offset` and recursive includes. Immutable: the source query is never mutated.
+- Deferred: typed cursor pagination and `fields` projection on relation sub-queries (the engine ignores them on nested sets in nested-1 anyway).
+
 ### Relational reads (nested-1)
 - Fixed `include` to resolve `link()`-created relations: an entity's relation triples are read directly and the targets fetched by id (with nested `where`/`order`/`limit` and recursive includes). The previous foreign-key-convention heuristic remains as a fallback.
 - To-many links now reconstruct as a list of related entities/ids.

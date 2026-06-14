@@ -41,5 +41,22 @@ void main() {
       expect(widgets.map((w) => w.weight), [2, 3]);
       expect(widgets.first.name, 'w2');
     });
+
+    test('getAll without include yields empty gadgets list', () async {
+      final widgets = await Widget2Table().query().getAll(db);
+      // gadgets is not included → fromRow guard yields [].
+      expect(widgets.every((w) => w.gadgets.isEmpty), isTrue);
+    });
+
+    test('getAll with include populates typed nested relation', () async {
+      await db.transact(db.tx['gadgets']['g1'].update({'label': 'A'}));
+      await db.transact(db.tx['widgets']['w0'].link({'gadgets': ['g1']}));
+      final widgets = await Widget2Table()
+          .query()
+          .include((w) => w.gadgets)
+          .getAll(db);
+      final w0 = widgets.firstWhere((w) => w.id == 'w0');
+      expect(w0.gadgets.map((g) => g.label), ['A']);
+    });
   });
 }

@@ -1,6 +1,6 @@
 # nested-2 — Typed relation accessors & typed `include`
 
-Status: design. Builds directly on **nested-1** (engine `include` populates relation
+Status: implemented. Builds directly on **nested-1** (engine `include` populates relation
 lists) and **phase6a** (typed query DSL) / **phase6b** (code generator).
 
 ## Goal
