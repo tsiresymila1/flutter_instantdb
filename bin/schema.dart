@@ -23,6 +23,7 @@
 
 import 'dart:io';
 import 'package:args/args.dart';
+import 'package:flutter_instantdb/src/schema/instant_schema_io.dart';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
@@ -87,6 +88,16 @@ void main(List<String> arguments) async {
           verbose: verbose,
         );
         break;
+      case 'to-dart':
+        await _toDart(
+          input: results.rest.length > 1 ? results.rest[1] : null,
+          schemaFile: schemaFile,
+          verbose: verbose,
+        );
+        break;
+      case 'to-ts':
+        await _toTs(schemaFile: schemaFile, verbose: verbose);
+        break;
       case 'help':
         _showHelp(parser);
         break;
@@ -112,12 +123,14 @@ USAGE:
   dart run instantdb_flutter:schema <command> [options]
 
 COMMANDS:
-  pull        Pull schema from InstantDB cloud and convert to Dart
-  push        Convert Dart schema to TypeScript and push to cloud
-  status      Show current schema status
-  validate    Validate Dart schema file syntax
-  diff        Compare local Dart schema with cloud schema
-  help        Show this help message
+  pull            Pull schema from cloud (instant-cli) and convert TS -> Dart
+  push            Convert Dart -> instant.schema.ts and push to cloud
+  to-dart <ts>    Offline: convert an instant.schema.ts to Dart @InstantModel
+  to-ts           Offline: convert the Dart schema file to instant.schema.ts
+  status          Show current schema status
+  validate        Validate Dart schema file syntax
+  diff            Compare local Dart schema with cloud schema
+  help            Show this help message
 
 OPTIONS:
 ${parser.usage}
@@ -137,6 +150,10 @@ EXAMPLES:
 
   # Compare local vs cloud
   dart run instantdb_flutter:schema diff
+
+  # Offline conversion (no cloud / npx)
+  dart run instantdb_flutter:schema to-dart instant.schema.ts -s lib/schema/app_schema.dart
+  dart run instantdb_flutter:schema to-ts -s lib/schema/app_schema.dart
 
   # Use custom schema file location
   dart run instantdb_flutter:schema pull -s lib/my_schema.dart
@@ -190,15 +207,35 @@ Future<void> _pullSchema({
   }
 
   _success('Schema pulled successfully: instant.schema.ts');
-  _warn('⚠️  TODO: Convert instant.schema.ts to Dart format');
-  _warn('    Manual conversion required for now');
-  _warn('    Target file: $schemaFile');
+
+  // Convert TS -> Dart.
+  final ts = await tsSchemaFile.readAsString();
+  await _writeDartFromTs(ts, schemaFile);
+  _success('Converted to Dart: $schemaFile');
 
   print('');
   _info('Next steps:');
-  print('  1. Review instant.schema.ts');
-  print('  2. Manually convert to Dart schema format');
-  print('  3. Save to $schemaFile');
+  print('  1. Review $schemaFile');
+  print('  2. Run: dart run build_runner build');
+}
+
+/// Convert TS source to a Dart `@InstantModel` file at [schemaFile],
+/// deriving the `part` base name from the output filename.
+Future<void> _writeDartFromTs(String ts, String schemaFile) async {
+  final schema = parseInstantTs(ts);
+  final partBase = _baseName(schemaFile);
+  final dart = emitDart(schema, partBase: partBase);
+  final out = File(schemaFile);
+  await out.parent.create(recursive: true);
+  await out.writeAsString(dart);
+}
+
+/// Filename without directory or `.dart` extension.
+String _baseName(String path) {
+  final name = path.split(Platform.pathSeparator).last.split('/').last;
+  return name.endsWith('.dart')
+      ? name.substring(0, name.length - '.dart'.length)
+      : name;
 }
 
 Future<void> _pushSchema({
@@ -215,17 +252,10 @@ Future<void> _pushSchema({
     exit(1);
   }
 
-  // Check if instant.schema.ts exists
+  // Convert Dart -> TS.
   final tsSchemaFile = File('instant.schema.ts');
-  if (!await tsSchemaFile.exists()) {
-    _error('instant.schema.ts not found');
-    _warn('You need to manually create instant.schema.ts first');
-    _warn('Run "just schema-pull" to get the template');
-    exit(1);
-  }
-
-  _warn('⚠️  Manual schema conversion required');
-  _warn('    Please ensure instant.schema.ts matches your Dart schema');
+  await _writeTsFromDart(await dartSchema.readAsString(), tsSchemaFile);
+  _success('Generated instant.schema.ts from $schemaFile');
   print('');
 
   final confirmation = _confirm('Continue with push?');
@@ -249,6 +279,49 @@ Future<void> _pushSchema({
   }
 
   _success('Schema pushed successfully!');
+}
+
+/// Convert a Dart `@InstantModel` source to `instant.schema.ts` at [out].
+Future<void> _writeTsFromDart(String dartSource, File out) async {
+  final schema = parseDartModels(dartSource);
+  final ts = emitInstantTs(schema);
+  await out.writeAsString(ts);
+}
+
+/// Offline TS -> Dart (no cloud / npx).
+Future<void> _toDart({
+  String? input,
+  required String schemaFile,
+  required bool verbose,
+}) async {
+  final inputPath = input ?? 'instant.schema.ts';
+  final tsFile = File(inputPath);
+  if (!await tsFile.exists()) {
+    _error('TypeScript schema not found: $inputPath');
+    exit(1);
+  }
+  _info('Converting $inputPath -> $schemaFile');
+  await _writeDartFromTs(await tsFile.readAsString(), schemaFile);
+  _success('Wrote Dart schema: $schemaFile');
+  _info('Next: dart run build_runner build');
+}
+
+/// Offline Dart -> TS (no cloud / npx).
+Future<void> _toTs({
+  required String schemaFile,
+  required bool verbose,
+}) async {
+  final dartSchema = File(schemaFile);
+  if (!await dartSchema.exists()) {
+    _error('Dart schema file not found: $schemaFile');
+    exit(1);
+  }
+  _info('Converting $schemaFile -> instant.schema.ts');
+  await _writeTsFromDart(
+    await dartSchema.readAsString(),
+    File('instant.schema.ts'),
+  );
+  _success('Wrote TypeScript schema: instant.schema.ts');
 }
 
 Future<void> _showStatus({
@@ -334,17 +407,45 @@ Future<void> _diffSchema({
   required String schemaFile,
   required bool verbose,
 }) async {
-  _info('Comparing local Dart schema with cloud schema...');
+  _info('Comparing local Dart schema with instant.schema.ts...');
 
-  _warn('⚠️  Schema diff not yet implemented');
-  _warn('    This feature requires:');
-  print('  1. Pulling cloud schema (npx instant-cli pull)');
-  print('  2. Converting TypeScript to Dart');
-  print('  3. Comparing the two Dart representations');
-  print('');
-  _info('For now, manually compare:');
-  print('  - Local: $schemaFile');
-  print('  - Cloud: Run "dart run instantdb_flutter:schema pull" first');
+  final dartSchema = File(schemaFile);
+  if (!await dartSchema.exists()) {
+    _error('Dart schema file not found: $schemaFile');
+    exit(1);
+  }
+  final tsFile = File('instant.schema.ts');
+  if (!await tsFile.exists()) {
+    _error('instant.schema.ts not found');
+    _warn('Run "schema pull" to fetch the cloud schema first.');
+    exit(1);
+  }
+
+  // Normalize both sides to TS and do a best-effort line diff.
+  final localTs = emitInstantTs(parseDartModels(await dartSchema.readAsString()));
+  final cloudTs = emitInstantTs(parseInstantTs(await tsFile.readAsString()));
+
+  if (localTs == cloudTs) {
+    _success('Schemas are equivalent (normalized).');
+    return;
+  }
+
+  _warn('Schemas differ (normalized line diff):');
+  final localLines = localTs.split('\n');
+  final cloudLines = cloudTs.split('\n');
+  final max = localLines.length > cloudLines.length
+      ? localLines.length
+      : cloudLines.length;
+  for (var i = 0; i < max; i++) {
+    final l = i < localLines.length ? localLines[i] : '';
+    final c = i < cloudLines.length ? cloudLines[i] : '';
+    if (l != c) {
+      if (l.isNotEmpty) print('  - local: $l');
+      if (c.isNotEmpty) print('  + cloud: $c');
+    }
+  }
+  _info('Note: diff is best-effort on normalized output (number->num, '
+      'link reverse synthesis).');
 }
 
 // ============================================================================

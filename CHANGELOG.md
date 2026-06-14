@@ -1,6 +1,12 @@
 
 ## Unreleased
 
+### Schema converter (schema-io)
+- **`bin/schema.dart` now converts `instant.schema.ts` ⇆ `@InstantModel` Dart** with a pure-Dart converter (no analyzer, no new dependencies). `pull` runs `instant-cli pull` then converts TS → Dart to `--schema-file`; `push` converts the Dart schema → `instant.schema.ts` then runs `instant-cli push`. New offline subcommands `to-dart <input.ts>` and `to-ts` convert without touching the cloud, and `diff` now does a best-effort normalized line diff.
+- **`@InstantField` gains `unique`/`indexed` flags** (additive named params) so Dart → TS preserves constraints. The code generator ignores them (no codegen/golden impact).
+- **Type mapping**: `i.string()`↔`String`, `i.number()`↔`num` (int/double/num all collapse to `i.number()` on the way back — documented), `i.boolean()`↔`bool`, `i.json()`↔`Map<String, dynamic>?`, `i.date()`↔`DateTime?`. json/date are always nullable + optional ctor params so the generated `fromRow` (which skips them) still compiles. Every entity gets a required `final String id`. `$`-prefixed system entities are not emitted as Dart classes (only resolved as link targets).
+- **Links**: TS `links` forward/reverse ⇆ paired `@InstantLink` fields (`has:'one'`→`T?`, `has:'many'`→`List<T>`). The side landing on a system entity is skipped; Dart → TS dedupes reciprocal links and synthesizes a `has:'many'` reverse when only one side is declared (hand-tuned link names may change — documented).
+
 ### mergeModel + Table().tx(db) sugar (6e)
 - **`mergeModel(id, Model)`**: deep-merges a whole model's scalar attributes (mirrors `updateModel` but uses `merge`). Backed by the new runtime primitive `TypedTx.mergeFromMap(id, map, {opts})`, which copies the map and delegates to `EntityInstanceBuilder.merge`.
 - **`Table().tx(db)` sugar**: each generated table now emits `TypedTx<${Model}Table> tx(InstantDB db) => db.txFor(this)`, so `table.tx(db).createModel(...)` is shorthand for `db.txFor(table).createModel(...)`. A model field literally named `tx` would collide with this method (documented edge, extremely rare).

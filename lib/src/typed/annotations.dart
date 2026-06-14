@@ -7,9 +7,14 @@ class InstantModel {
 
 /// Overrides the stored attribute name for a field. Without it, the field name
 /// is used as the attribute name.
+///
+/// [unique] and [indexed] are constraint hints carried through the schema
+/// converter (`instant.schema.ts` ⇆ Dart). The code generator ignores them.
 class InstantField {
   final String name;
-  const InstantField(this.name);
+  final bool unique;
+  final bool indexed;
+  const InstantField(this.name, {this.unique = false, this.indexed = false});
 }
 
 /// Marks a relation field on an `@InstantModel`. Cardinality is inferred from the
