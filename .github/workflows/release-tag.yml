@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write
 
+# IMPORTANT: tags pushed with the default GITHUB_TOKEN do NOT trigger other
+# workflows (GitHub loop protection), so publish.yml would never run. Push tags
+# with a PAT (repo scope) stored as the RELEASE_PAT secret so the tag event
+# triggers publish.yml. Without RELEASE_PAT the tags are still created (via the
+# default token) but you must trigger publishing manually.
+
 jobs:
   tag:
     runs-on: ubuntu-latest
@@ -22,6 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT || github.token }}
 
       - name: Tag flutter_instantdb if version bumped
         run: |
