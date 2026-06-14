@@ -131,6 +131,16 @@ void main() {
       expect(chunk.operations.single.data, {'priority': 1});
     });
 
+    test('mergeFromMap builds a merge op and copies the map', () {
+      final src = {'priority': 1};
+      final chunk = TypedTx(t).mergeFromMap('t1', src);
+      src['priority'] = 99; // must not leak
+      final op = chunk.operations.single;
+      expect(op.type, OperationType.merge);
+      expect(op.entityId, 't1');
+      expect(op.data, {'priority': 1});
+    });
+
     test('linkRel / unlinkRel build link/unlink ops via the RelationRef attr',
         () {
       const rel = RelationRef<_Todos>('todos');

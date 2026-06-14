@@ -41,6 +41,12 @@ class TypedTx<E extends InstantTable<E>> {
       EntityInstanceBuilder(_type, id)
           .update(Map<String, dynamic>.from(data), opts: opts);
 
+  /// Build a deep-merge op from a whole attribute map (e.g. a generated toMap).
+  TransactionChunk mergeFromMap(String id, Map<String, dynamic> data,
+          {TxOpts? opts}) =>
+      EntityInstanceBuilder(_type, id)
+          .merge(Map<String, dynamic>.from(data), opts: opts);
+
   /// Typed relation link. [targetIds] is one id or a List of ids.
   TransactionChunk linkRel<R extends InstantTable<R>>(
           String id, RelationRef<R> rel, Object targetIds) =>
