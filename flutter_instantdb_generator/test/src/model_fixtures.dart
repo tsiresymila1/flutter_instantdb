@@ -11,6 +11,11 @@ class InstantField {
   const InstantField(this.name);
 }
 
+class InstantLink {
+  final String? attr;
+  const InstantLink({this.attr});
+}
+
 @ShouldGenerate(r'''
 class TodoTable extends InstantModelTable<TodoTable, Todo> {
   TodoTable() : super('todos');
@@ -110,4 +115,155 @@ class MismatchModel {
   final String title;
   const MismatchModel({required this.id, required String heading})
       : title = heading;
+}
+
+// ---------------------------------------------------------------------------
+// Relation fixtures for @InstantLink (nested-2)
+// ---------------------------------------------------------------------------
+
+// Author is the to-one relation target for Post.
+@ShouldGenerate(r'''
+class AuthorTable extends InstantModelTable<AuthorTable, Author> {
+  AuthorTable() : super('authors');
+
+  final id = const Col<String>('id');
+  final name = const Col<String>('name');
+
+  @override
+  Author fromRow(Map<String, dynamic> m) => Author(
+        id: m['id'] as String,
+        name: m['name'] as String,
+      );
+}
+
+extension AuthorQueryX on TypedQuery<AuthorTable> {
+  Future<List<Author>> getAll(InstantDB db) async =>
+      (await db.queryOnceTyped(this))
+          .documents
+          .map(AuthorTable().fromRow)
+          .toList();
+
+  ReadonlySignal<List<Author>> watchAll(InstantDB db) {
+    final src = db.queryTyped(this);
+    return computed(
+        () => src.value.documents.map(AuthorTable().fromRow).toList());
+  }
+}
+''')
+@InstantModel('authors')
+class Author {
+  final String id;
+  final String name;
+  const Author({required this.id, required this.name});
+}
+
+// Goal has a to-many @InstantLink to Todo.
+@ShouldGenerate(r'''
+class GoalTable extends InstantModelTable<GoalTable, Goal> {
+  GoalTable() : super('goals');
+
+  final id = const Col<String>('id');
+  final title = const Col<String>('title');
+
+  TypedQuery<TodoTable> get todos =>
+      TypedQuery<TodoTable>(TodoTable(), relationAttr: 'todos');
+
+  @override
+  Goal fromRow(Map<String, dynamic> m) => Goal(
+        id: m['id'] as String,
+        title: m['title'] as String,
+        todos: (m['todos'] as List<dynamic>?)
+                ?.whereType<Map<String, dynamic>>()
+                .map(TodoTable().fromRow)
+                .toList() ??
+            const <Todo>[],
+      );
+}
+
+extension GoalQueryX on TypedQuery<GoalTable> {
+  Future<List<Goal>> getAll(InstantDB db) async =>
+      (await db.queryOnceTyped(this))
+          .documents
+          .map(GoalTable().fromRow)
+          .toList();
+
+  ReadonlySignal<List<Goal>> watchAll(InstantDB db) {
+    final src = db.queryTyped(this);
+    return computed(
+        () => src.value.documents.map(GoalTable().fromRow).toList());
+  }
+}
+''')
+@InstantModel('goals')
+class Goal {
+  final String id;
+  final String title;
+  @InstantLink()
+  final List<Todo> todos;
+  const Goal({required this.id, required this.title, required this.todos});
+}
+
+// Post has a to-one @InstantLink to Author (nullable).
+@ShouldGenerate(r'''
+class PostTable extends InstantModelTable<PostTable, Post> {
+  PostTable() : super('posts');
+
+  final id = const Col<String>('id');
+  final title = const Col<String>('title');
+
+  TypedQuery<AuthorTable> get author =>
+      TypedQuery<AuthorTable>(AuthorTable(), relationAttr: 'author');
+
+  @override
+  Post fromRow(Map<String, dynamic> m) => Post(
+        id: m['id'] as String,
+        title: m['title'] as String,
+        author: (() {
+          final l = (m['author'] as List<dynamic>?)
+              ?.whereType<Map<String, dynamic>>();
+          return (l == null || l.isEmpty)
+              ? null
+              : AuthorTable().fromRow(l.first);
+        })(),
+      );
+}
+
+extension PostQueryX on TypedQuery<PostTable> {
+  Future<List<Post>> getAll(InstantDB db) async =>
+      (await db.queryOnceTyped(this))
+          .documents
+          .map(PostTable().fromRow)
+          .toList();
+
+  ReadonlySignal<List<Post>> watchAll(InstantDB db) {
+    final src = db.queryTyped(this);
+    return computed(
+        () => src.value.documents.map(PostTable().fromRow).toList());
+  }
+}
+''')
+@InstantModel('posts')
+class Post {
+  final String id;
+  final String title;
+  @InstantLink()
+  final Author? author;
+  const Post({required this.id, required this.title, this.author});
+}
+
+// NonModel is NOT annotated with @InstantModel — used for the @ShouldThrow below.
+class NonModel {
+  final String id;
+  const NonModel({required this.id});
+}
+
+@ShouldThrow(
+  'Relation field "target" on BadLink targets "NonModel", which is not an @InstantModel.',
+)
+@InstantModel('badlinks')
+class BadLink {
+  final String id;
+  @InstantLink()
+  final List<NonModel> target;
+  const BadLink({required this.id, required this.target});
 }

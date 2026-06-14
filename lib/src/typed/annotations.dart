@@ -11,3 +11,12 @@ class InstantField {
   final String name;
   const InstantField(this.name);
 }
+
+/// Marks a relation field on an `@InstantModel`. Cardinality is inferred from the
+/// field type (`List<T>` to-many, bare `T` to-one); the target table is
+/// `${T}Table` (T must be an `@InstantModel`). [attr] overrides the stored
+/// relation attribute (include key), defaulting to the field name.
+class InstantLink {
+  final String? attr;
+  const InstantLink({this.attr});
+}

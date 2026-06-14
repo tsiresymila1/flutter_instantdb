@@ -71,6 +71,7 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
     final entityType = annotation.getField('entityType')!.toStringValue()!;
 
     final fields = _modelFields(element);
+    final links = _modelLinks(element);
 
     ConstructorElement? ctor;
     for (final c in element.constructors) {
@@ -87,19 +88,28 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
     }
     final namedParams =
         ctor.parameters.where((p) => p.isNamed).map((p) => p.name).toSet();
-    for (final f in fields) {
-      if (!namedParams.contains(f.fieldName)) {
+    // Validate both scalars and relation fields have matching ctor params.
+    final allFieldNames = {
+      for (final f in fields) f.fieldName,
+      for (final l in links) l.fieldName,
+    };
+    for (final name in allFieldNames) {
+      if (!namedParams.contains(name)) {
+        // Find source element for error reporting.
+        final srcField = element.fields.firstWhere((f) => f.name == name);
         throw InvalidGenerationSourceError(
-          'Field "${f.fieldName}" on ${element.name} has no matching named '
+          'Field "$name" on ${element.name} has no matching named '
           'constructor parameter. The generated fromRow needs `${element.name}('
-          '{required ... ${f.fieldName}})`.',
-          element: element,
+          '{required ... $name})`.',
+          element: srcField,
         );
       }
     }
 
     final cols = StringBuffer();
     final ctorArgs = StringBuffer();
+
+    // Scalar columns.
     for (final f in fields) {
       cols.writeln(
         "  final ${f.fieldName} = const Col<${f.dartType}>('${_escape(f.attr)}');",
@@ -109,11 +119,67 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
       );
     }
 
+    // Relation accessors and ctor args.
+    final linkAccessors = StringBuffer();
+    for (final l in links) {
+      // Accessor
+      linkAccessors.writeln(
+        '  TypedQuery<${l.relatedTableName}> get ${l.fieldName} =>\n'
+        "      TypedQuery<${l.relatedTableName}>(${l.relatedTableName}(), relationAttr: '${_escape(l.attr)}');",
+      );
+
+      // fromRow arg
+      if (l.toMany) {
+        if (!l.nullable) {
+          // Non-nullable List<T>: guard + fallback to empty list.
+          ctorArgs.writeln(
+            "        ${l.fieldName}: (m['${_escape(l.attr)}'] as List<dynamic>?)\n"
+            '                ?.whereType<Map<String, dynamic>>()\n'
+            '                .map(${l.relatedTableName}().fromRow)\n'
+            '                .toList() ??\n'
+            '            const <${l.relatedTypeName}>[],',
+          );
+        } else {
+          // Nullable List<T>?: guard, no fallback.
+          ctorArgs.writeln(
+            "        ${l.fieldName}: (m['${_escape(l.attr)}'] as List<dynamic>?)\n"
+            '                ?.whereType<Map<String, dynamic>>()\n'
+            '                .map(${l.relatedTableName}().fromRow)\n'
+            '                .toList(),',
+          );
+        }
+      } else {
+        // To-one (treat as nullable T? regardless of declared nullability).
+        ctorArgs.writeln(
+          '        ${l.fieldName}: (() {\n'
+          "          final l = (m['${_escape(l.attr)}'] as List<dynamic>?)?.whereType<Map<String, dynamic>>();\n"
+          '          return (l == null || l.isEmpty) ? null : ${l.relatedTableName}().fromRow(l.first);\n'
+          '        })(),',
+        );
+      }
+    }
+
+    // Build the class body: scalar cols + link accessors (separated by blank
+    // line when both are present), then fromRow.
+    final classBody = StringBuffer();
+    final colsStr = cols.toString().trimRight();
+    final linkStr = linkAccessors.toString().trimRight();
+
+    if (colsStr.isNotEmpty && linkStr.isNotEmpty) {
+      classBody.writeln(colsStr);
+      classBody.writeln();
+      classBody.writeln(linkStr);
+    } else if (colsStr.isNotEmpty) {
+      classBody.writeln(colsStr);
+    } else if (linkStr.isNotEmpty) {
+      classBody.writeln(linkStr);
+    }
+
     return '''
 class $tableName extends InstantModelTable<$tableName, $modelName> {
   $tableName() : super('${_escape(entityType)}');
 
-${cols.toString().trimRight()}
+${classBody.toString().trimRight()}
 
   @override
   $modelName fromRow(Map<String, dynamic> m) => $modelName(
@@ -123,11 +189,15 @@ ${ctorArgs.toString().trimRight()}
 
 extension ${modelName}QueryX on TypedQuery<$tableName> {
   Future<List<$modelName>> getAll(InstantDB db) async =>
-      (await db.queryOnceTyped(this)).documents.map($tableName().fromRow).toList();
+      (await db.queryOnceTyped(this))
+          .documents
+          .map($tableName().fromRow)
+          .toList();
 
   ReadonlySignal<List<$modelName>> watchAll(InstantDB db) {
     final src = db.queryTyped(this);
-    return computed(() => src.value.documents.map($tableName().fromRow).toList());
+    return computed(
+        () => src.value.documents.map($tableName().fromRow).toList());
   }
 }
 ''';
@@ -141,6 +211,9 @@ extension ${modelName}QueryX on TypedQuery<$tableName> {
       final type = field.type;
       final dartType = type.getDisplayString(withNullability: false);
       final nullable = type.nullabilitySuffix == NullabilitySuffix.question;
+
+      // Skip fields marked with @InstantLink — handled separately.
+      if (_hasInstantLink(field)) continue;
 
       if (!_isSupportedScalar(type)) {
         // Relation / unsupported type: deferred to the nested sub-phase.
@@ -163,6 +236,86 @@ extension ${modelName}QueryX on TypedQuery<$tableName> {
       ));
     }
     return result;
+  }
+
+  List<_LinkInfo> _modelLinks(ClassElement element) {
+    final result = <_LinkInfo>[];
+    for (final field in element.fields) {
+      if (field.isStatic || field.isSynthetic) continue;
+      if (!_hasInstantLink(field)) continue;
+
+      final linkAnnotation = _instantLinkAnnotation(field);
+      final type = field.type;
+
+      bool toMany;
+      DartType related;
+
+      if (type is InterfaceType && type.isDartCoreList) {
+        toMany = true;
+        related = type.typeArguments.first;
+      } else {
+        toMany = false;
+        // Strip nullability for the related type.
+        related = type;
+      }
+
+      // The related type name (the model class name, e.g. "Todo").
+      final relatedTypeName =
+          (related.element as ClassElement?)?.name ?? related.getDisplayString(withNullability: false);
+      final relatedTableName = '${relatedTypeName}Table';
+
+      // Validate the related element carries @InstantModel.
+      final relatedClass = related.element;
+      if (relatedClass is! ClassElement ||
+          _instantModelAnnotationForClass(relatedClass) == null) {
+        throw InvalidGenerationSourceError(
+          'Relation field "${field.name}" on ${element.name} targets '
+          '"$relatedTypeName", which is not an @InstantModel.',
+          element: field,
+        );
+      }
+
+      // attr defaults to field name; can be overridden with @InstantLink(attr: 'x').
+      final attrOverride =
+          linkAnnotation?.getField('attr')?.toStringValue();
+      final attr = attrOverride ?? field.name;
+
+      final nullable = type.nullabilitySuffix == NullabilitySuffix.question;
+
+      result.add(_LinkInfo(
+        fieldName: field.name,
+        attr: attr,
+        relatedTypeName: relatedTypeName,
+        relatedTableName: relatedTableName,
+        toMany: toMany,
+        nullable: nullable,
+      ));
+    }
+    return result;
+  }
+
+  bool _hasInstantLink(FieldElement field) {
+    for (final meta in field.metadata) {
+      final value = meta.computeConstantValue();
+      if (value?.type?.element?.name == 'InstantLink') return true;
+    }
+    return false;
+  }
+
+  DartObject? _instantLinkAnnotation(FieldElement field) {
+    for (final meta in field.metadata) {
+      final value = meta.computeConstantValue();
+      if (value?.type?.element?.name == 'InstantLink') return value;
+    }
+    return null;
+  }
+
+  DartObject? _instantModelAnnotationForClass(ClassElement element) {
+    for (final meta in element.metadata) {
+      final value = meta.computeConstantValue();
+      if (value?.type?.element?.name == _annotationName) return value;
+    }
+    return null;
   }
 
   bool _isSupportedScalar(DartType type) =>
@@ -192,6 +345,23 @@ class _FieldInfo {
     required this.fieldName,
     required this.attr,
     required this.dartType,
+    required this.nullable,
+  });
+}
+
+class _LinkInfo {
+  final String fieldName;
+  final String attr;
+  final String relatedTypeName;
+  final String relatedTableName;
+  final bool toMany;
+  final bool nullable;
+  _LinkInfo({
+    required this.fieldName,
+    required this.attr,
+    required this.relatedTypeName,
+    required this.relatedTableName,
+    required this.toMany,
     required this.nullable,
   });
 }
