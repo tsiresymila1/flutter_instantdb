@@ -1,6 +1,6 @@
 # refactor — split triple_store.dart & sync_engine.dart
 
-Status: design. Two core files are very long single classes: `TripleStore`
+Status: implemented. Two core files are very long single classes: `TripleStore`
 (1450 L) and `SyncEngine` (1922 L). Goal: smaller, clearer files with **zero
 behavior change**. Approach is dictated by coupling + test coverage.
 

@@ -1,6 +1,9 @@
 
 ## Unreleased
 
+### Internal: store/sync refactor (no behavior change)
+- Split `triple_store.dart` and `sync_engine.dart` into focused files (pure restructure, no behavior change). Extracted and added unit tests for the pure query/aggregate helpers (`triple_query_eval.dart`) and the datalog-conversion helpers (`datalog_convert.dart`); moved large private clusters into `part of` extensions.
+
 ### Schema converter (schema-io)
 - **`bin/schema.dart` now converts `instant.schema.ts` ⇆ `@InstantModel` Dart** with a pure-Dart converter (no analyzer, no new dependencies). `pull` runs `instant-cli pull` then converts TS → Dart to `--schema-file`; `push` converts the Dart schema → `instant.schema.ts` then runs `instant-cli push`. New offline subcommands `to-dart <input.ts>` and `to-ts` convert without touching the cloud, and `diff` now does a best-effort normalized line diff.
 - **`@InstantField` gains `unique`/`indexed` flags** (additive named params) so Dart → TS preserves constraints. The code generator ignores them (no codegen/golden impact).
