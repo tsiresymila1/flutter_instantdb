@@ -22,24 +22,25 @@ class InstantDBLogging {
     bool enableHierarchical = true,
     String? instanceId,
   }) {
-    if (_isConfigured) return;
-
     if (instanceId != null) {
       _instanceId = instanceId;
     }
 
-    // Enable hierarchical logging to allow per-component configuration
-    if (enableHierarchical) {
-      hierarchicalLoggingEnabled = true;
+    // One-time global setup: enabling hierarchical logging and attaching the
+    // record listener must happen exactly once — re-attaching the listener would
+    // print every record twice. The LEVEL, however, is (re)applied on every call
+    // so a later configure(...) (e.g. a second InstantDB.init with
+    // verboseLogging: true, or a hot reload) actually takes effect.
+    if (!_isConfigured) {
+      if (enableHierarchical) {
+        hierarchicalLoggingEnabled = true;
+      }
+      Logger.root.onRecord.listen(_logHandler);
+      _isConfigured = true;
     }
 
-    // Set default log level for the root logger
+    // Apply the requested level to the root and every component logger.
     Logger.root.level = level;
-
-    // Set up the log record listener with formatted output
-    Logger.root.onRecord.listen(_logHandler);
-
-    // Set individual component levels (can be overridden)
     root.level = level;
     syncEngine.level = level;
     reaxStore.level = level;
@@ -47,8 +48,6 @@ class InstantDBLogging {
     webSocket.level = level;
     transaction.level = level;
     auth.level = level;
-
-    _isConfigured = true;
 
     root.info('InstantDB logging configured for $_instanceId');
     root.info('Log level: ${level.name}, Hierarchical: $enableHierarchical');
