@@ -260,4 +260,56 @@ void main() {
       );
     });
   });
+
+  group('edge cases', () {
+    test('a full modifier chain parses all flags', () {
+      const ts = '''
+const schema = i.schema({
+  entities: {
+    users: i.entity({
+      handle: i.string().unique().indexed().optional(),
+    }),
+  },
+  links: {},
+});
+''';
+      final f = parseInstantTs(ts)
+          .entities
+          .firstWhere((e) => e.name == 'users')
+          .fields
+          .firstWhere((f) => f.name == 'handle');
+      expect(f.optional, isTrue);
+      expect(f.unique, isTrue);
+      expect(f.indexed, isTrue);
+      final dart = emitDart(parseInstantTs(ts));
+      expect(dart, contains('final String? handle;'));
+    });
+
+    test('@InstantField with double quotes parses the attr name', () {
+      const src = '''
+@InstantModel('users')
+class User {
+  final String id;
+  @InstantField("email_addr", unique: true)
+  final String email;
+  const User({required this.id, required this.email});
+}
+''';
+      final ts = emitInstantTs(parseDartModels(src));
+      expect(ts, contains('email_addr: i.string().unique()'));
+    });
+
+    test('colliding class names fail loudly', () {
+      const ts = '''
+const schema = i.schema({
+  entities: {
+    stats: i.entity({ v: i.number() }),
+    stat: i.entity({ v: i.number() }),
+  },
+  links: {},
+});
+''';
+      expect(() => emitDart(parseInstantTs(ts)), throwsArgumentError);
+    });
+  });
 }

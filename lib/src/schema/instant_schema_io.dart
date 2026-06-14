@@ -257,6 +257,22 @@ LinkDef? _parseLink(String name, String value) {
 /// Emit a single Dart file of `@InstantModel` classes from a [SchemaDef].
 String emitDart(SchemaDef schema, {String partBase = 'app_schema'}) {
   final entitiesByName = {for (final e in schema.entities) e.name: e};
+
+  // Guard against silent class-name collisions (e.g. `status` + `stats` both
+  // singularize to `Stat`). Two classes with the same name would be a confusing
+  // Dart compile error downstream — fail loudly here instead.
+  final seenClass = <String, String>{};
+  for (final e in schema.entities) {
+    if (e.system) continue;
+    final prior = seenClass[e.className];
+    if (prior != null) {
+      throw ArgumentError(
+        'Entities "$prior" and "${e.name}" both map to class '
+        '"${e.className}". Rename one entity.',
+      );
+    }
+    seenClass[e.className] = e.name;
+  }
   // Collect link fields per (user-side) entity.
   final linkFields = <String, List<_LinkFieldEmit>>{};
   for (final link in schema.links) {
@@ -288,6 +304,12 @@ String emitDart(SchemaDef schema, {String partBase = 'app_schema'}) {
   }
 
   final buf = StringBuffer();
+  buf.writeln('// Generated from instant.schema.ts by '
+      '`dart run flutter_instantdb:schema`.');
+  buf.writeln('// Note: i.number() maps to `num` (the int/double distinction is '
+      'not in the');
+  buf.writeln('// InstantDB schema) — narrow a field to `int`/`double` by hand '
+      'if you need it.');
   buf.writeln(
       "import 'package:flutter_instantdb/flutter_instantdb.dart';");
   buf.writeln();
@@ -571,7 +593,8 @@ _FieldAnn? _lastFieldAnnotation(String preceding) {
   final tail = preceding.substring(last.end).trim();
   if (tail.isNotEmpty && !tail.startsWith('@')) return null;
   final args = last.group(1)!;
-  final nameMatch = RegExp(r"'([^']*)'").firstMatch(args);
+  // Accept both single- and double-quoted attribute names.
+  final nameMatch = RegExp('''['"]([^'"]*)['"]''').firstMatch(args);
   final name = nameMatch?.group(1) ?? '';
   final unique = RegExp(r'unique\s*:\s*true').hasMatch(args);
   final indexed = RegExp(r'indexed\s*:\s*true').hasMatch(args);
