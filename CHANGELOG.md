@@ -1,11 +1,18 @@
 
 ## Unreleased
 
+### Whole-model writes + typed relation link (6d)
+- **Whole-model writes**: `db.txFor(table).createModel(Model)` and `updateModel(id, Model)` write a model's scalar fields in one call via a generated `toMap`. The generator emits `Map<String, dynamic> toMap(Model m)` on the table plus a `${Model}TxX` extension on `TypedTx<${Model}Table>`.
+- **`toMap` is scalar-only**: every scalar field is included (`id` too); relation fields are excluded. A model's relations are therefore **not** persisted by `createModel` — write them with `linkRel`/`unlinkRel`. For `createModel`, `data['id']` from the model is used as the entity id; for `updateModel`, the `id` attribute in the update map is harmless (it equals the entity id and reconstruction skips it).
+- **Typed relation link**: the generator emits a `static const ${field}Rel = RelationRef<${Target}Table>('${attr}')` per relation. `db.txFor(table).linkRel(id, Table.relRel, ids)` / `unlinkRel(id, Table.relRel, ids)` write typed links (`ids` is a single id or a `List`).
+- **Runtime primitives**: new `RelationRef<R>` handle in `typed_query.dart`; new `TypedTx` methods `createFromMap(map, {id})`, `updateFromMap(id, map, {opts})` (copies the map), `linkRel`/`unlinkRel`. All delegate to the existing untyped `EntityBuilder`/`EntityInstanceBuilder`. No base-class or `TypedTx` generic change; no public API removed.
+- **Deferred to 6e**: `mergeModel`, the `Table().tx(db)` sugar, and richer typed relation handles that also carry the target table factory.
+
 ### Typed transactions (6c)
 - **Typed write builder**: `db.txFor(table)` returns a `TypedTx<E>` whose fluent `set<T>(Col<T>, T)` binds each value's type to its column — wrong-typed writes (`set(t.priority, 'x')`) no longer compile. Cascade-friendly (`..set(..)..set(..)`).
 - **Ops**: `create({id})`, `update(id)`, `merge(id)`, `delete(id)`, `link(id, relation, target)`, `unlink(id, relation, target)`, plus typed `lookup(Col, value)` upsert-by-unique-attribute. `opts(TxOpts(...))` controls upsert/strict on update/merge. All delegate to the existing untyped `EntityBuilder`/`EntityInstanceBuilder` — no op-construction is reimplemented.
 - **Core seam**: new `abstract interface class ToTransaction { TransactionChunk toTransactionChunk(); }` in core; `TransactionChunk implements ToTransaction`, and `db.transact` now accepts any `ToTransaction` (so `db.transact(db.txFor(t).create()..set(...))` works) while `List<Operation>` and existing `TransactionChunk` callers are unchanged. No core→typed import.
-- **Deferred to 6d**: whole-model writes (`createModel(Todo(...))` via a generated `toMap`), typed relation `link` (the relation name is an untyped `String` in v1), and a generated `Table().tx(db)` convenience.
+- **Landed in 6d**: whole-model writes (`createModel(Todo(...))` via a generated `toMap`) and typed relation `link`/`unlink` (`RelationRef` consts). The generated `Table().tx(db)` convenience is deferred to 6e.
 
 ### Per-relation pageInfo (nested-4)
 - **Engine**: cursor-paginated nested `include` relations now surface `pageInfo` at `QueryResult.pageInfo['<parentType>.<relation>']` (e.g. `result.pageInfo['goals.todos']`). Deeper nesting produces dotted keys (`'goals.todos.tags'`). The existing read API is unchanged — composite keys (containing `.`) coexist with top-level namespace keys in the same `pageInfo` map.

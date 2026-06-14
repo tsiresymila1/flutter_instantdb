@@ -1,6 +1,6 @@
 # phase 6d — Whole-model typed writes + typed relation link
 
-Status: design. Extends 6c (typed tx builder) with generator-backed ergonomics:
+Status: implemented. Extends 6c (typed tx builder) with generator-backed ergonomics:
 (1) `createModel(Model)`/`updateModel(id, Model)` via a generated `toMap`;
 (2) typed relation link via a generated `RelationRef` handle. The low-value
 `Table().tx(db)` sugar is **trimmed** (`db.txFor(table)` already covers it).
