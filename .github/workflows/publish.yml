@@ -1,0 +1,51 @@
+name: Publish to pub.dev
+
+# Triggered by tags pushed from release-tag.yml. Uses pub.dev automated
+# publishing (OIDC) — no tokens stored. REQUIRED ONE-TIME SETUP on pub.dev:
+#   flutter_instantdb           -> Admin -> Automated publishing -> GitHub Actions
+#     repository: tsiresymila1/flutter_instantdb, tag pattern: v{{version}}
+#   flutter_instantdb_generator -> same, tag pattern: generator-v{{version}}
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'generator-v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  publish-main:
+    if: ${{ startsWith(github.ref_name, 'v') }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for pub.dev OIDC
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter test
+      - name: Publish
+        run: flutter pub publish --force
+
+  publish-generator:
+    if: ${{ startsWith(github.ref_name, 'generator-v') }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for pub.dev OIDC
+    defaults:
+      run:
+        working-directory: flutter_instantdb_generator
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      # The root .pubignore excludes this subpackage from the MAIN package's
+      # archive; that ancestor rule also hides the generator's own files when
+      # publishing it. Strip the line for this job only (checkout is ephemeral).
+      - name: Unhide generator from its own archive
+        working-directory: .
+        run: sed -i '/^flutter_instantdb_generator$/d' .pubignore
+      - run: dart pub get
+      - run: dart test
+      - name: Publish
+        run: dart pub publish --force
