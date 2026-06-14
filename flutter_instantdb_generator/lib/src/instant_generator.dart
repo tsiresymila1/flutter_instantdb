@@ -159,21 +159,33 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
       }
     }
 
-    // Build the class body: scalar cols + link accessors (separated by blank
-    // line when both are present), then fromRow.
+    // RelationRef static consts, one per relation, placed after the accessors.
+    final relationRefs = StringBuffer();
+    for (final l in links) {
+      relationRefs.writeln(
+        "  static const ${l.fieldName}Rel = RelationRef<${l.relatedTableName}>('${_escape(l.attr)}');",
+      );
+    }
+
+    // toMap entries over scalar fields only (relations excluded).
+    final toMapEntries = StringBuffer();
+    for (final f in fields) {
+      toMapEntries.writeln("        '${_escape(f.attr)}': m.${f.fieldName},");
+    }
+
+    // Build the class body: scalar cols + link accessors + relation refs
+    // (separated by blank lines when present), then fromRow + toMap.
     final classBody = StringBuffer();
     final colsStr = cols.toString().trimRight();
     final linkStr = linkAccessors.toString().trimRight();
+    final refsStr = relationRefs.toString().trimRight();
 
-    if (colsStr.isNotEmpty && linkStr.isNotEmpty) {
-      classBody.writeln(colsStr);
-      classBody.writeln();
-      classBody.writeln(linkStr);
-    } else if (colsStr.isNotEmpty) {
-      classBody.writeln(colsStr);
-    } else if (linkStr.isNotEmpty) {
-      classBody.writeln(linkStr);
-    }
+    final sections = <String>[
+      if (colsStr.isNotEmpty) colsStr,
+      if (linkStr.isNotEmpty) linkStr,
+      if (refsStr.isNotEmpty) refsStr,
+    ];
+    classBody.write(sections.join('\n\n'));
 
     return '''
 class $tableName extends InstantModelTable<$tableName, $modelName> {
@@ -185,6 +197,10 @@ ${classBody.toString().trimRight()}
   $modelName fromRow(Map<String, dynamic> m) => $modelName(
 ${ctorArgs.toString().trimRight()}
       );
+
+  Map<String, dynamic> toMap($modelName m) => {
+${toMapEntries.toString().trimRight()}
+      };
 }
 
 extension ${modelName}QueryX on TypedQuery<$tableName> {
@@ -199,6 +215,13 @@ extension ${modelName}QueryX on TypedQuery<$tableName> {
     return computed(
         () => src.value.documents.map($tableName().fromRow).toList());
   }
+}
+
+extension ${modelName}TxX on TypedTx<$tableName> {
+  TransactionChunk createModel($modelName m) =>
+      createFromMap($tableName().toMap(m));
+  TransactionChunk updateModel(String id, $modelName m) =>
+      updateFromMap(id, $tableName().toMap(m));
 }
 ''';
   }

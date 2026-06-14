@@ -30,6 +30,12 @@ class TodoTable extends InstantModelTable<TodoTable, Todo> {
         title: m['title'] as String,
         priority: m['priority'] as int,
       );
+
+  Map<String, dynamic> toMap(Todo m) => {
+        'id': m.id,
+        'title': m.title,
+        'priority': m.priority,
+      };
 }
 
 extension TodoQueryX on TypedQuery<TodoTable> {
@@ -44,6 +50,12 @@ extension TodoQueryX on TypedQuery<TodoTable> {
     return computed(
         () => src.value.documents.map(TodoTable().fromRow).toList());
   }
+}
+
+extension TodoTxX on TypedTx<TodoTable> {
+  TransactionChunk createModel(Todo m) => createFromMap(TodoTable().toMap(m));
+  TransactionChunk updateModel(String id, Todo m) =>
+      updateFromMap(id, TodoTable().toMap(m));
 }
 ''')
 @InstantModel('todos')
@@ -68,6 +80,12 @@ class ProfileTable extends InstantModelTable<ProfileTable, Profile> {
         createdAt: m['created_at'] as int,
         nickname: m['nickname'] as String?,
       );
+
+  Map<String, dynamic> toMap(Profile m) => {
+        'id': m.id,
+        'created_at': m.createdAt,
+        'nickname': m.nickname,
+      };
 }
 
 extension ProfileQueryX on TypedQuery<ProfileTable> {
@@ -82,6 +100,13 @@ extension ProfileQueryX on TypedQuery<ProfileTable> {
     return computed(
         () => src.value.documents.map(ProfileTable().fromRow).toList());
   }
+}
+
+extension ProfileTxX on TypedTx<ProfileTable> {
+  TransactionChunk createModel(Profile m) =>
+      createFromMap(ProfileTable().toMap(m));
+  TransactionChunk updateModel(String id, Profile m) =>
+      updateFromMap(id, ProfileTable().toMap(m));
 }
 ''')
 @InstantModel('profiles')
@@ -134,6 +159,11 @@ class AuthorTable extends InstantModelTable<AuthorTable, Author> {
         id: m['id'] as String,
         name: m['name'] as String,
       );
+
+  Map<String, dynamic> toMap(Author m) => {
+        'id': m.id,
+        'name': m.name,
+      };
 }
 
 extension AuthorQueryX on TypedQuery<AuthorTable> {
@@ -148,6 +178,13 @@ extension AuthorQueryX on TypedQuery<AuthorTable> {
     return computed(
         () => src.value.documents.map(AuthorTable().fromRow).toList());
   }
+}
+
+extension AuthorTxX on TypedTx<AuthorTable> {
+  TransactionChunk createModel(Author m) =>
+      createFromMap(AuthorTable().toMap(m));
+  TransactionChunk updateModel(String id, Author m) =>
+      updateFromMap(id, AuthorTable().toMap(m));
 }
 ''')
 @InstantModel('authors')
@@ -168,6 +205,8 @@ class GoalTable extends InstantModelTable<GoalTable, Goal> {
   TypedQuery<TodoTable> get todos =>
       TypedQuery<TodoTable>(TodoTable(), relationAttr: 'todos');
 
+  static const todosRel = RelationRef<TodoTable>('todos');
+
   @override
   Goal fromRow(Map<String, dynamic> m) => Goal(
         id: m['id'] as String,
@@ -178,6 +217,11 @@ class GoalTable extends InstantModelTable<GoalTable, Goal> {
                 .toList() ??
             const <Todo>[],
       );
+
+  Map<String, dynamic> toMap(Goal m) => {
+        'id': m.id,
+        'title': m.title,
+      };
 }
 
 extension GoalQueryX on TypedQuery<GoalTable> {
@@ -192,6 +236,12 @@ extension GoalQueryX on TypedQuery<GoalTable> {
     return computed(
         () => src.value.documents.map(GoalTable().fromRow).toList());
   }
+}
+
+extension GoalTxX on TypedTx<GoalTable> {
+  TransactionChunk createModel(Goal m) => createFromMap(GoalTable().toMap(m));
+  TransactionChunk updateModel(String id, Goal m) =>
+      updateFromMap(id, GoalTable().toMap(m));
 }
 ''')
 @InstantModel('goals')
@@ -214,6 +264,8 @@ class PostTable extends InstantModelTable<PostTable, Post> {
   TypedQuery<AuthorTable> get author =>
       TypedQuery<AuthorTable>(AuthorTable(), relationAttr: 'author');
 
+  static const authorRel = RelationRef<AuthorTable>('author');
+
   @override
   Post fromRow(Map<String, dynamic> m) => Post(
         id: m['id'] as String,
@@ -226,6 +278,11 @@ class PostTable extends InstantModelTable<PostTable, Post> {
               : AuthorTable().fromRow(l.first);
         })(),
       );
+
+  Map<String, dynamic> toMap(Post m) => {
+        'id': m.id,
+        'title': m.title,
+      };
 }
 
 extension PostQueryX on TypedQuery<PostTable> {
@@ -240,6 +297,12 @@ extension PostQueryX on TypedQuery<PostTable> {
     return computed(
         () => src.value.documents.map(PostTable().fromRow).toList());
   }
+}
+
+extension PostTxX on TypedTx<PostTable> {
+  TransactionChunk createModel(Post m) => createFromMap(PostTable().toMap(m));
+  TransactionChunk updateModel(String id, Post m) =>
+      updateFromMap(id, PostTable().toMap(m));
 }
 ''')
 @InstantModel('posts')
