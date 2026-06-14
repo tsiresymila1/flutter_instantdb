@@ -83,6 +83,63 @@ class ConnectionStatusIndicator extends StatelessWidget {
 }
 ```
 
+### Lifecycle status with `connectionStatus`
+
+For the full connection lifecycle (not just a boolean), read `db.connectionStatus` — a
+`ReadonlySignal<ConnectionStatus>`. The `ConnectionStatus` enum has five values:
+
+| Value | Meaning |
+|-------|---------|
+| `connecting` | Socket is connecting |
+| `opened` | Socket open but not yet authenticated (pre `init-ok`) |
+| `authenticated` | Socket open and authenticated — fully online |
+| `closed` | Socket is closed |
+| `errored` | Socket errored |
+
+"Online" corresponds to `ConnectionStatus.authenticated`.
+
+```dart
+Watch((context) {
+  final status = db.connectionStatus.value;
+  final online = status == ConnectionStatus.authenticated;
+  return Text(online ? 'Online' : status.name);
+});
+```
+
+#### `ConnectionStateBuilder` widget
+
+`ConnectionStateBuilder` rebuilds with the full lifecycle status:
+
+```dart
+ConnectionStateBuilder(
+  builder: (context, status) {
+    switch (status) {
+      case ConnectionStatus.authenticated:
+        return const Text('Online');
+      case ConnectionStatus.connecting:
+      case ConnectionStatus.opened:
+        return const Text('Connecting...');
+      case ConnectionStatus.closed:
+      case ConnectionStatus.errored:
+        return const Text('Offline');
+    }
+  },
+)
+```
+
+### Stable local id
+
+`db.getLocalId(name)` returns a stable id for `name` that is persisted and survives
+restarts (matching `useLocalId` in the React SDK):
+
+```dart
+final sessionId = await db.getLocalId('session');
+```
+
+> **Deprecations:** `db.isOnline` is deprecated — use `connectionStatus` (online ==
+> `ConnectionStatus.authenticated`). `db.getAnonymousUserId()` is deprecated — use
+> `getLocalId(name)`. Both still work for now.
+
 ## How Sync Works
 
 ### Differential Sync

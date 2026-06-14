@@ -358,6 +358,58 @@ await db.transact([
 ]);
 ```
 
+## Upsert, Strict Mode & Rule Params
+
+### `lookup()` — upsert by unique attribute
+
+Target an entity by a unique attribute instead of by id. If a matching entity exists it
+is updated; otherwise one is created (upsert). `lookup` is chainable like an entity
+target and supports `update`, `merge`, `delete`, `link`, and `unlink`.
+
+```dart
+// Update-or-create the profile whose email == 'a@b.com'
+await db.transact(
+  db.tx['profiles'].lookup('email', 'a@b.com').update({
+    'name': 'Ada',
+    'lastSeen': DateTime.now().millisecondsSinceEpoch,
+  }),
+);
+
+// Also works with merge / delete / link / unlink
+await db.transact(
+  db.tx['profiles'].lookup('email', 'a@b.com').merge({
+    'preferences': {'theme': 'dark'},
+  }),
+);
+```
+
+### Strict mode with `TxOpts(upsert: false)`
+
+By default `update` / `merge` upsert — they create the entity if it does not exist. Pass
+`opts: TxOpts(upsert: false)` to make the write a no-op when the target does not exist.
+
+```dart
+await db.transact(
+  db.tx['goals'][goalId].update(
+    {'title': 'Updated'},
+    opts: const TxOpts(upsert: false), // does not create if missing
+  ),
+);
+```
+
+### `ruleParams()`
+
+Attach rule parameters forwarded to the server for permission rules. Chain it after a
+write op.
+
+```dart
+await db.transact(
+  db.tx['docs'][docId]
+      .update({'title': 'Shared doc'})
+      .ruleParams({'inviteToken': token}),
+);
+```
+
 ## New Transaction API (tx namespace)
 
 ### `TransactionNamespace`

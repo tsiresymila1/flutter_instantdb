@@ -1,3 +1,5 @@
 export default {
-    "basics": "Basics"
+    "basics": "Basics",
+    "operators": "Operators",
+    "pagination": "Pagination & Fields"
 }

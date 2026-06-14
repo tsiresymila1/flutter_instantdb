@@ -28,6 +28,10 @@ export default {
         "title": "Queries",
         "type": "page"
     },
+    "typed": {
+        "title": "Typed",
+        "type": "page"
+    },
     "flutter": {
         "title": "Flutter",
         "type": "page"

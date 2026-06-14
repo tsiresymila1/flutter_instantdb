@@ -14,7 +14,14 @@ This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com),
 - ✅ **Offline-first** - Local SQLite storage with automatic sync when online
 - ✅ **Reactive UI** - Widgets automatically update when data changes using Signals
 - ✅ **Type-safe queries** - InstaQL query language with schema validation
+- ✅ **Typed query DSL** - Compile-time-checked `Col<T>` / `TypedQuery` builder (no string maps)
+- ✅ **Code generation** - `@InstantModel` annotations generate typed tables returning `List<Model>`
+- ✅ **Typed relations** - `@InstantLink` + `.include(...)` reconstructs related models recursively
+- ✅ **Typed transactions** - `db.txFor(table)` with field-checked `set`, whole-model writes, typed links
 - ✅ **Transactions** - Atomic operations with optimistic updates and rollback
+- ✅ **Cursor pagination** - `first`/`after`/`last`/`before` with `pageInfo` and infinite-scroll helper
+- ✅ **Files & storage** - Upload/download/delete via `db.storage` and queryable `$files`
+- ✅ **Connection status** - `ConnectionStatus` lifecycle and persistent per-name local ids
 - ✅ **Authentication** - Built-in user authentication and session management
 - ✅ **Presence system** - Real-time collaboration features (cursors, typing, reactions, avatars) with consistent multi-instance synchronization
 - ✅ **Conflict resolution** - Automatic handling of concurrent data modifications
@@ -42,6 +49,7 @@ This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com),
 - Getting Started: [Installation](https://flutter-instantdb.vercel.app/getting-started/installation) · [Quick Start](https://flutter-instantdb.vercel.app/getting-started/quick-start)
 - Concepts: [Database](https://flutter-instantdb.vercel.app/concepts/database) · [Schema](https://flutter-instantdb.vercel.app/concepts/schema)
 - API Reference: [InstantDB](https://flutter-instantdb.vercel.app/api/instantdb) · [Queries](https://flutter-instantdb.vercel.app/api/queries) · [Transactions](https://flutter-instantdb.vercel.app/api/transactions) · [Presence](https://flutter-instantdb.vercel.app/api/presence-api) · [Widgets](https://flutter-instantdb.vercel.app/api/widgets) · [Types](https://flutter-instantdb.vercel.app/api/types)
+- Typed API: [Typed Queries](https://flutter-instantdb.vercel.app/typed/queries) · [Code Generation](https://flutter-instantdb.vercel.app/typed/codegen) · [Typed Relations](https://flutter-instantdb.vercel.app/typed/relations) · [Typed Transactions](https://flutter-instantdb.vercel.app/typed/transactions)
 - Authentication: [Users](https://flutter-instantdb.vercel.app/auth/users) · [Sessions](https://flutter-instantdb.vercel.app/auth/sessions) · [Permissions](https://flutter-instantdb.vercel.app/auth/permissions)
 - Real-time: [Sync](https://flutter-instantdb.vercel.app/realtime/sync) · [Presence](https://flutter-instantdb.vercel.app/realtime/presence) · [Collaboration](https://flutter-instantdb.vercel.app/realtime/collaboration)
 - Advanced: [Offline](https://flutter-instantdb.vercel.app/advanced/offline) · [Performance](https://flutter-instantdb.vercel.app/advanced/performance) · [Migration](https://flutter-instantdb.vercel.app/advanced/migration) · [Troubleshooting](https://flutter-instantdb.vercel.app/advanced/troubleshooting)
@@ -276,11 +284,17 @@ Watch((context) {
 #### Cursor pagination & infinite scroll
 
 ```dart
-// Cursor pagination
+// Cursor pagination (first/after/last/before, + afterInclusive/beforeInclusive)
 final page = await db.queryOnce({
   'todos': { r'$': { 'order': {'n': 'asc'}, 'first': 20 } },
 });
 final next = page.pageInfo?['todos']?['endCursor'];
+final hasMore = page.pageInfo?['todos']?['hasNextPage'];
+
+// Field projection (id is always included)
+final lite = await db.queryOnce({
+  'todos': { r'$': { 'fields': ['title', 'status'] } },
+});
 
 // Infinite scroll
 final feed = db.infiniteQuery(
@@ -378,6 +392,12 @@ ConnectionStateBuilder(
 // Stable per-name local id (survives restarts)
 final deviceId = await db.getLocalId('device');
 ```
+
+`connectionStatus` exposes the full lifecycle as a `ConnectionStatus` enum
+(`connecting` / `opened` / `authenticated` / `closed` / `errored`); online means
+`authenticated`. `db.isOnline` and `db.getAnonymousUserId()` are deprecated in
+favor of `connectionStatus` and `getLocalId(name)` respectively (both still
+work).
 
 #### Enhanced Sync Features
 
@@ -631,8 +651,9 @@ InstantDB uses a declarative query language with advanced operators:
       'age': {'\$gte': 18, '\$lt': 65},
       'salary': {'\$gt': 50000, '\$lte': 200000},
       'status': {'\$ne': 'inactive'},
+      'role': {'\$not': 'guest'}, // alias of $ne
 
-      // String pattern matching
+      // String pattern matching (SQL % / _ wildcards)
       'email': {'\$like': '%@company.com'},
       'name': {'\$ilike': '%john%'}, // Case insensitive
 
@@ -674,7 +695,7 @@ InstantDB uses a declarative query language with advanced operators:
   }
 }
 
-// String match + logical combinators
+// String match + logical combinators (lowercase `and` / `or` also supported)
 db.query({
   'todos': {
     'where': {
@@ -683,6 +704,13 @@ db.query({
         {'priority': {r'$gte': 8}},
       ],
     },
+  },
+});
+
+// Dot-notation matching on a nested/related field
+db.query({
+  'goals': {
+    'where': {'todos.title': 'Run'},
   },
 });
 
@@ -696,28 +724,54 @@ db.query({
 }
 ```
 
-## Typed queries
+## Typed API (codegen)
+
+On top of the string-map InstaQL API, Flutter InstantDB ships a fully type-safe
+layer: a hand-writable query DSL (`Col<T>` / `TypedQuery`) and a code generator
+(`flutter_instantdb_generator`) that emits typed tables, relations, and
+transactions from annotated model classes.
+
+### Typed queries
+
+Define a table by extending `InstantTable<Self>` with one `Col<T>` per field,
+then build queries with compile-time-checked operators:
 
 ```dart
 class Todos extends InstantTable<Todos> {
   Todos() : super('todos');
-  final title = Col<String>('title');
-  final priority = Col<int>('priority');
-  final createdAt = Col<int>('createdAt');
+  final title = const Col<String>('title');
+  final priority = const Col<int>('priority');
+  final createdAt = const Col<int>('createdAt');
 }
 
-final result = await db.queryOnceTyped(
+final result = await db.queryOnceTyped(   // one-shot
   Todos()
     .query()
     .where((t) => t.title.ilike('%urgent%') & t.priority.gte(8))
     .order((t) => t.createdAt.desc())
     .first(20),
 );
+
+// Reactive variant returns a Signal<QueryResult>
+final live = db.queryTyped(Todos().query().where((t) => t.priority.gte(8)));
 ```
 
-## Typed models (codegen)
+Type safety is enforced by the column type: `like`/`ilike` exist only on
+`Col<String>`, comparisons (`gt`/`gte`/`lt`/`lte`) only on `Col<Comparable>`,
+and `eq`/`ne`/`inList` values are checked against the column's `T`. Combine
+filters with `&` (and) / `|` (or).
 
-Add the generator to your dev dependencies and annotate a model:
+### Code generation
+
+Add the generator and `build_runner` as dev dependencies:
+
+```yaml
+dev_dependencies:
+  build_runner: ^2.4.0
+  flutter_instantdb_generator: ^0.1.0
+```
+
+Annotate a model class and add a `part` directive:
 
 ```dart
 import 'package:flutter_instantdb/flutter_instantdb.dart';
@@ -727,19 +781,124 @@ part 'todo.instant.dart';
 class Todo {
   final String id;
   final String title;
+  @InstantField('createdAt') // override the stored attribute name (optional)
+  final int created;
   final int priority;
-  const Todo({required this.id, required this.title, required this.priority});
+  const Todo({
+    required this.id,
+    required this.title,
+    required this.created,
+    required this.priority,
+  });
 }
 ```
 
-Run `dart run build_runner build`, then:
+Run the generator:
+
+```bash
+dart run build_runner build
+```
+
+It emits a `${Model}Table` (here `TodoTable`) plus a query extension exposing
+`getAll`/`watchAll`:
 
 ```dart
+// One-shot -> List<Todo>
 final todos = await TodoTable()
     .query()
     .where((t) => t.priority.gte(8))
     .order((t) => t.priority.desc())
-    .getAll(db); // List<Todo>
+    .getAll(db);
+
+// Reactive -> ReadonlySignal<List<Todo>>
+final live = TodoTable().query().watchAll(db);
+```
+
+### Typed relations
+
+Mark relation fields with `@InstantLink`. Cardinality is inferred from the field
+type (`List<T>` → to-many, bare `T` → to-one); the target must itself be an
+`@InstantModel`.
+
+```dart
+@InstantModel('goals')
+class Goal {
+  final String id;
+  final String title;
+  @InstantLink()
+  final List<Todo> todos; // to-many
+  const Goal({required this.id, required this.title, required this.todos});
+}
+```
+
+The generator emits a typed relation accessor and a recursive `fromRow`. Pull in
+related entities with `.include(...)`, which supports nested `where`/`order` and
+cursor pagination on the related set:
+
+```dart
+final r = await db.queryOnceTyped(
+  GoalTable()
+    .query()
+    .include((g) => g.todos.where((t) => t.priority.gte(2)).order((t) => t.priority.asc()).first(5)),
+);
+
+final goal = GoalTable().fromRow(r.documents.first);
+final List<Todo> todos = goal.todos; // typed; un-included relations yield []
+
+// Per-relation pagination cursors live under a dotted key
+final hasMore = r.pageInfo?['goals.todos']?['hasNextPage'];
+```
+
+Note: `select()` (field projection) is not allowed inside a typed `include` —
+the generated `fromRow` requires every field. Use the untyped map API if you
+need a projected relation.
+
+### Typed transactions
+
+`db.txFor(table)` returns a `TypedTx<E>` whose `set<T>(Col<T>, T)` binds each
+value's type to its column, so wrong-typed writes do not compile. Pass the
+result straight to `db.transact`:
+
+```dart
+final t = Todos();
+
+// Create / update / merge / delete
+await db.transact(db.txFor(t).create(id: 't1')
+  ..set(t.title, 'Run')
+  ..set(t.priority, 1));
+
+await db.transact(db.txFor(t).update('t1')..set(t.priority, 2));
+await db.transact(db.txFor(t).merge('t1')..set(t.priority, 5));
+await db.transact(db.txFor(t).delete('t1'));
+
+// Upsert by unique attribute, with strict (no-create) control
+await db.transact(db.txFor(t).lookup(t.email, 'a@b.com')..set(t.title, 'X'));
+await db.transact(db.txFor(t).update('t1')
+  ..set(t.priority, 9)
+  ..opts(const TxOpts(upsert: false)));
+```
+
+Generated tables add whole-model writes and a `tx(db)` shorthand:
+
+```dart
+// Whole-model writes (scalar fields only; relations are not persisted here)
+await db.transact(TodoTable().tx(db).createModel(todo));
+await db.transact(TodoTable().tx(db).updateModel('t1', todo));
+await db.transact(TodoTable().tx(db).mergeModel('t1', todo));
+
+// `table.tx(db)` is shorthand for `db.txFor(table)`
+```
+
+Relations are written with typed `RelationRef` consts the generator emits
+(`${field}Rel`); `ids` is a single id or a `List`:
+
+```dart
+await db.transact(
+  db.txFor(GoalTable()).linkRel('g1', GoalTable.todosRel, ['t1', 't2']),
+);
+await db.transact(
+  db.txFor(GoalTable()).unlinkRel('g1', GoalTable.todosRel, 't1'),
+);
 ```
 
 ## Authentication
@@ -863,8 +1022,9 @@ class _AuthPageState extends State<AuthPage> {
 final db = InstantProvider.of(context);
 final currentUser = db.auth.currentUser.value;
 
-// For anonymous/guest users
-final anonymousId = db.getAnonymousUserId();
+// For a stable local id (e.g. anonymous/guest users).
+// Prefer getLocalId; getAnonymousUserId() is deprecated.
+final localId = await db.getLocalId('user');
 
 // Verify refresh token
 if (user?.refreshToken != null) {
@@ -890,8 +1050,12 @@ final url = await db.storage.getDownloadUrl('photos/avatar.png');
 // Delete
 await db.storage.delete('photos/avatar.png');
 
-// Query file records (synced from the server)
+// Query file records (synced from the server) — $files is a normal namespace.
+// Each record maps to the `InstantFile` model.
 final files = await db.queryOnce({r'$files': {}});
+
+// Remove a local file reference
+await db.transact(db.tx[r'$files'][fileId].delete());
 ```
 
 ## Schema Validation

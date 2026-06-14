@@ -1,0 +1,113 @@
+---
+title: Query Operators
+description: String matching, negation, logical combinators, and dot-notation in where clauses
+
+---
+
+InstantDB's `where` clauses support a set of operators for matching, negation, and
+logical composition, in addition to the comparison and array operators covered in
+[Basics](../basics/).
+
+## String matching
+
+`$like` (case-sensitive) and `$ilike` (case-insensitive) match against SQL-style
+patterns using `%` (any sequence) and `_` (single character) wildcards.
+
+```dart
+// Case-sensitive: titles containing "urgent"
+final urgent = db.query({
+  'todos': {
+    'where': {
+      'title': {'\$like': '%urgent%'},
+    },
+  },
+});
+
+// Case-insensitive: titles starting with "ship"
+final shipping = db.query({
+  'todos': {
+    'where': {
+      'title': {'\$ilike': 'ship%'},
+    },
+  },
+});
+```
+
+## Negation
+
+`$not` matches values that are not equal to the operand (an alias of `$ne`).
+
+```dart
+final notDone = db.query({
+  'todos': {
+    'where': {
+      'status': {'\$not': 'done'},
+    },
+  },
+});
+```
+
+## Logical combinators
+
+Use `and` / `or` to combine multiple conditions. Each takes a list of sub-conditions.
+
+```dart
+// AND: high priority AND not completed
+final q = db.query({
+  'todos': {
+    'where': {
+      'and': [
+        {'priority': {'\$gte': 8}},
+        {'completed': false},
+      ],
+    },
+  },
+});
+
+// OR: urgent OR overdue
+final q2 = db.query({
+  'todos': {
+    'where': {
+      'or': [
+        {'priority': 'urgent'},
+        {'dueDate': {'\$lt': DateTime.now().millisecondsSinceEpoch}},
+      ],
+    },
+  },
+});
+```
+
+## Dot-notation nested fields
+
+Match on a nested or related field using a dotted key:
+
+```dart
+final q = db.query({
+  'goals': {
+    'where': {
+      'todos.title': 'Run',
+    },
+  },
+});
+```
+
+## Other supported operators
+
+`$eq` (default equality), `$nin` (not in array), and `$exists` remain supported:
+
+```dart
+db.query({
+  'todos': {
+    'where': {
+      'status': {'\$nin': ['deleted', 'archived']},
+      'assignee': {'\$exists': true},
+    },
+  },
+});
+```
+
+## Typed equivalents
+
+If you use the [typed query DSL](../../typed/query-dsl/), these operators are exposed as
+type-checked methods: `like` / `ilike` on `Col<String>`, comparisons on
+`Col<Comparable>`, and `&` / `|` for `and` / `or`.

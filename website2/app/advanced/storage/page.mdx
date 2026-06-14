@@ -1,0 +1,77 @@
+---
+title: Files & Storage
+description: Upload, download, and delete files with db.storage and the $files namespace
+
+---
+
+InstantDB includes a storage API for uploading and serving files, plus a queryable
+`$files` namespace for file metadata.
+
+## The storage client
+
+`db.storage` is an `InstantStorage` instance exposing three methods.
+
+### `uploadFile`
+
+Upload bytes to a path. Returns the created `InstantFile` record.
+
+```dart
+import 'dart:typed_data';
+
+final bytes = Uint8List.fromList(/* ... */);
+
+final file = await db.storage.uploadFile(
+  'avatars/ada.png',
+  bytes,
+  contentType: 'image/png',                 // optional
+  contentDisposition: 'inline',             // optional
+);
+
+print(file.path); // 'avatars/ada.png'
+```
+
+### `getDownloadUrl`
+
+Get a signed download URL for the file at a path.
+
+```dart
+final url = await db.storage.getDownloadUrl('avatars/ada.png');
+// Use `url` in an Image.network(...) or share it
+```
+
+### `delete`
+
+Delete the file at a path.
+
+```dart
+await db.storage.delete('avatars/ada.png');
+```
+
+## The `InstantFile` model
+
+`uploadFile` returns an `InstantFile` describing the stored file:
+
+```dart
+class InstantFile {
+  final String id;
+  final String path;
+  final String? url;
+  final int? size;
+  final String? contentType;
+}
+```
+
+## Querying `$files`
+
+The `$files` namespace is queryable like any other namespace:
+
+```dart
+final result = await db.queryOnce({r'$files': {}});
+final files = result.data![r'$files'] as List;
+```
+
+A local file reference can be removed via a transaction on the `$files` namespace:
+
+```dart
+await db.transact(db.tx[r'$files'][fileId].delete());
+```
