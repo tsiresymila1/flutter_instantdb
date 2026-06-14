@@ -20,6 +20,7 @@ export 'src/query/infinite_query.dart';
 
 // Typed query DSL exports
 export 'src/typed/typed_query.dart';
+export 'src/typed/typed_tx.dart';
 export 'src/typed/annotations.dart';
 export 'src/typed/model_table.dart';
 

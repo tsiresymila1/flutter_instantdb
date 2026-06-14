@@ -17,6 +17,7 @@ import '../storage/instant_storage.dart';
 import '../schema/schema.dart';
 import '../reactive/presence.dart';
 import '../typed/typed_query.dart';
+import '../typed/typed_tx.dart';
 
 /// Main InstantDB client
 class InstantDB {
@@ -239,6 +240,10 @@ class InstantDB {
   }) {
     return queryOnce(query.toQuery(), syncedOnly: syncedOnly);
   }
+
+  /// Typed transaction entry point for [table]. Returns a [TypedTx] whose
+  /// `set<T>(Col<T>, T)` writes are compile-time field/value checked.
+  TypedTx<E> txFor<E extends InstantTable<E>>(E table) => TypedTx<E>(table);
 
   /// Create an accumulating infinite query over a single namespace. [pageSize]
   /// becomes the `first` count; [entityType] is the namespace to paginate.
