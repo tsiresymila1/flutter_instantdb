@@ -1,6 +1,6 @@
 # phase 6e — `mergeModel` + `Table().tx(db)` sugar
 
-Status: design. Small ergonomic round-off of the typed-write layer (6c/6d):
+Status: implemented. Small ergonomic round-off of the typed-write layer (6c/6d):
 (1) `mergeModel(id, Model)` (deep-merge a whole model); (2) a generated
 `Table().tx(db)` convenience returning `db.txFor(table)`.
 

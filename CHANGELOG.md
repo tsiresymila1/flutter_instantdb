@@ -1,6 +1,11 @@
 
 ## Unreleased
 
+### mergeModel + Table().tx(db) sugar (6e)
+- **`mergeModel(id, Model)`**: deep-merges a whole model's scalar attributes (mirrors `updateModel` but uses `merge`). Backed by the new runtime primitive `TypedTx.mergeFromMap(id, map, {opts})`, which copies the map and delegates to `EntityInstanceBuilder.merge`.
+- **`Table().tx(db)` sugar**: each generated table now emits `TypedTx<${Model}Table> tx(InstantDB db) => db.txFor(this)`, so `table.tx(db).createModel(...)` is shorthand for `db.txFor(table).createModel(...)`. A model field literally named `tx` would collide with this method (documented edge, extremely rare).
+- **Generator**: emits the `tx` method on each table (after `toMap`) and `mergeModel` in each `${Model}TxX` extension (after `updateModel`). No public API removed.
+
 ### Whole-model writes + typed relation link (6d)
 - **Whole-model writes**: `db.txFor(table).createModel(Model)` and `updateModel(id, Model)` write a model's scalar fields in one call via a generated `toMap`. The generator emits `Map<String, dynamic> toMap(Model m)` on the table plus a `${Model}TxX` extension on `TypedTx<${Model}Table>`.
 - **`toMap` is scalar-only**: every scalar field is included (`id` too); relation fields are excluded. A model's relations are therefore **not** persisted by `createModel` — write them with `linkRel`/`unlinkRel`. For `createModel`, `data['id']` from the model is used as the entity id; for `updateModel`, the `id` attribute in the update map is harmless (it equals the entity id and reconstruction skips it).

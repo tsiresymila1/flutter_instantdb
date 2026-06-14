@@ -21,6 +21,8 @@ class GadgetTable extends InstantModelTable<GadgetTable, Gadget> {
         'id': m.id,
         'label': m.label,
       };
+
+  TypedTx<GadgetTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension GadgetQueryX on TypedQuery<GadgetTable> {
@@ -42,6 +44,8 @@ extension GadgetTxX on TypedTx<GadgetTable> {
       createFromMap(GadgetTable().toMap(m));
   TransactionChunk updateModel(String id, Gadget m) =>
       updateFromMap(id, GadgetTable().toMap(m));
+  TransactionChunk mergeModel(String id, Gadget m) =>
+      mergeFromMap(id, GadgetTable().toMap(m));
 }
 
 class Widget2Table extends InstantModelTable<Widget2Table, Widget2> {
@@ -73,6 +77,8 @@ class Widget2Table extends InstantModelTable<Widget2Table, Widget2> {
         'name': m.name,
         'weight': m.weight,
       };
+
+  TypedTx<Widget2Table> tx(InstantDB db) => db.txFor(this);
 }
 
 extension Widget2QueryX on TypedQuery<Widget2Table> {
@@ -94,4 +100,6 @@ extension Widget2TxX on TypedTx<Widget2Table> {
       createFromMap(Widget2Table().toMap(m));
   TransactionChunk updateModel(String id, Widget2 m) =>
       updateFromMap(id, Widget2Table().toMap(m));
+  TransactionChunk mergeModel(String id, Widget2 m) =>
+      mergeFromMap(id, Widget2Table().toMap(m));
 }

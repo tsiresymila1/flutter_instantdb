@@ -89,6 +89,30 @@ void main() {
       expect(got.single.weight, 2);
     });
 
+    test('Table().tx(db) sugar createModel round-trips', () async {
+      await db.transact(
+        Widget2Table().tx(db).createModel(
+              const Widget2(id: 'ws', name: 'S', weight: 4, gadgets: []),
+            ),
+      );
+      final got =
+          await Widget2Table().query().where((t) => t.id.eq('ws')).getAll(db);
+      expect(got.single.name, 'S');
+    });
+
+    test('mergeModel merges a field', () async {
+      await db.transact(Widget2Table().tx(db).createModel(
+            const Widget2(id: 'wg', name: 'Before', weight: 1, gadgets: []),
+          ));
+      await db.transact(Widget2Table().tx(db).mergeModel(
+            'wg', const Widget2(id: 'wg', name: 'After', weight: 5, gadgets: []),
+          ));
+      final got =
+          await Widget2Table().query().where((t) => t.id.eq('wg')).getAll(db);
+      expect(got.single.name, 'After');
+      expect(got.single.weight, 5);
+    });
+
     test('linkRel links via the generated RelationRef', () async {
       await db.transact(db.tx['gadgets']['g1'].update({'label': 'A'}));
       await db.transact(
