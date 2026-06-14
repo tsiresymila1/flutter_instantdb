@@ -125,5 +125,18 @@ void main() {
           .todos;
       expect(todos.map((t) => t.n).toList(), [1]);
     });
+
+    test('per-relation pageInfo is reachable through the typed path', () async {
+      // Seed a third todo (n=3) linked to g1 (setUp has t1 n=1, t2 n=2).
+      await db.transact(
+          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
+      await db.transact(db.tx['goals']['g1'].link({'todos': ['t3']}));
+
+      final q = _GoalTable()
+          .query()
+          .include((g) => g.todos.order((t) => t.n.asc()).first(1));
+      final r = await db.queryOnceTyped(q);
+      expect(r.pageInfo?['goals.todos']?['hasNextPage'], true);
+    });
   });
 }
