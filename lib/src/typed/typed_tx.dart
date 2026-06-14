@@ -27,6 +27,9 @@ class TypedTx<E extends InstantTable<E>> {
 
   TransactionChunk delete(String id) =>
       EntityInstanceBuilder(_type, id).delete();
+
+  // [relation] is an untyped attribute name — typed relation writes (via the
+  // generated relation accessor) are deferred to 6d.
   TransactionChunk link(String id, String relation, Object targetId) =>
       EntityInstanceBuilder(_type, id).link({relation: targetId});
   TransactionChunk unlink(String id, String relation, Object targetId) =>
@@ -68,9 +71,10 @@ class TypedWrite implements ToTransaction {
         return EntityBuilder(_type)
             .create({if (_id != null) 'id': _id, ..._fields});
       case _WriteKind.update:
-        return _instance().update(_fields, opts: _opts);
+        // Copy so a later set() can't mutate an already-built operation's data.
+        return _instance().update(Map<String, dynamic>.from(_fields), opts: _opts);
       case _WriteKind.merge:
-        return _instance().merge(_fields, opts: _opts);
+        return _instance().merge(Map<String, dynamic>.from(_fields), opts: _opts);
     }
   }
 

@@ -84,6 +84,21 @@ void main() {
       expect(op.data, {'title': 'X'});
     });
 
+    test('typed lookup(merge: true) builds a merge op with a lookupRef', () {
+      final w = TypedTx(t).lookup(t.email, 'a@b.com', merge: true)
+        ..set(t.title, 'X');
+      final op = w.toTransactionChunk().operations.single;
+      expect(op.type, OperationType.merge);
+      expect(op.lookupRef?.attribute, 'email');
+    });
+
+    test('set() after toTransactionChunk does not mutate the built op', () {
+      final w = TypedTx(t).update('t1')..set(t.priority, 1);
+      final op = w.toTransactionChunk().operations.single;
+      w.set(t.priority, 2); // must not leak into the already-built op
+      expect(op.data, {'priority': 1});
+    });
+
     test('opts carries upsert:false through to update', () {
       final w = TypedTx(t).update('t1')
         ..set(t.priority, 9)
