@@ -12,3 +12,6 @@ out
 .vercel
 *.log
 .DS_Store
+
+# next types
+next-env.d.ts
