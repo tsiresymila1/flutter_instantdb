@@ -161,6 +161,35 @@ void main() {
           TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos'));
       expect((base.toQuery()['goals'] as Map)[r'$'], isNot(contains('include')));
     });
+
+    test('include serializes nested cursor keys', () {
+      final goals = _GoalsTable();
+      final q = goals.query().include(
+            (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
+                .order((t) => t.n.asc())
+                .first(2)
+                .after('cursor-1')
+                .afterInclusive(true),
+          );
+      final todos = ((((q.toQuery()['goals'] as Map)[r'$'] as Map)['include'])
+          as Map)['todos'] as Map;
+      expect(todos['first'], 2);
+      expect(todos['after'], 'cursor-1');
+      expect(todos['afterInclusive'], true);
+      expect(todos['order'], {'n': 'asc'});
+      expect(todos.containsKey('fields'), isFalse); // never serialized
+    });
+
+    test('include throws if the relation sub-query uses select()', () {
+      final goals = _GoalsTable();
+      expect(
+        () => goals.query().include(
+              (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
+                  .select((t) => [t.n]),
+            ),
+        throwsArgumentError,
+      );
+    });
   });
 }
 

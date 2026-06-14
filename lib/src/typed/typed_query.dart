@@ -203,6 +203,12 @@ class TypedQuery<E extends InstantTable<E>> {
     TypedQuery<R> Function(E t) build,
   ) {
     final sub = build(table);
+    if (sub._fields != null) {
+      throw ArgumentError(
+        'select()/fields projection is not supported on a typed relation '
+        'include: the generated fromRow requires every field. Use the untyped '
+        'query-map API if you need a projected relation.');
+    }
     final attr = sub._relationAttr ?? sub.table.entityType;
     final merged = <String, dynamic>{...?_includes, attr: sub._includeOptions()};
     return _copyWith(includes: merged);
@@ -212,6 +218,12 @@ class TypedQuery<E extends InstantTable<E>> {
   Map<String, dynamic> _includeOptions() => {
         if (_where != null) 'where': _where.toMap(),
         if (_order != null) 'order': _order.toMap(),
+        if (_first != null) 'first': _first,
+        if (_last != null) 'last': _last,
+        if (_after != null) 'after': _after,
+        if (_before != null) 'before': _before,
+        if (_afterInclusive != null) 'afterInclusive': _afterInclusive,
+        if (_beforeInclusive != null) 'beforeInclusive': _beforeInclusive,
         if (_limit != null) 'limit': _limit,
         if (_offset != null) 'offset': _offset,
         if (_includes != null) 'include': _includes,

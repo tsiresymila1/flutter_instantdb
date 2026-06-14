@@ -109,5 +109,21 @@ void main() {
           .todos;
       expect(todos, isEmpty);
     });
+
+    test('typed include applies nested cursor window', () async {
+      // Seed a third todo (n=3) linked to g1.
+      await db.transact(
+          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
+      await db.transact(db.tx['goals']['g1'].link({'todos': ['t3']}));
+
+      final q = _GoalTable()
+          .query()
+          .include((g) => g.todos.order((t) => t.n.asc()).first(1));
+      final r = await db.queryOnceTyped(q);
+      final todos = _GoalTable()
+          .fromRow(r.documents.firstWhere((d) => d['id'] == 'g1'))
+          .todos;
+      expect(todos.map((t) => t.n).toList(), [1]);
+    });
   });
 }
