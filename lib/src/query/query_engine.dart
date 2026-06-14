@@ -342,6 +342,12 @@ class QueryEngine {
     return entities;
   }
 
+  // [relationPageInfo] is an OUTPUT sink: when a nested relation is
+  // cursor-paginated, its pageInfo is written into this map (the caller's live
+  // `pageInfo`) under the composite key `'<pathPrefix>.<relationName>'`.
+  // [pathPrefix] is the dotted path to the current level (the parent entity type
+  // at the top call, extended per nesting level). Both assume entity/relation
+  // names contain no '.' (true for Dart-identifier namespaces).
   Future<List<Map<String, dynamic>>> _processIncludes(
     List<Map<String, dynamic>> entities,
     Map<String, dynamic> includes, {
