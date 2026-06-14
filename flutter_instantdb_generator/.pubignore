@@ -1,0 +1,5 @@
+# Local pubignore so the parent package's .pubignore (which excludes this
+# subpackage from the root package archive) does not hide our own files when
+# publishing flutter_instantdb_generator itself.
+.dart_tool/
+pubspec.lock

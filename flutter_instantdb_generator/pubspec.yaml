@@ -1,7 +1,19 @@
 name: flutter_instantdb_generator
-description: Code generator for flutter_instantdb typed models.
+description: >-
+  Build-time code generator for flutter_instantdb. Emits type-safe query tables,
+  typed transactions, and relation accessors from @InstantModel-annotated models.
 version: 0.1.0
-publish_to: none
+homepage: https://github.com/tsiresymila1/flutter_instantdb
+repository: https://github.com/tsiresymila1/flutter_instantdb
+issue_tracker: https://github.com/tsiresymila1/flutter_instantdb/issues
+documentation: https://flutter-instantdb.vercel.app/typed/codegen
+topics:
+  - instantdb
+  - codegen
+  - build-runner
+  - source-gen
+  - database
+
 environment:
   sdk: ^3.8.0
 
