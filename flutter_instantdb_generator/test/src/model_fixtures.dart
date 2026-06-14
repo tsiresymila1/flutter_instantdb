@@ -36,6 +36,8 @@ class TodoTable extends InstantModelTable<TodoTable, Todo> {
         'title': m.title,
         'priority': m.priority,
       };
+
+  TypedTx<TodoTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension TodoQueryX on TypedQuery<TodoTable> {
@@ -56,6 +58,8 @@ extension TodoTxX on TypedTx<TodoTable> {
   TransactionChunk createModel(Todo m) => createFromMap(TodoTable().toMap(m));
   TransactionChunk updateModel(String id, Todo m) =>
       updateFromMap(id, TodoTable().toMap(m));
+  TransactionChunk mergeModel(String id, Todo m) =>
+      mergeFromMap(id, TodoTable().toMap(m));
 }
 ''')
 @InstantModel('todos')
@@ -86,6 +90,8 @@ class ProfileTable extends InstantModelTable<ProfileTable, Profile> {
         'created_at': m.createdAt,
         'nickname': m.nickname,
       };
+
+  TypedTx<ProfileTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension ProfileQueryX on TypedQuery<ProfileTable> {
@@ -107,6 +113,8 @@ extension ProfileTxX on TypedTx<ProfileTable> {
       createFromMap(ProfileTable().toMap(m));
   TransactionChunk updateModel(String id, Profile m) =>
       updateFromMap(id, ProfileTable().toMap(m));
+  TransactionChunk mergeModel(String id, Profile m) =>
+      mergeFromMap(id, ProfileTable().toMap(m));
 }
 ''')
 @InstantModel('profiles')
@@ -164,6 +172,8 @@ class AuthorTable extends InstantModelTable<AuthorTable, Author> {
         'id': m.id,
         'name': m.name,
       };
+
+  TypedTx<AuthorTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension AuthorQueryX on TypedQuery<AuthorTable> {
@@ -185,6 +195,8 @@ extension AuthorTxX on TypedTx<AuthorTable> {
       createFromMap(AuthorTable().toMap(m));
   TransactionChunk updateModel(String id, Author m) =>
       updateFromMap(id, AuthorTable().toMap(m));
+  TransactionChunk mergeModel(String id, Author m) =>
+      mergeFromMap(id, AuthorTable().toMap(m));
 }
 ''')
 @InstantModel('authors')
@@ -222,6 +234,8 @@ class GoalTable extends InstantModelTable<GoalTable, Goal> {
         'id': m.id,
         'title': m.title,
       };
+
+  TypedTx<GoalTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension GoalQueryX on TypedQuery<GoalTable> {
@@ -242,6 +256,8 @@ extension GoalTxX on TypedTx<GoalTable> {
   TransactionChunk createModel(Goal m) => createFromMap(GoalTable().toMap(m));
   TransactionChunk updateModel(String id, Goal m) =>
       updateFromMap(id, GoalTable().toMap(m));
+  TransactionChunk mergeModel(String id, Goal m) =>
+      mergeFromMap(id, GoalTable().toMap(m));
 }
 ''')
 @InstantModel('goals')
@@ -283,6 +299,8 @@ class PostTable extends InstantModelTable<PostTable, Post> {
         'id': m.id,
         'title': m.title,
       };
+
+  TypedTx<PostTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension PostQueryX on TypedQuery<PostTable> {
@@ -303,6 +321,8 @@ extension PostTxX on TypedTx<PostTable> {
   TransactionChunk createModel(Post m) => createFromMap(PostTable().toMap(m));
   TransactionChunk updateModel(String id, Post m) =>
       updateFromMap(id, PostTable().toMap(m));
+  TransactionChunk mergeModel(String id, Post m) =>
+      mergeFromMap(id, PostTable().toMap(m));
 }
 ''')
 @InstantModel('posts')

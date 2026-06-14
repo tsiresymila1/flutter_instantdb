@@ -201,6 +201,8 @@ ${ctorArgs.toString().trimRight()}
   Map<String, dynamic> toMap($modelName m) => {
 ${toMapEntries.toString().trimRight()}
       };
+
+  TypedTx<$tableName> tx(InstantDB db) => db.txFor(this);
 }
 
 extension ${modelName}QueryX on TypedQuery<$tableName> {
@@ -222,6 +224,8 @@ extension ${modelName}TxX on TypedTx<$tableName> {
       createFromMap($tableName().toMap(m));
   TransactionChunk updateModel(String id, $modelName m) =>
       updateFromMap(id, $tableName().toMap(m));
+  TransactionChunk mergeModel(String id, $modelName m) =>
+      mergeFromMap(id, $tableName().toMap(m));
 }
 ''';
   }
