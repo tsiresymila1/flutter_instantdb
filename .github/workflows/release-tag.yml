@@ -1,4 +1,4 @@
-name: Release (tag on version bump)
+name: Release - tag on version bump
 
 # On every push to main, if a package's `version:` changed, push a git tag.
 # The tag then triggers `publish.yml` (pub.dev OIDC publishing).
