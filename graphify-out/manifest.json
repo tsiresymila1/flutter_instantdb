@@ -1,0 +1,902 @@
+{
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/pagination_test.dart": {
+    "mtime": 1781365659.2387776,
+    "hash": "63e575ca05bfc5b7309513fb600c3441"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/model_table_test.dart": {
+    "mtime": 1781373882.4618073,
+    "hash": "0156888f31409739027f8d4105877fcd"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/tx_completeness_test.dart": {
+    "mtime": 1781365659.2393658,
+    "hash": "c6050009277cbfd8b8387583841e5731"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/pagination_integration_test.dart": {
+    "mtime": 1781365659.2385306,
+    "hash": "e29cf873dbf88f799d9b82549d552765"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/connection_localid_test.dart": {
+    "mtime": 1781365659.2376325,
+    "hash": "bd81a940ab417f7067ffd60bac22ceb8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/instant_storage_test.dart": {
+    "mtime": 1781365659.2382557,
+    "hash": "240d802e916de9d3af4d1bb93394fae6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/typed_query_integration_test.dart": {
+    "mtime": 1781370032.6986015,
+    "hash": "ac7e2d8dffd7c9d39873d02136e86e76"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/auth_integration_test.dart": {
+    "mtime": 1762411115.0853841,
+    "hash": "a6b534a0a835c1d1d3b96d2cfdac2abf"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/schema_validation_test.dart": {
+    "mtime": 1762242578.1285207,
+    "hash": "29fd96ff4d5dec7cbf7beae44e436dfd"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/room_presence_test.dart": {
+    "mtime": 1762242578.1388316,
+    "hash": "3907f13f5d008c3f641fe8fd0455217a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/where_matcher_test.dart": {
+    "mtime": 1781365659.239772,
+    "hash": "4252a29b2412801708611a1cb1e9ca81"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/query_engine_advanced_test.dart": {
+    "mtime": 1762242578.175042,
+    "hash": "922cda8a68fd46562455d66026df4331"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/transaction_builder_test.dart": {
+    "mtime": 1781365659.2390327,
+    "hash": "7d0dce4a7d2cecb69b94743537d45aba"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/codegen_runtime_test.dart": {
+    "mtime": 1781373882.4602072,
+    "hash": "3f9165a6b0ada00d5e63e33dd5273223"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/files_integration_test.dart": {
+    "mtime": 1781365659.237884,
+    "hash": "eb841b78e1c551ccdce2e67414d678b8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/typed_query_test.dart": {
+    "mtime": 1781414238.5393434,
+    "hash": "4bd699285dd080e74068769fac4474ee"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/presence_test.dart": {
+    "mtime": 1762242578.1634185,
+    "hash": "0874b127c3bef60fe31d4f6404f25e9f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/relational_include_test.dart": {
+    "mtime": 1781413263.562681,
+    "hash": "20aa37cc73ca1291b66c9fbb22cfbff4"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/instantdb_flutter_test.dart": {
+    "mtime": 1762411385.516279,
+    "hash": "2d461ea80479f6c63f4a26539f0bd9fa"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/fixtures/sample.instant.dart": {
+    "mtime": 1781373882.4612386,
+    "hash": "02fd91c81f58cf9c369a88e1a85d9491"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/test/fixtures/sample.dart": {
+    "mtime": 1781373882.4607568,
+    "hash": "c4a898935612bbc7a90a232046ea63b1"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/bin/schema.dart": {
+    "mtime": 1770575535.9462996,
+    "hash": "5bdf6f50d4292359b5d38eecb13d082a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/RunnerTests/RunnerTests.swift": {
+    "mtime": 1762241654.3819125,
+    "hash": "97d3a20fd20a063c192e886d1822b4a8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/MainFlutterWindow.swift": {
+    "mtime": 1762241654.3816392,
+    "hash": "4a747b1f256d62a2bbb79bd976891eb5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/AppDelegate.swift": {
+    "mtime": 1762241654.3789625,
+    "hash": "2a7411ae3e7c6715525b94b6f8d2e80b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Flutter/GeneratedPluginRegistrant.swift": {
+    "mtime": 1762241654.377777,
+    "hash": "9b11999b539b26fee9f79cc4859df443"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/sqflite_darwin/sqflite_darwin-dummy.m": {
+    "mtime": 1770462193.8117542,
+    "hash": "0ef5d1c91c91870ac3843938e5a8ab0e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/sqflite_darwin/sqflite_darwin-umbrella.h": {
+    "mtime": 1770462193.8101492,
+    "hash": "5eba3fbfc038155c2eff524e22135cf2"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/Pods-Runner/Pods-Runner-umbrella.h": {
+    "mtime": 1770462193.8150728,
+    "hash": "814a4c2d3024597e419f66f6f048d39e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/Pods-Runner/Pods-Runner-dummy.m": {
+    "mtime": 1770462193.8212545,
+    "hash": "d3f88e6bc5bffb456bd31d3ae36c9256"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/shared_preferences_foundation/shared_preferences_foundation-dummy.m": {
+    "mtime": 1770462193.7977276,
+    "hash": "7673a87a2ff137ab1024361310c89863"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/shared_preferences_foundation/shared_preferences_foundation-umbrella.h": {
+    "mtime": 1770462193.7926419,
+    "hash": "353082decddc13f39a8f7023b84e363e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-dummy.m": {
+    "mtime": 1770462193.826822,
+    "hash": "097dfaf08332f413805fcca47157791c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-umbrella.h": {
+    "mtime": 1770462193.8258452,
+    "hash": "c23802aedf43339011f9ddde1d7d0c49"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/test/widget_test.dart": {
+    "mtime": 1762242505.2080028,
+    "hash": "8084e3aa11c4fe75dbbb1a8c84c54981"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/sqflite_sw.js": {
+    "mtime": 1762241654.3859806,
+    "hash": "1f359fd9e7f9eb7adbfd806749473a17"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/RunnerTests/RunnerTests.swift": {
+    "mtime": 1762241654.3732595,
+    "hash": "a225a382d14d7b16b6f602a5c1d49331"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Runner-Bridging-Header.h": {
+    "mtime": 1762241654.3730855,
+    "hash": "e07862ac930ed4d8479185d52c6cc66d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/GeneratedPluginRegistrant.h": {
+    "mtime": 1762241724.738246,
+    "hash": "decb9041b5e91a07e66f4664e5dac408"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/AppDelegate.swift": {
+    "mtime": 1762241654.3702157,
+    "hash": "303ca46dbd58544be7b816861d70a27c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/GeneratedPluginRegistrant.m": {
+    "mtime": 1762241724.7387521,
+    "hash": "9153b0c5dbeac5b56f8dda165da97eda"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Flutter/ephemeral/flutter_lldb_helper.py": {
+    "mtime": 1781349446.9024127,
+    "hash": "98fc75412162af387e2e3461e4e58094"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/runner/main.cc": {
+    "mtime": 1762241654.3769813,
+    "hash": "0643b8609698e96b3abd63c210361a87"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/runner/my_application.h": {
+    "mtime": 1762241654.3771713,
+    "hash": "7bd839b67ebee22174be9f4da4521b6f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/runner/my_application.cc": {
+    "mtime": 1762241654.3770754,
+    "hash": "7c12c5689f210442506845c0f39b6919"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/flutter/generated_plugin_registrant.cc": {
+    "mtime": 1762241654.376392,
+    "hash": "d07afe003d5837167bdd357d593f20a0"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/flutter/generated_plugin_registrant.h": {
+    "mtime": 1762241654.3766246,
+    "hash": "d295462c9da9f7fef22dc86c34492318"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/gradlew": {
+    "mtime": 1762241748.6614687,
+    "hash": "7f1cd7eb3f75a1dc85cd37753972a6e2"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/build.gradle.kts": {
+    "mtime": 1762241654.367145,
+    "hash": "699579880a795350891cafc998a3ec79"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/settings.gradle.kts": {
+    "mtime": 1762241654.3675692,
+    "hash": "e61cad7ba20397368b0ef120702043cf"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/build.gradle.kts": {
+    "mtime": 1762241654.3644226,
+    "hash": "ccfbbe6039488d2449fc4885889bcd07"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java": {
+    "mtime": 1762241724.7329848,
+    "hash": "4e24ad985234c7ea587449a7b9814f29"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/kotlin/com/example/instantdb_todo_example/MainActivity.kt": {
+    "mtime": 1762241654.3651047,
+    "hash": "a834c927983726c1c5f4884b1a3da5e3"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/scripts/instant.schema.ts": {
+    "mtime": 1762241654.3825753,
+    "hash": "23f5f583f90728ba1413c6f29dc70950"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/scripts/instant.perms.ts": {
+    "mtime": 1762241654.3824642,
+    "hash": "bfe89cd20a18ff3c53b6a0eadd9064f5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/main.dart": {
+    "mtime": 1770575535.9598231,
+    "hash": "94aee8bb1a73375070b59ea64b44288d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/utils/colors.dart": {
+    "mtime": 1762241654.3758674,
+    "hash": "4ef66067f566d5fe03ff6826f28964c6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/typing_page.dart": {
+    "mtime": 1762242578.1454952,
+    "hash": "8681bc2366b897f2ff256e9cb2d1bac5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/custom_cursors_page.dart": {
+    "mtime": 1762242578.1686423,
+    "hash": "04323b2936d69065f458b4940537162a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/tile_game_page.dart": {
+    "mtime": 1762242578.1349907,
+    "hash": "bbbae03a90491fca932b4d14b0c9772f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/auth_page.dart": {
+    "mtime": 1762411114.6812394,
+    "hash": "a70ff3eb32460e9992c5d1fd174e1e6a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/avatars_page.dart": {
+    "mtime": 1762242578.1558511,
+    "hash": "dbbc78a538146a3c76be2ef3e29942ab"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/reactions_page.dart": {
+    "mtime": 1762406877.014102,
+    "hash": "9addf88a75a729cdd12cbe25fffc239f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/todos_page.dart": {
+    "mtime": 1762242578.1422207,
+    "hash": "809dd62abecabfeff5fd26de09b8d94c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/lib/pages/cursors_page.dart": {
+    "mtime": 1762242578.125226,
+    "hash": "8f0269d44fdcbe1b2eba3a52a303b850"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/flutter_window.cpp": {
+    "mtime": 1762241654.3904877,
+    "hash": "9b92b95a9eecce25e3e9d356688d0cb6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/utils.h": {
+    "mtime": 1762241654.3915558,
+    "hash": "c741fb9cddbf3a62f4688b6cca39ddcc"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/utils.cpp": {
+    "mtime": 1762241654.3914495,
+    "hash": "9b5697b276c8ad67a02ec12ad2c09851"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/win32_window.h": {
+    "mtime": 1762241654.3920763,
+    "hash": "5a4cf051798d7e6931ee0405a4523c8f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/win32_window.cpp": {
+    "mtime": 1762241654.3919594,
+    "hash": "928e86a2be27eca688669dce6c9177d9"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/resource.h": {
+    "mtime": 1762241654.3909478,
+    "hash": "c8f809a4f8d3f2f625e358fd90f72fee"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/main.cpp": {
+    "mtime": 1762241654.3908205,
+    "hash": "d55e55934b2967d4fa8099d8dfb96132"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/flutter_window.h": {
+    "mtime": 1762241654.3905869,
+    "hash": "79bea736711adda00c49419a39a4a0b4"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/flutter/generated_plugin_registrant.cc": {
+    "mtime": 1762241654.3899007,
+    "hash": "a8f91348d8d9090f22ec69d597c41e1f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/flutter/generated_plugin_registrant.h": {
+    "mtime": 1762241654.3900096,
+    "hash": "0ea33875f9f8e118f9c2ded03e2e2835"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/flutter_instantdb_generator/test/instant_generator_test.dart": {
+    "mtime": 1781373882.4565394,
+    "hash": "88568e07f9aceaae116d6b3b84cf948c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/flutter_instantdb_generator/test/src/model_fixtures.dart": {
+    "mtime": 1781373882.4571052,
+    "hash": "b29f6e463dd420f3981c829673694bdb"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/flutter_instantdb_generator/lib/builder.dart": {
+    "mtime": 1781373882.4538996,
+    "hash": "c6dc932c3decc1022d85030774498181"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/flutter_instantdb_generator/lib/src/instant_generator.dart": {
+    "mtime": 1781373882.4544768,
+    "hash": "e8d478c8ca390604d54456311a46e996"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/next.config.mjs": {
+    "mtime": 1770561167.848201,
+    "hash": "52eb3482adca2465b002bf9fc5d0ecca"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/next-env.d.ts": {
+    "mtime": 1770569942.2734387,
+    "hash": "d0f8375ae1199dc7acd3977fc33b78b8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/mdx-components.js": {
+    "mtime": 1770560512.0772898,
+    "hash": "d5af684303d129570617a614d257f7ee"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/layout.jsx": {
+    "mtime": 1770569288.1282911,
+    "hash": "9ef68c26684bfc67937e6e6f1f914828"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/_meta.js": {
+    "mtime": 1770569327.8100035,
+    "hash": "622bcc9eade11f18ae41450155f7d4c4"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/llms.txt/route.ts": {
+    "mtime": 1770571673.367956,
+    "hash": "0d29c78f2031c228edaa908a8562eb7d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/advanced/_meta.js": {
+    "mtime": 1770571249.6193116,
+    "hash": "a4a3943769b2fa36772c4ffa840beb46"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/auth/_meta.js": {
+    "mtime": 1770569390.3245573,
+    "hash": "b398fd8f3f889412e04d2e67427b46a7"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/queries/_meta.js": {
+    "mtime": 1770569420.9158876,
+    "hash": "2a03cb23a02c9f2a4b16192d78b7469e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/realtime/_meta.js": {
+    "mtime": 1770569405.3506134,
+    "hash": "5924e20c41d5255104d5ce7ae257513d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/flutter/_meta.js": {
+    "mtime": 1770569437.31716,
+    "hash": "4b0477ed9d09cf29fa52e8fb25c9ea0e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/getting-started/_meta.js": {
+    "mtime": 1770569343.3678284,
+    "hash": "30f4703acaa042576f7f53223b95e856"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/_meta.js": {
+    "mtime": 1770569373.4174194,
+    "hash": "fbcc45a3b52af0035f4209e44a3cdcd8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/llms/route.ts": {
+    "mtime": 1770571635.5745816,
+    "hash": "0d29c78f2031c228edaa908a8562eb7d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/flutter_instantdb.dart": {
+    "mtime": 1781373882.4580076,
+    "hash": "34cfede72b38374199ed0f6833dfe310"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/core/types.g.dart": {
+    "mtime": 1770575538.5348976,
+    "hash": "18328ff085b0df5bfd62226e03175004"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/core/types.dart": {
+    "mtime": 1781365659.2330751,
+    "hash": "163c11ae6a34dbf39e68ea47053d34ad"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/core/instant_db.dart": {
+    "mtime": 1781370032.6975815,
+    "hash": "ea7d968562cb36d63c3be696107e501b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/core/transaction_builder.dart": {
+    "mtime": 1781365659.232621,
+    "hash": "560889bcf41f692048df83391cc67d26"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/core/logging.dart": {
+    "mtime": 1762241654.3929493,
+    "hash": "6e61404f8db8b0f4759d366d7f468306"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/core/logging_config.dart": {
+    "mtime": 1762241654.393033,
+    "hash": "ca56598f6781cc8127b2fe8fb11b1b1e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/auth/auth_manager.dart": {
+    "mtime": 1762412315.1922982,
+    "hash": "1da649f1528771dc4c6e04c41a66ebe0"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/reactive/instant_builder.dart": {
+    "mtime": 1781365659.2352505,
+    "hash": "6c8d6ec446eb672d0d2226754b4187fb"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/reactive/presence.dart": {
+    "mtime": 1770575536.0655706,
+    "hash": "7a0c212cf731f82dc4685efddeb51ecb"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/instant_storage.dart": {
+    "mtime": 1781365659.235707,
+    "hash": "de6f7778e92120a5d2ae520a3d885dd5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/database_factory_stub.dart": {
+    "mtime": 1762241654.3942761,
+    "hash": "fe4d8e583a0f8b7df03b8e99860ef2bf"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/storage_interface.dart": {
+    "mtime": 1781365659.236055,
+    "hash": "509ce336daa7f0d6d76b44989c82a8d4"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/database_factory_io.dart": {
+    "mtime": 1770480925.209551,
+    "hash": "09cba034c23f03643d48ff7ebb4560e7"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/triple_store.dart": {
+    "mtime": 1781413263.5620923,
+    "hash": "122b539253eee8de6bb1809572c7d76c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/database_factory_web.dart": {
+    "mtime": 1762241654.3943746,
+    "hash": "7fcc0553442b84c627de0df0c981289f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/storage/database_factory.dart": {
+    "mtime": 1762241654.394077,
+    "hash": "8d12c02ac8c54d4da6d977da5659a628"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/schema/schema.dart": {
+    "mtime": 1770575536.0696063,
+    "hash": "a9a8508764f07e0faf24798e038e0a3b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/typed/annotations.dart": {
+    "mtime": 1781373882.4592125,
+    "hash": "947059395ca485c504ea6b2647b2563e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/typed/typed_query.dart": {
+    "mtime": 1781414311.9569302,
+    "hash": "7789eb85612ff3882ee1ea0734747e47"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/typed/model_table.dart": {
+    "mtime": 1781373882.4595237,
+    "hash": "2f775de40a9c10a5908baab08e15b9a1"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/sync/web_socket_io.dart": {
+    "mtime": 1762241654.3950295,
+    "hash": "1ecdee4c702558905c14213b5ad5a5be"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/sync/web_socket_stub.dart": {
+    "mtime": 1762241654.395249,
+    "hash": "b0eec613e6dc252006043176de186630"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/sync/sync_engine.dart": {
+    "mtime": 1781365659.2372434,
+    "hash": "d0312729e7f82e5dca546855d6266899"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/sync/web_socket_web.dart": {
+    "mtime": 1762241654.395363,
+    "hash": "fd47d486fbd479ca71f1f3f57b35724b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/query/pagination.dart": {
+    "mtime": 1781365659.233974,
+    "hash": "25be40bf3940dfd35e3ce2cdfcaea15e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/query/infinite_query.dart": {
+    "mtime": 1781365659.233524,
+    "hash": "e1a273eec81e842c0e10f46c3405f6a4"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/query/query_engine.dart": {
+    "mtime": 1781413263.5615263,
+    "hash": "32fc9a1a412508c180b265915fcbc559"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/lib/src/query/where_matcher.dart": {
+    "mtime": 1781365659.2349532,
+    "hash": "b871451d58d121d5c64c8d3ec6e1fd4f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/ReleasingWorkflow.md": {
+    "mtime": 1762410994.3198264,
+    "hash": "790230706e98623073b5515c19b880ef"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/CHANGELOG.md": {
+    "mtime": 1781413263.5610695,
+    "hash": "9cdd57d01f5d513997df854b28e89dca"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/README.md": {
+    "mtime": 1781373882.4523466,
+    "hash": "94160a78759c9e1d51c48ff0030ad869"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/Tasks.md": {
+    "mtime": 1762241654.3632917,
+    "hash": "d053b8b3235638ad513fa381bb3aca8e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/pubspec.yaml": {
+    "mtime": 1781347562.5099287,
+    "hash": "609fe54f07df3ac6308f08dbc0e6fc74"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/ADVANCED_FEATURES.md": {
+    "mtime": 1762411244.3215268,
+    "hash": "16db68d568c330fb372cbe3e6e516ba4"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/CONTRIBUTING.md": {
+    "mtime": 1762411385.5585303,
+    "hash": "61077e6a5ba7f51e94a571b5331a23dd"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/analysis_options.yaml": {
+    "mtime": 1762241654.3634038,
+    "hash": "e0b429a27bd86f8a3f1d0542e5f70362"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/DEVELOPMENT.md": {
+    "mtime": 1762411273.5747662,
+    "hash": "467d647764892b18b6b943ddc111c435"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/CLAUDE.md": {
+    "mtime": 1762411250.6160579,
+    "hash": "4c1a2c36f9ea0a653342288f6779ad7e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/devtools_options.yaml": {
+    "mtime": 1762406518.2013478,
+    "hash": "d1ff5187b1b67653e7357395895e8449"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/README.md": {
+    "mtime": 1762411385.5625155,
+    "hash": "778eee93b291794e11af0f061ef700e7"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/GETTING_STARTED.md": {
+    "mtime": 1762411358.6254587,
+    "hash": "59114ef27a7102d2c63d5d1fa047d8c5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/pubspec.yaml": {
+    "mtime": 1762411229.5974205,
+    "hash": "47a88a08886ab6fc3ea19d7bd7d01c55"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/DEPLOYMENT.md": {
+    "mtime": 1762411346.289571,
+    "hash": "e23f79403677b32d59fb30437f72b86d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/analysis_options.yaml": {
+    "mtime": 1762241654.3641262,
+    "hash": "66d03d7647c8e438164feaf5b922d44a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/instantdb_test.html": {
+    "mtime": 1762241654.3845417,
+    "hash": "effae645ddc29526095ffb2162efae9b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/instantdb_debug.html": {
+    "mtime": 1762241654.3843515,
+    "hash": "6be43ef793947380bc6ecbd35038030a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/index.html": {
+    "mtime": 1762411385.5452757,
+    "hash": "28998378837b46620eab83cbc9c7f93e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/capture_protocol.html": {
+    "mtime": 1762241654.3832777,
+    "hash": "8c3e7f9d29478d218b957db7a8eb5117"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md": {
+    "mtime": 1762241654.372584,
+    "hash": "e175e436acacf76c814d83532d0b662c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/CMakeLists.txt": {
+    "mtime": 1762241654.376108,
+    "hash": "7876ae7235b6b9705edfcf9d1ab78d9d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/runner/CMakeLists.txt": {
+    "mtime": 1762241654.3768837,
+    "hash": "6d75431dc21756981b53a7494c836311"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/linux/flutter/CMakeLists.txt": {
+    "mtime": 1762241654.3762834,
+    "hash": "46690fb8ffaf7d227d8bc4713f31140d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/scripts/README.md": {
+    "mtime": 1762241654.3823512,
+    "hash": "c197bd2b062178b1c345a9da4125ba76"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/CMakeLists.txt": {
+    "mtime": 1762241654.389644,
+    "hash": "23ea146f7de6c24023e35a5de775082e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/runner/CMakeLists.txt": {
+    "mtime": 1762241654.3902597,
+    "hash": "e99a99b5cc82a168fc557eb23b8d5a96"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/windows/flutter/CMakeLists.txt": {
+    "mtime": 1762241654.3897986,
+    "hash": "0c500410e3259a9a053797dc1c28070e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/flutter_instantdb_generator/pubspec.yaml": {
+    "mtime": 1781373882.455887,
+    "hash": "2716cd4acd91a3af88cc0bca711c2cc8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/flutter_instantdb_generator/build.yaml": {
+    "mtime": 1781373882.4531808,
+    "hash": "0d43e576341697cf54bd129b1b32403d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase2-tx-completeness.md": {
+    "mtime": 1781365659.2298145,
+    "hash": "bfda27b5399a830bf846c6f846b5ea52"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase1-query-operators.md": {
+    "mtime": 1781346312.571754,
+    "hash": "752fa8d9e64825b49c6dd14d4734cd37"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-nested1-relational-read.md": {
+    "mtime": 1781374977.4413736,
+    "hash": "4b16b188cef0530a2dc4ac8edf584bdf"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase6a-typed-query-dsl.md": {
+    "mtime": 1781368693.390223,
+    "hash": "58893c4a939dfcce6d7849104b1a02fb"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase4-pagination-fields.md": {
+    "mtime": 1781365659.2306268,
+    "hash": "97e9ec79f41a8ae11e4f98097dda6672"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase3-connection-localid.md": {
+    "mtime": 1781365659.2303154,
+    "hash": "a16feef8ed827833626792a1060a540c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase5-files-storage.md": {
+    "mtime": 1781365659.2312777,
+    "hash": "df8f76b02f9a6ade48ceb9676a6a89c5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-14-nested2-typed-relations.md": {
+    "mtime": 1781414087.365988,
+    "hash": "66c2a1c054dbce35057ed751e77fe52a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/plans/2026-06-13-phase6b-codegen.md": {
+    "mtime": 1781371479.4184015,
+    "hash": "85bcb8086db2435bb9208ed68aa60b6d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/specs/2026-06-13-phase6a-typed-query-dsl-design.md": {
+    "mtime": 1781368212.1353884,
+    "hash": "58c3b7ee756187f319bb4cf674589473"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/specs/2026-06-13-instantdb-parity-design.md": {
+    "mtime": 1781345866.971062,
+    "hash": "bbe48ced2ff0a7250179ac78a68d514c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/specs/2026-06-13-phase6b-codegen-design.md": {
+    "mtime": 1781371157.9529452,
+    "hash": "d127e81a4fe0060c7e8b03eda3dc7752"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/specs/2026-06-13-nested1-relational-read-design.md": {
+    "mtime": 1781374516.2595272,
+    "hash": "818dc233aed709a5ce1febbd875de596"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/docs/superpowers/specs/2026-06-14-nested2-typed-relations-design.md": {
+    "mtime": 1781414009.4793668,
+    "hash": "7643c33aa99f18372c8a332c3a72449d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/page.mdx": {
+    "mtime": 1770571886.9367979,
+    "hash": "42d6c50e96d9da7bc8c3b7d39e4b475d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/advanced/troubleshooting/page.mdx": {
+    "mtime": 1770570133.8980215,
+    "hash": "21fbc8ce8cd54951518877390ba7b4eb"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/advanced/performance/page.mdx": {
+    "mtime": 1770570126.3778791,
+    "hash": "f101a329e61fcbd9cee56698f019bdc6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/advanced/migration/page.mdx": {
+    "mtime": 1770570112.5804877,
+    "hash": "ecc97839581ea810ac3b0addbbbf1bff"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/advanced/offline/page.mdx": {
+    "mtime": 1770570119.2478788,
+    "hash": "ac6f3f251dc9347e248b1ef16e2a653a"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/auth/permissions/page.mdx": {
+    "mtime": 1770569101.4850998,
+    "hash": "b03305830754d0b5cc9cc8eb5f285d69"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/auth/sessions/page.mdx": {
+    "mtime": 1770569101.4884365,
+    "hash": "e87d8c6ec54cf01e1bbf76565ddbc3e9"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/auth/users/page.mdx": {
+    "mtime": 1770569101.491431,
+    "hash": "f95db622bedaf1d85dbab99ef1a70f1c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/queries/basics/page.mdx": {
+    "mtime": 1770561570.655808,
+    "hash": "ff6dc966664e2c0dbba7e97ad1ad184d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/realtime/collaboration/page.mdx": {
+    "mtime": 1770569101.4946933,
+    "hash": "0f2f7a9339ad6b28e40e709d0a1ba67e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/realtime/presence/page.mdx": {
+    "mtime": 1770569101.5008988,
+    "hash": "06d7b696403a45361219fa8fb26a8f8b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/realtime/sync/page.mdx": {
+    "mtime": 1770569101.4973288,
+    "hash": "df002581b989a71317752833723ff349"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/flutter/widgets/page.mdx": {
+    "mtime": 1770569101.503926,
+    "hash": "753ce7e77edf45f4d1181ef629e0a723"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/getting-started/installation/page.mdx": {
+    "mtime": 1770561617.1235914,
+    "hash": "4825b2352a8ff6b28ae9ce98ae7cc7b6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/getting-started/quick-start/page.mdx": {
+    "mtime": 1770569101.5066688,
+    "hash": "684d1d77ab58b6ffccfed4a37d341315"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/concepts/database/page.mdx": {
+    "mtime": 1770569101.5099044,
+    "hash": "0a64eeab2acfef43a1489b8ed51b9570"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/concepts/schema/page.mdx": {
+    "mtime": 1770569101.5138707,
+    "hash": "3066fe602f26c37779fa81bc03e8487b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/types/page.mdx": {
+    "mtime": 1770569101.538727,
+    "hash": "62ad1945a7248644a2d5fc1eac48eb88"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/instantdb/page.mdx": {
+    "mtime": 1770569101.5435042,
+    "hash": "5ab01810dd42c88c5952188a27ac5f1b"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/queries/page.mdx": {
+    "mtime": 1770569101.5277376,
+    "hash": "bdc172cee8edcd83f1e8bf0d1e782e31"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/transactions/page.mdx": {
+    "mtime": 1770561570.6514816,
+    "hash": "c41cffcf26a6556427e4c9e2b404ab19"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/presence-api/page.mdx": {
+    "mtime": 1770569101.5219004,
+    "hash": "92d213427b2d1b4f2813d3f3f7800c61"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/app/api/widgets/page.mdx": {
+    "mtime": 1770569101.5331936,
+    "hash": "360f2171132a79af968ec1ee304c1868"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_16.png": {
+    "mtime": 1762241654.380035,
+    "hash": "8bf511604bc6ed0a6aeb380c5113fdcf"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png": {
+    "mtime": 1762241654.3798356,
+    "hash": "c9becc9105f8cabce934d20c7bfb6aac"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_256.png": {
+    "mtime": 1762241654.3801455,
+    "hash": "dfe2c93d1536ae02f085cc63faa3430e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_64.png": {
+    "mtime": 1762241654.380701,
+    "hash": "04e7b6ef05346c70b663ca1d97de3ad5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png": {
+    "mtime": 1762241654.3804724,
+    "hash": "0ad44039155424738917502c69667699"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png": {
+    "mtime": 1762241654.3799374,
+    "hash": "3ded30823804caaa5ccc944067c54a36"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_32.png": {
+    "mtime": 1762241654.3802428,
+    "hash": "8e0ae58e362a6636bdfccbc04da2c58c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/favicon.png": {
+    "mtime": 1762241654.3833876,
+    "hash": "5dcef449791fa27946b3d35ad8803796"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/icons/Icon-192.png": {
+    "mtime": 1762241654.383551,
+    "hash": "ac9a721a12bbc803b44f645561ecb1e1"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/icons/Icon-maskable-192.png": {
+    "mtime": 1762241654.3837698,
+    "hash": "c457ef57daa1d16f64b27b786ec2ea3c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/icons/Icon-maskable-512.png": {
+    "mtime": 1762241654.3839228,
+    "hash": "301a7604d45b3e739efc881eb04896ea"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/web/icons/Icon-512.png": {
+    "mtime": 1762241654.383666,
+    "hash": "96e752610906ba2a93c65f8abe1645f1"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png": {
+    "mtime": 1762241654.372369,
+    "hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png": {
+    "mtime": 1762241654.3724802,
+    "hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png": {
+    "mtime": 1762241654.372265,
+    "hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png": {
+    "mtime": 1762241654.3718944,
+    "hash": "643842917530acf4c5159ae851b0baf2"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png": {
+    "mtime": 1762241654.3708985,
+    "hash": "be8887071dd7ec39cb754d236aa9584f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png": {
+    "mtime": 1762241654.3711917,
+    "hash": "2247a840b6ee72b8a069208af170e5b1"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png": {
+    "mtime": 1762241654.3706124,
+    "hash": "a2f8558fb1d42514111fbbb19fb67314"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png": {
+    "mtime": 1762241654.370519,
+    "hash": "c785f8932297af4acd5f5ccb7630f01c"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png": {
+    "mtime": 1762241654.3719962,
+    "hash": "665cb5e3c5729da6d639d26eff47a503"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png": {
+    "mtime": 1762241654.370802,
+    "hash": "1b3b1538136316263c7092951e923e9d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png": {
+    "mtime": 1762241654.3707094,
+    "hash": "2247a840b6ee72b8a069208af170e5b1"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png": {
+    "mtime": 1762241654.3710973,
+    "hash": "2b1452c4c1bda6177b4fbbb832df217f"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png": {
+    "mtime": 1762241654.3712933,
+    "hash": "8245359312aea1b0d2412f79a07b0ca5"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png": {
+    "mtime": 1762241654.3716874,
+    "hash": "e419d22a37bc40ba185aca1acb6d4ac6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png": {
+    "mtime": 1762241654.3715897,
+    "hash": "5b3c0902200ce596e9848f22e1f0fe0e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png": {
+    "mtime": 1762241654.3717892,
+    "hash": "36c0d7a7132bdde18898ffdfcfcdc4d2"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png": {
+    "mtime": 1762241654.3714905,
+    "hash": "5b3c0902200ce596e9848f22e1f0fe0e"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png": {
+    "mtime": 1762241654.3710036,
+    "hash": "043119ef4faa026ff82bd03f241e5338"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/res/mipmap-mdpi/ic_launcher.png": {
+    "mtime": 1762241654.3659809,
+    "hash": "6270344430679711b81476e29878caa7"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/res/mipmap-hdpi/ic_launcher.png": {
+    "mtime": 1762241654.3658133,
+    "hash": "13e9c72ec37fac220397aa819fa1ef2d"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": {
+    "mtime": 1762241654.3665342,
+    "hash": "57838d52c318faff743130c3fcfae0c6"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png": {
+    "mtime": 1762241654.3663135,
+    "hash": "afe1b655b9f32da22f9a4301bb8e6ba8"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/example/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png": {
+    "mtime": 1762241654.366139,
+    "hash": "a0a8db5985280b3679d99a820ae2db79"
+  },
+  "/Users/tsiresymila/Development/Flutter/flutter_instantdb/website2/public/logo.svg": {
+    "mtime": 1770560632.9315937,
+    "hash": "8ba603f8296f8416e39a45ef007cd50c"
+  }
+}
