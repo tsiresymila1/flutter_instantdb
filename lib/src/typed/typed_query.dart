@@ -69,6 +69,13 @@ abstract class InstantTable<Self extends InstantTable<Self>> {
   TypedQuery<Self> query() => TypedQuery<Self>(this as Self);
 }
 
+/// A typed handle to a relation attribute, used by typed link/unlink writes.
+/// Generated as `static const ${field}Rel = RelationRef<${Target}Table>('${attr}')`.
+class RelationRef<R extends InstantTable<R>> {
+  final String attr;
+  const RelationRef(this.attr);
+}
+
 /// An immutable, fluent, type-safe query over a single namespace. Compiles to
 /// the InstaQL `{entityType: {r'$': {...}}}` map the engine consumes.
 ///

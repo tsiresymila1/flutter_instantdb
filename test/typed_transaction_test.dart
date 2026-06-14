@@ -11,6 +11,10 @@ class _Todos extends InstantTable<_Todos> {
   final email = const Col<String>('email');
 }
 
+class _Goals extends InstantTable<_Goals> {
+  _Goals() : super('goals');
+}
+
 void main() {
   final t = _Todos();
 
@@ -109,6 +113,34 @@ void main() {
 
     // Compile-time safety is inherent: `set(t.priority, 'x')` would not compile
     // because `set<T>(Col<T>, T)` binds the value type to the column's T.
+
+    test('createFromMap builds an add op with the whole map', () {
+      final chunk =
+          TypedTx(t).createFromMap({'id': 't1', 'title': 'Run', 'priority': 1});
+      final op = chunk.operations.single;
+      expect(op.type, OperationType.add);
+      expect(op.entityId, 't1');
+      expect(op.data, containsPair('title', 'Run'));
+      expect(op.data, containsPair('__type', 'todos'));
+    });
+
+    test('updateFromMap builds an update op and copies the map', () {
+      final src = {'priority': 1};
+      final chunk = TypedTx(t).updateFromMap('t1', src);
+      src['priority'] = 99; // must not leak into the built op
+      expect(chunk.operations.single.data, {'priority': 1});
+    });
+
+    test('linkRel / unlinkRel build link/unlink ops via the RelationRef attr',
+        () {
+      const rel = RelationRef<_Todos>('todos');
+      final linkOps = TypedTx(_Goals()).linkRel('g1', rel, ['t1', 't2']).operations;
+      expect(linkOps.length, 2);
+      expect(linkOps.every((o) => o.type == OperationType.link), isTrue);
+      final unlinkOps = TypedTx(_Goals()).unlinkRel('g1', rel, 't1').operations;
+      expect(unlinkOps.single.type, OperationType.unlink);
+      expect(unlinkOps.single.data, {'todos': 't1'});
+    });
   });
 
   group('TypedTx (integration, sqflite-ffi)', () {

@@ -28,6 +28,27 @@ class TypedTx<E extends InstantTable<E>> {
   TransactionChunk delete(String id) =>
       EntityInstanceBuilder(_type, id).delete();
 
+  /// Build a create op from a whole attribute map (e.g. a generated toMap).
+  /// `data['id']` (if present) is used as the entity id; [id] overrides it.
+  TransactionChunk createFromMap(Map<String, dynamic> data, {String? id}) =>
+      EntityBuilder(_type).create({...data, if (id != null) 'id': id});
+
+  /// Build an update op from a whole attribute map.
+  TransactionChunk updateFromMap(String id, Map<String, dynamic> data,
+          {TxOpts? opts}) =>
+      EntityInstanceBuilder(_type, id)
+          .update(Map<String, dynamic>.from(data), opts: opts);
+
+  /// Typed relation link. [targetIds] is one id or a List of ids.
+  TransactionChunk linkRel<R extends InstantTable<R>>(
+          String id, RelationRef<R> rel, Object targetIds) =>
+      EntityInstanceBuilder(_type, id).link({rel.attr: targetIds});
+
+  /// Typed relation unlink. [targetIds] is one id or a List of ids.
+  TransactionChunk unlinkRel<R extends InstantTable<R>>(
+          String id, RelationRef<R> rel, Object targetIds) =>
+      EntityInstanceBuilder(_type, id).unlink({rel.attr: targetIds});
+
   // [relation] is an untyped attribute name — typed relation writes (via the
   // generated relation accessor) are deferred to 6d.
   TransactionChunk link(String id, String relation, Object targetId) =>
