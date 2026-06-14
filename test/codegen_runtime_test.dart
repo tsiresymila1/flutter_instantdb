@@ -58,5 +58,36 @@ void main() {
       final w0 = widgets.firstWhere((w) => w.id == 'w0');
       expect(w0.gadgets.map((g) => g.label), ['A']);
     });
+
+    test('createModel round-trips a whole model', () async {
+      await db.transact(
+        db.txFor(Widget2Table()).createModel(
+              const Widget2(id: 'wm', name: 'M', weight: 7, gadgets: []),
+            ),
+      );
+      final got =
+          await Widget2Table().query().where((t) => t.id.eq('wm')).getAll(db);
+      expect(got.single.name, 'M');
+      expect(got.single.weight, 7);
+    });
+
+    test('linkRel links via the generated RelationRef', () async {
+      await db.transact(db.tx['gadgets']['g1'].update({'label': 'A'}));
+      await db.transact(
+        db.txFor(Widget2Table()).createModel(
+              const Widget2(id: 'wl', name: 'L', weight: 1, gadgets: []),
+            ),
+      );
+      await db.transact(
+        db.txFor(Widget2Table()).linkRel('wl', Widget2Table.gadgetsRel, ['g1']),
+      );
+      final w = (await Widget2Table()
+              .query()
+              .where((t) => t.id.eq('wl'))
+              .include((x) => x.gadgets)
+              .getAll(db))
+          .single;
+      expect(w.gadgets.map((g) => g.label), ['A']);
+    });
   });
 }

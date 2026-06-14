@@ -16,6 +16,11 @@ class GadgetTable extends InstantModelTable<GadgetTable, Gadget> {
         id: m['id'] as String,
         label: m['label'] as String,
       );
+
+  Map<String, dynamic> toMap(Gadget m) => {
+        'id': m.id,
+        'label': m.label,
+      };
 }
 
 extension GadgetQueryX on TypedQuery<GadgetTable> {
@@ -32,6 +37,13 @@ extension GadgetQueryX on TypedQuery<GadgetTable> {
   }
 }
 
+extension GadgetTxX on TypedTx<GadgetTable> {
+  TransactionChunk createModel(Gadget m) =>
+      createFromMap(GadgetTable().toMap(m));
+  TransactionChunk updateModel(String id, Gadget m) =>
+      updateFromMap(id, GadgetTable().toMap(m));
+}
+
 class Widget2Table extends InstantModelTable<Widget2Table, Widget2> {
   Widget2Table() : super('widgets');
 
@@ -41,6 +53,8 @@ class Widget2Table extends InstantModelTable<Widget2Table, Widget2> {
 
   TypedQuery<GadgetTable> get gadgets =>
       TypedQuery<GadgetTable>(GadgetTable(), relationAttr: 'gadgets');
+
+  static const gadgetsRel = RelationRef<GadgetTable>('gadgets');
 
   @override
   Widget2 fromRow(Map<String, dynamic> m) => Widget2(
@@ -53,6 +67,12 @@ class Widget2Table extends InstantModelTable<Widget2Table, Widget2> {
                 .toList() ??
             const <Gadget>[],
       );
+
+  Map<String, dynamic> toMap(Widget2 m) => {
+        'id': m.id,
+        'name': m.name,
+        'weight': m.weight,
+      };
 }
 
 extension Widget2QueryX on TypedQuery<Widget2Table> {
@@ -67,4 +87,11 @@ extension Widget2QueryX on TypedQuery<Widget2Table> {
     return computed(
         () => src.value.documents.map(Widget2Table().fromRow).toList());
   }
+}
+
+extension Widget2TxX on TypedTx<Widget2Table> {
+  TransactionChunk createModel(Widget2 m) =>
+      createFromMap(Widget2Table().toMap(m));
+  TransactionChunk updateModel(String id, Widget2 m) =>
+      updateFromMap(id, Widget2Table().toMap(m));
 }
