@@ -1,55 +1,477 @@
+/* ============================================================================
+   Flutter InstantDB — docs theme
+   Refined, dark-first developer documentation on top of nextra-theme-docs.
+   ========================================================================== */
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --fid-accent: 56, 142, 255;        /* azure — matches the logo + Flutter */
+  --fid-accent-2: 120, 196, 255;     /* lighter azure for gradients */
+  --fid-amber: 255, 176, 87;         /* warm secondary highlight */
+  --fid-bg: 12, 14, 19;              /* near-black, cool */
+  --fid-bg-soft: 18, 21, 28;
+  --fid-border: 255, 255, 255, 0.08;
+  --fid-radius: 14px;
+  --font-fallback: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+/* ---- Typography ---------------------------------------------------------- */
+html {
+  font-family: var(--font-sans), var(--font-fallback);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+code,
+kbd,
+pre,
+samp,
+.nextra-code,
+[class*='language-'],
+.nextra-code-block code {
+  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace !important;
+  font-feature-settings: "liga" 0;
 }
 
-/* Cards.Card padding and styling */
+/* Display font on content + hero headings */
+article :is(h1, h2),
+.fid-hero h1,
+.fid-section-title {
+  font-family: var(--font-display), var(--font-sans), var(--font-fallback);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+article h1 {
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+/* Slightly tighter, more confident body measure */
+article p,
+article li {
+  line-height: 1.7;
+}
+
+/* ---- Selection & scrollbar ---------------------------------------------- */
+::selection {
+  background: rgba(var(--fid-accent), 0.28);
+  color: inherit;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--fid-accent), 0.45);
+  background-clip: padding-box;
+}
+
+/* ---- Brand logo (navbar) ------------------------------------------------ */
+.fid-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.fid-logo__mark {
+  filter: drop-shadow(0 2px 8px rgba(var(--fid-accent), 0.45));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fid-logo:hover .fid-logo__mark {
+  transform: rotate(-8deg) scale(1.06);
+}
+.fid-logo__text {
+  font-family: var(--font-display), var(--font-sans);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+.fid-logo__accent {
+  color: rgb(var(--fid-accent));
+  margin-left: 0.18em;
+}
+
+/* Subtle frosted navbar */
+.nextra-navbar .nextra-navbar-blur,
+.nextra-navbar {
+  backdrop-filter: blur(14px) saturate(160%);
+}
+
+/* ---- Footer ------------------------------------------------------------- */
+.fid-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  font-size: 0.85rem;
+}
+.fid-footer__meta {
+  opacity: 0.6;
+}
+.fid-footer a {
+  color: rgb(var(--fid-accent));
+}
+
+/* ---- Cards (Nextra <Cards>) -------------------------------------------- */
 .nextra-cards {
-  gap: 1rem;
+  gap: 0.9rem;
 }
-
 .nextra-card {
-  padding: 1.5rem !important;
-  border-radius: 0.75rem !important;
-  transition: all 0.2s ease-in-out !important;
+  position: relative;
+  padding: 1.35rem !important;
+  border-radius: var(--fid-radius) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0))
+      padding-box,
+    rgba(255, 255, 255, 0.012);
+  border: 1px solid rgba(var(--fid-border)) !important;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  overflow: hidden;
 }
-
+.nextra-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--fid-accent), 0.5),
+    rgba(var(--fid-accent), 0) 45%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
 .nextra-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-3px);
+  border-color: rgba(var(--fid-accent), 0.35) !important;
+  box-shadow:
+    0 18px 40px -18px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(var(--fid-accent), 0.08);
+}
+.nextra-card:hover::after {
+  opacity: 1;
+}
+.nextra-card svg {
+  color: rgb(var(--fid-accent));
 }
 
-.nextra-card h3 {
-  margin-bottom: 0.5rem;
+/* ---- Code blocks -------------------------------------------------------- */
+.nextra-code:not(:has(pre)),
+code:not(pre code) {
+  border-radius: 6px;
+}
+figure.nextra-code,
+.nextra-code-block,
+div[data-rehype-pretty-code-figure] {
+  border-radius: var(--fid-radius) !important;
+}
+.nextra-code pre,
+pre.shiki,
+pre[class*='language-'] {
+  border-radius: var(--fid-radius) !important;
+  border: 1px solid rgba(var(--fid-border));
+}
+
+/* ---- Links in prose ----------------------------------------------------- */
+article a:not(.nextra-card):not([class*='anchor']) {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* ============================================================================
+   Landing hero (app/page.mdx, full layout)
+   ========================================================================== */
+.fid-hero {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(3.5rem, 9vw, 7rem) 1.5rem clamp(2rem, 5vw, 3.5rem);
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Layered atmospheric background: radial glow + grid mesh */
+.fid-hero::before {
+  content: '';
+  position: absolute;
+  inset: -40% -10% auto -10%;
+  height: 130%;
+  z-index: -2;
+  background:
+    radial-gradient(
+      48% 42% at 50% 0%,
+      rgba(var(--fid-accent), 0.22),
+      transparent 70%
+    ),
+    radial-gradient(
+      30% 30% at 80% 10%,
+      rgba(var(--fid-amber), 0.1),
+      transparent 70%
+    );
+  filter: blur(8px);
+}
+.fid-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(
+    60% 55% at 50% 35%,
+    #000 0%,
+    transparent 80%
+  );
+  mask-image: radial-gradient(60% 55% at 50% 35%, #000 0%, transparent 80%);
+}
+:root:not(.dark) .fid-hero::after {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+
+.fid-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.85rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--fid-accent), 0.3);
+  background: rgba(var(--fid-accent), 0.08);
+  color: rgb(var(--fid-accent-2));
+  animation: fid-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.fid-hero__badge .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgb(var(--fid-accent));
+  box-shadow: 0 0 0 0 rgba(var(--fid-accent), 0.7);
+  animation: fid-pulse 2.2s infinite;
+}
+
+.fid-hero h1 {
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin: 0 auto 1.1rem;
+  max-width: 16ch;
+  animation: fid-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+}
+.fid-hero .grad {
+  background: linear-gradient(
+    100deg,
+    rgb(var(--fid-accent-2)),
+    rgb(var(--fid-accent)) 45%,
+    rgb(var(--fid-amber))
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.fid-hero__sub {
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  line-height: 1.6;
+  max-width: 44ch;
+  margin: 0 auto 2rem;
+  opacity: 0.74;
+  animation: fid-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.fid-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  justify-content: center;
+  animation: fid-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+}
+.fid-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.72rem 1.4rem;
+  border-radius: 11px;
   font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  transition: transform 0.18s ease, box-shadow 0.25s ease, background 0.2s ease;
+}
+.fid-btn--primary {
+  color: #07111f;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--fid-accent-2)),
+    rgb(var(--fid-accent))
+  );
+  box-shadow:
+    0 10px 30px -8px rgba(var(--fid-accent), 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.fid-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 40px -10px rgba(var(--fid-accent), 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.fid-btn--ghost {
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+}
+:root:not(.dark) .fid-btn--ghost {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.02);
+}
+.fid-btn--ghost:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--fid-accent), 0.5);
+  background: rgba(var(--fid-accent), 0.07);
 }
 
-.nextra-card p {
-  color: rgb(107, 114, 128);
-  font-size: 0.875rem;
-  line-height: 1.5;
+/* Hero code window */
+.fid-window {
+  max-width: 720px;
+  margin: 3rem auto 0;
+  text-align: left;
+  border-radius: var(--fid-radius);
+  border: 1px solid rgba(var(--fid-border));
+  background: rgba(var(--fid-bg-soft), 0.9);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: fid-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
+}
+.fid-window__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid rgba(var(--fid-border));
+  background: rgba(255, 255, 255, 0.02);
+}
+.fid-window__bar i {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.fid-window__bar i:nth-child(1) { background: #ff5f57; }
+.fid-window__bar i:nth-child(2) { background: #febc2e; }
+.fid-window__bar i:nth-child(3) { background: #28c840; }
+.fid-window__name {
+  margin-left: 0.6rem;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  opacity: 0.55;
+}
+.fid-window pre {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+/* keep nextra code figure flush inside the window */
+.fid-window figure,
+.fid-window .nextra-code {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  .nextra-card p {
-    color: rgb(156, 163, 175);
+/* ---- Stat / trust strip ------------------------------------------------- */
+.fid-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 3.5rem auto 0;
+  max-width: 760px;
+  border: 1px solid rgba(var(--fid-border));
+  border-radius: var(--fid-radius);
+  overflow: hidden;
+  background: rgba(var(--fid-border));
+}
+.fid-stat {
+  padding: 1.4rem 1rem;
+  text-align: center;
+  background: rgb(var(--fid-bg));
+}
+:root:not(.dark) .fid-stat {
+  background: #fff;
+}
+.fid-stat b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 800;
+  background: linear-gradient(120deg, rgb(var(--fid-accent-2)), rgb(var(--fid-accent)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.fid-stat span {
+  font-size: 0.82rem;
+  opacity: 0.6;
+}
+
+/* ---- Section heading on landing ---------------------------------------- */
+.fid-section-title {
+  text-align: center;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 4rem auto 0.4rem;
+}
+.fid-section-sub {
+  text-align: center;
+  opacity: 0.6;
+  margin-bottom: 2rem;
+}
+
+/* ---- Animations --------------------------------------------------------- */
+@keyframes fid-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
-  
-  .nextra-card:hover {
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fid-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--fid-accent), 0.6); }
+  70% { box-shadow: 0 0 0 7px rgba(var(--fid-accent), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--fid-accent), 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

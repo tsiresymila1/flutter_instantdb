@@ -2,7 +2,15 @@ export default {
     "index": {
       "title": "Introduction",
       "type": "page",
-      "display": "hidden"
+      "display": "hidden",
+      "theme": {
+        "layout": "full",
+        "sidebar": false,
+        "toc": false,
+        "breadcrumb": false,
+        "pagination": false,
+        "timestamp": false
+      }
     },
     "getting-started": {
         "title": "Getting Started",
