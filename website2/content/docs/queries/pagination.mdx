@@ -1,0 +1,126 @@
+---
+title: Pagination & Fields
+description: Cursor pagination, pageInfo, field projection, and infinite queries
+---
+
+Beyond `limit` / `offset` (covered in [Basics](/docs/queries/basics)), InstantDB supports cursor
+pagination, a `pageInfo` cursor summary, field projection, and an accumulating infinite
+query.
+
+## Cursor pagination
+
+Under a namespace's `$` options, use `first` / `after` for forward paging and
+`last` / `before` for backward paging. `afterInclusive` / `beforeInclusive` control
+whether the cursor row itself is included.
+
+```dart
+// First page: leading 2 by ascending order
+final firstPage = await db.queryOnce({
+  'todos': {
+    '\$': {'order': {'n': 'asc'}, 'first': 2},
+  },
+});
+```
+
+## pageInfo
+
+When a query paginates, `QueryResult.pageInfo` carries a per-namespace cursor summary:
+`startCursor`, `endCursor`, `hasNextPage`, and `hasPreviousPage`. It is `null` when the
+query did not paginate.
+
+```dart
+final r = await db.queryOnce({
+  'todos': {
+    '\$': {'order': {'n': 'asc'}, 'first': 2},
+  },
+});
+
+r.pageInfo?['todos']?['hasNextPage'];     // true
+r.pageInfo?['todos']?['hasPreviousPage']; // false
+final cursor = r.pageInfo?['todos']?['endCursor'] as String;
+```
+
+Use `endCursor` as the `after` value to fetch the next page:
+
+```dart
+final next = await db.queryOnce({
+  'todos': {
+    '\$': {'order': {'n': 'asc'}, 'first': 2, 'after': cursor},
+  },
+});
+```
+
+## Field projection
+
+Use `fields` under `$` to fetch only specific attributes. The `id` is always included.
+
+```dart
+final r = await db.queryOnce({
+  'todos': {
+    '\$': {'fields': ['title', 'status']},
+  },
+});
+```
+
+## Infinite queries
+
+`db.infiniteQuery(...)` returns an accumulator that concatenates items across pages and
+advances via `loadMore()`. `pageSize` becomes the `first` count; `entityType` is the
+namespace to paginate. Pair it with the `InstantInfiniteBuilder` widget.
+
+<Tabs items={['Accumulator', 'Widget']}>
+<Tab value="Accumulator">
+```dart
+final inf = db.infiniteQuery(
+  {
+    'todos': {
+      '\$': {'order': {'n': 'asc'}, 'first': 2},
+    },
+  },
+  pageSize: 2,
+  entityType: 'todos',
+);
+
+// inf.items   -> Signal<List<Map<String, dynamic>>> (accumulated)
+// inf.hasMore -> Signal<bool>
+// inf.isLoading -> Signal<bool>
+
+await inf.loadMore(); // append the next page
+
+// Dispose when done
+inf.dispose();
+```
+  </Tab>
+  <Tab value="Widget">
+```dart
+InstantInfiniteBuilder(
+  query: inf,
+  builder: (context, items, hasMore) {
+    return ListView.builder(
+      itemCount: items.length + (hasMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index >= items.length) {
+          inf.loadMore();
+          return const Center(child: CircularProgressIndicator());
+        }
+        return TodoTile(todo: items[index]);
+      },
+    );
+  },
+)
+```
+  </Tab>
+</Tabs>
+
+## Per-relation pageInfo
+
+Cursor-paginated nested `include` relations surface their own `pageInfo` under a
+composite key. See [Typed Relations](/docs/typed/relations#per-relation-pageinfo) for
+details — the key looks like `result.pageInfo?['goals.todos']`.
+
+## Typed equivalent
+
+The [typed query DSL](/docs/typed/query-dsl#pagination-and-limits) exposes
+`first` / `last` / `after` / `before` / `afterInclusive` / `beforeInclusive` and
+`select` as type-checked builder methods, returning the same `QueryResult` with the
+same `pageInfo`.

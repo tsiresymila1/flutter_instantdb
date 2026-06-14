@@ -1,0 +1,68 @@
+---
+title: Typed Layer Overview
+description: Compile-time-safe queries and writes over the same InstantDB engine
+---
+
+The typed layer adds a thin, compile-time-safe API on top of the untyped query and
+transaction engine. Queries and writes are expressed against typed column handles,
+so wrong field names and wrong value types fail to compile instead of failing at
+runtime. Everything compiles down to the exact same InstaQL maps and operations the
+untyped API produces — there is no separate engine and no runtime overhead.
+
+## What you get
+
+- **Typed query DSL** — `Col<T>`, `Filter`, `Order`, `InstantTable`, and `TypedQuery`
+  let you build `where`/`order`/pagination/projection clauses with full type checking.
+  See [Query DSL](/docs/typed/query-dsl).
+- **Code generation** — annotate a plain model class with `@InstantModel` and let
+  `flutter_instantdb_generator` emit the table, columns, `fromRow`, and `getAll`/`watchAll`
+  helpers. See [Code Generation](/docs/typed/codegen).
+- **Typed relations** — `@InstantLink` fields become typed relation accessors and
+  typed `.include(...)`, with recursively-typed `fromRow`. See [Relations](/docs/typed/relations).
+- **Typed transactions** — `db.txFor(table)` gives a fluent, type-checked write builder
+  (`create`/`update`/`merge`/`delete`/`link`/`unlink`/`lookup`) plus whole-model writes
+  (`createModel`/`updateModel`/`mergeModel`). See [Transactions](/docs/typed/transactions).
+
+## When to use it
+
+Reach for the typed layer when you have a known schema and want the compiler to catch
+mistakes — typos in field names, comparing a `String` column to an `int`, calling a
+string operator on a numeric column. The untyped map API remains fully supported and
+is the right choice for dynamic queries, projected relations, or schema-less data.
+
+The two layers interoperate freely: `db.transact` accepts typed writes alongside
+`List<Operation>` and `TransactionChunk`, and typed queries return the same
+`QueryResult` as untyped ones.
+
+## A quick taste
+
+```dart
+// Typed query
+final q = Todos()
+    .query()
+    .where((t) => t.priority.gte(8) & t.title.ilike('%urgent%'))
+    .order((t) => t.createdAt.desc())
+    .first(20);
+
+final result = await db.queryOnceTyped(q);
+
+// Typed write
+await db.transact(
+  db.txFor(Todos()).create(id: db.id())
+    ..set(Todos().title, 'Ship it')
+    ..set(Todos().priority, 9),
+);
+```
+
+## Importing
+
+Everything is exported from the main barrel:
+
+```dart
+import 'package:flutter_instantdb/flutter_instantdb.dart';
+```
+
+This brings in `Col`, `Filter`, `Order`, `InstantTable`, `InstantModelTable`,
+`TypedQuery`, `TypedTx`, `RelationRef`, and the `@InstantModel` / `@InstantField` /
+`@InstantLink` annotations. The code generator lives in a separate dev-only package
+(`flutter_instantdb_generator`).

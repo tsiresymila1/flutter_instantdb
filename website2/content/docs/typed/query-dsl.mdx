@@ -1,0 +1,165 @@
+---
+title: Typed Query DSL
+description: Build compile-time-safe InstaQL queries with Col, Filter, Order and TypedQuery
+---
+
+The typed query DSL (Phase 6a) lets you build queries against typed column handles.
+Every clause is type-checked at compile time, and `TypedQuery.toQuery()` compiles to
+the same InstaQL map the untyped engine consumes.
+
+## Defining a table
+
+A table is a class extending `InstantTable<Self>` that declares a `Col<T>` per field.
+Pass the namespace (entity type) to the superclass constructor.
+
+```dart
+class Todos extends InstantTable<Todos> {
+  Todos() : super('todos');
+
+  final title = Col<String>('title');
+  final priority = Col<int>('priority');
+  final createdAt = Col<int>('createdAt');
+}
+```
+
+You can write tables by hand like this, or generate them from an annotated model —
+see [Code Generation](/docs/typed/codegen).
+
+## Columns and operators
+
+`Col<T>` exposes operators whose value types are bound to the column's `T`:
+
+```dart
+final title = Col<String>('title');
+final priority = Col<int>('priority');
+
+title.eq('Run');         // {'title': 'Run'}
+title.ne('Run');         // {'title': {'$ne': 'Run'}}
+title.isNull(true);      // {'title': {'$isNull': true}}
+priority.inList([1, 2]); // {'priority': {'$in': [1, 2]}}
+```
+
+### Comparisons (Comparable only)
+
+`gt` / `gte` / `lt` / `lte` are available only on `Col<T>` where `T` is `Comparable`:
+
+```dart
+priority.gt(5);   // {'priority': {'$gt': 5}}
+priority.gte(5);  // {'priority': {'$gte': 5}}
+priority.lt(5);   // {'priority': {'$lt': 5}}
+priority.lte(5);  // {'priority': {'$lte': 5}}
+```
+
+### String match (Col&lt;String&gt; only)
+
+`like` (case-sensitive) and `ilike` (case-insensitive) are available only on
+`Col<String>` and accept SQL `%` / `_` wildcards:
+
+```dart
+title.like('%x%');   // {'title': {'$like': '%x%'}}
+title.ilike('%x%');  // {'title': {'$ilike': '%x%'}}
+```
+
+Calling `priority.like(...)` or `title.gt(...)` is a compile error.
+
+## Combining filters
+
+Combine leaf filters with `&` (and) and `|` (or):
+
+```dart
+// AND
+final f = priority.gte(8) & title.ilike('%x%');
+// {'and': [{'priority': {'$gte': 8}}, {'title': {'$ilike': '%x%'}}]}
+
+// OR
+final g = title.eq('A') | title.eq('B');
+// {'or': [{'title': 'A'}, {'title': 'B'}]}
+```
+
+## Ordering
+
+`Col.asc()` / `Col.desc()` produce an `Order`:
+
+```dart
+Col<int>('createdAt').asc();   // {'createdAt': 'asc'}
+Col<int>('createdAt').desc();  // {'createdAt': 'desc'}
+```
+
+## Building a query
+
+Start a query with `table.query()`, then chain fluent, **immutable** methods — each
+returns a new `TypedQuery`; the source query is never mutated.
+
+```dart
+final q = Todos()
+    .query()
+    .where((t) => t.priority.gte(8) & t.title.ilike('%x%'))
+    .order((t) => t.createdAt.desc())
+    .first(20)
+    .select((t) => [t.title, t.priority]);
+
+q.toQuery();
+// {
+//   'todos': {
+//     '$': {
+//       'where': {'and': [{'priority': {'$gte': 8}}, {'title': {'$ilike': '%x%'}}]},
+//       'order': {'createdAt': 'desc'},
+//       'first': 20,
+//       'fields': ['title', 'priority'],
+//     },
+//   },
+// }
+```
+
+### Pagination and limits
+
+`first` / `last` / `after` / `before` (cursor pagination), `afterInclusive` /
+`beforeInclusive`, and `limit` / `offset` are all available:
+
+```dart
+final q = Todos()
+    .query()
+    .order((t) => t.createdAt.asc())
+    .first(2)
+    .after('cursor1')
+    .afterInclusive(true);
+```
+
+### Projection
+
+`select` restricts the returned attributes (`id` is always included):
+
+```dart
+Todos().query().select((t) => [t.title, t.priority]);
+```
+
+## Running typed queries
+
+`db.queryTyped` returns a reactive `Signal<QueryResult>`; `db.queryOnceTyped` runs once.
+
+<Tabs items={['Reactive', 'One-shot']}>
+<Tab value="Reactive">
+```dart
+final signal = db.queryTyped(Todos().query().where((t) => t.priority.gte(8)));
+
+Watch((context) {
+  final result = signal.value;
+  if (result.isLoading) return const CircularProgressIndicator();
+  final todos = result.data!['todos'] as List;
+  return Text('${todos.length} todos');
+});
+```
+  </Tab>
+  <Tab value="One-shot">
+```dart
+final result = await db.queryOnceTyped(
+  Todos().query().where((t) => t.title.ilike('%urgent%')),
+);
+final todos = result.data!['todos'] as List;
+```
+  </Tab>
+</Tabs>
+
+Both return the same `QueryResult` as the untyped API, so `result.pageInfo` and
+`result.documents` behave identically. To map result documents into typed model
+objects, see [Code Generation](/docs/typed/codegen) (the generated `getAll`/`watchAll` helpers).

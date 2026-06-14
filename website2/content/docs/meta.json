@@ -1,0 +1,16 @@
+{
+  "title": "Documentation",
+  "root": true,
+  "pages": [
+    "index",
+    "getting-started",
+    "concepts",
+    "typed",
+    "queries",
+    "realtime",
+    "auth",
+    "flutter",
+    "advanced",
+    "api"
+  ]
+}

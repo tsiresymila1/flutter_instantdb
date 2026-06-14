@@ -1,1 +1,14 @@
+# dependencies
+node_modules
+
+# next.js
+.next
+out
+
+# fumadocs-mdx generated source
+.source
+
+# misc
 .vercel
+*.log
+.DS_Store

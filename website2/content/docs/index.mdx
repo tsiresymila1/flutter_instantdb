@@ -1,0 +1,44 @@
+---
+title: Flutter InstantDB
+description: Real-time, offline-first database for Flutter with reactive bindings, type-safe queries and code generation.
+---
+
+A Flutter/Dart port of [InstantDB](https://instantdb.com) — a real-time,
+offline-first database with reactive bindings, a type-safe query DSL, code
+generation, and live multiplayer collaboration.
+
+<Cards>
+  <Card title="Installation" href="/docs/getting-started/installation">
+    Add the package and initialize the client.
+  </Card>
+  <Card title="Quick Start" href="/docs/getting-started/quick-start">
+    Reactive queries, transactions, and your first live widget.
+  </Card>
+  <Card title="Typed layer" href="/docs/typed/overview">
+    Compile-time-safe queries and writes generated from your models.
+  </Card>
+  <Card title="Code generation" href="/docs/typed/codegen">
+    Annotate a model, run the generator, get typed tables.
+  </Card>
+</Cards>
+
+## A taste
+
+```dart
+final db = await InstantDB.init(
+  appId: 'your-app-id',
+  config: const InstantConfig(syncEnabled: true),
+);
+
+final todos = await TodoTable()
+    .query()
+    .where((t) => t.done.eq(false))
+    .order((t) => t.createdAt.desc())
+    .getAll(db);
+
+await db.transact(
+  TodoTable().tx(db).createModel(
+    Todo(id: db.id(), title: 'Ship it', done: false),
+  ),
+);
+```

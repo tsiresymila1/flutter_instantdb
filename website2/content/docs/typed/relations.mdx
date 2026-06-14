@@ -1,0 +1,131 @@
+---
+title: Typed Relations
+description: Model relations with @InstantLink, typed includes, and recursively-typed fromRow
+---
+
+Relations let a model reference other models. With `@InstantLink` the generator emits
+typed relation accessors, a recursively-typed `fromRow`, and a `RelationRef` handle for
+typed link/unlink writes.
+
+## Declaring relations
+
+Mark a relation field with `@InstantLink`. **Cardinality is inferred from the field
+type**: `List<T>` is to-many, a bare `T` is to-one. The target (`T`) must itself be an
+`@InstantModel`.
+
+```dart
+@InstantModel('gadgets')
+class Gadget {
+  final String id;
+  final String label;
+  const Gadget({required this.id, required this.label});
+}
+
+@InstantModel('widgets')
+class Widget2 {
+  final String id;
+  final String name;
+  final int weight;
+
+  @InstantLink()
+  final List<Gadget> gadgets; // to-many (List<Gadget>)
+
+  const Widget2({
+    required this.id,
+    required this.name,
+    required this.weight,
+    required this.gadgets,
+  });
+}
+```
+
+`@InstantLink({attr: '...'})` overrides the stored relation attribute (the include key),
+which defaults to the field name.
+
+## What the generator emits
+
+For each `@InstantLink` field the generator emits:
+
+- A **typed relation accessor** getter returning a `TypedQuery` of the target table,
+  tagged with the relation attribute:
+
+  ```dart
+  TypedQuery<GadgetTable> get gadgets =>
+      TypedQuery<GadgetTable>(GadgetTable(), relationAttr: 'gadgets');
+  ```
+
+- A **`RelationRef` const** for typed link/unlink writes (see [Transactions](/docs/typed/transactions)):
+
+  ```dart
+  static const gadgetsRel = RelationRef<GadgetTable>('gadgets');
+  ```
+
+- A **recursively-typed `fromRow`** arm mapping included relation maps to `List<T>`
+  (to-many) or `T?` (to-one). Un-included relations safely yield `[]` / `null` via a
+  `whereType<Map>` guard:
+
+  ```dart
+  gadgets: (m['gadgets'] as List<dynamic>?)
+          ?.whereType<Map<String, dynamic>>()
+          .map(GadgetTable().fromRow)
+          .toList() ??
+      const <Gadget>[],
+  ```
+
+## Typed includes
+
+Use `TypedQuery.include((t) => t.relation...)` to fetch related entities. The relation
+sub-query supports nested `where` / `order` / `limit` / `offset`, cursor pagination, and
+recursive includes. Includes are immutable — the source query is never mutated.
+
+```dart
+// Fetch goals, each with its linked todos
+final q = GoalTable().query().include((g) => g.todos);
+
+// Narrow the included set
+final q2 = GoalTable()
+    .query()
+    .include((g) => g.todos.where((t) => t.n.gte(2)));
+
+// Order + cursor window the relation
+final q3 = GoalTable()
+    .query()
+    .include((g) => g.todos.order((t) => t.n.asc()).first(1));
+
+final r = await db.queryOnceTyped(q3);
+final goal = GoalTable().fromRow(r.documents.firstWhere((d) => d['id'] == 'g1'));
+final todos = goal.todos; // List<Todo>, in order, windowed
+```
+
+Querying a parent **without** an `include` leaves relation fields empty — `fromRow`
+yields `[]` / `null` rather than crashing.
+
+## The `.select()` restriction
+
+`include(...)` **throws `ArgumentError`** if the relation sub-query carries `.select()`
+(a fields projection). The generated `fromRow` hard-casts every field, so a projected
+map would cause a `TypeError`. Use the untyped map API if you need a projected relation.
+
+```dart
+// Throws ArgumentError:
+GoalTable().query().include((g) => g.todos.select((t) => [t.n]));
+```
+
+## Per-relation pageInfo
+
+When a nested relation include is cursor-paginated, the engine surfaces its `pageInfo`
+under a composite key `'<parentType>.<relation>'`. Deeper nesting produces dotted keys.
+
+```dart
+final q = GoalTable()
+    .query()
+    .include((g) => g.todos.order((t) => t.n.asc()).first(1));
+
+final r = await db.queryOnceTyped(q);
+r.pageInfo?['goals.todos']?['hasNextPage']; // true
+// Deeper: r.pageInfo?['goals.todos.tags']
+```
+
+Non-paginated includes add no composite pageInfo key. Note that pageInfo is per
+relation **path**, not per parent entity: with multiple parents, the key reflects the
+last parent's window.

@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* Make Tailwind scan Fumadocs UI classes */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+/* Brand: azure accent (matches the logo + Flutter), dark-first feel. */
+:root {
+  --color-fd-primary: #2f7bff;
+}
+
+.dark {
+  --color-fd-primary: #78c4ff;
+}
