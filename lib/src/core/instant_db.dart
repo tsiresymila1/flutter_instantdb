@@ -269,16 +269,16 @@ class InstantDB {
       );
     }
 
-    // Handle both List<Operation> and TransactionChunk
+    // Handle List<Operation> and any ToTransaction (TransactionChunk, TypedWrite)
     final List<Operation> operations;
-    if (transaction is TransactionChunk) {
-      operations = transaction.operations;
+    if (transaction is ToTransaction) {
+      operations = transaction.toTransactionChunk().operations;
     } else if (transaction is List<Operation>) {
       operations = transaction;
     } else {
       throw InstantException(
         message:
-            'transact() expects either List<Operation> or TransactionChunk, got ${transaction.runtimeType}',
+            'transact() expects either List<Operation> or a ToTransaction (e.g. TransactionChunk), got ${transaction.runtimeType}',
       );
     }
 

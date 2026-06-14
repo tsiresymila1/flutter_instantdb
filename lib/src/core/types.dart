@@ -437,11 +437,19 @@ class LookupRef {
   Map<String, dynamic> toJson() => _$LookupRefToJson(this);
 }
 
+/// Anything convertible to a TransactionChunk, accepted by `db.transact`.
+abstract interface class ToTransaction {
+  TransactionChunk toTransactionChunk();
+}
+
 /// Transaction chunk - represents a chainable transaction operation
-class TransactionChunk {
+class TransactionChunk implements ToTransaction {
   final List<Operation> operations;
 
   const TransactionChunk(this.operations);
+
+  @override
+  TransactionChunk toTransactionChunk() => this;
 
   /// Merge with another transaction chunk
   TransactionChunk merge(TransactionChunk other) {

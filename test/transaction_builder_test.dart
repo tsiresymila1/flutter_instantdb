@@ -78,4 +78,18 @@ void main() {
       expect(chunk.operations.single.options?['upsert'], isFalse);
     });
   });
+
+  group('ToTransaction', () {
+    test('transact accepts any ToTransaction', () {
+      final chunk = TransactionChunk([
+        Operation(
+            type: OperationType.add,
+            entityType: 'todos',
+            entityId: 'x',
+            data: {'title': 'hi', '__type': 'todos'}),
+      ]);
+      expect(chunk, isA<ToTransaction>());
+      expect(chunk.toTransactionChunk().operations, chunk.operations);
+    });
+  });
 }
