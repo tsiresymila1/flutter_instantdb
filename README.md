@@ -3,7 +3,7 @@
 Real-time, offline-first database for Flutter with reactive bindings. Build collaborative apps in minutes.
 
 - 📚 Docs: https://flutter-instantdb.vercel.app
-- 🚀 Quick Start: https://flutter-instantdb.vercel.app/getting-started/quick-start
+- 🚀 Quick Start: https://flutter-instantdb.vercel.app/docs/getting-started/quick-start
 - 🧩 Example app: [example/](example/)
 
 This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com), enabling you to build real-time, collaborative applications with ease.
@@ -46,13 +46,13 @@ This package provides a Flutter/Dart port of [InstantDB](https://instantdb.com),
 
 ## Documentation
 
-- Getting Started: [Installation](https://flutter-instantdb.vercel.app/getting-started/installation) · [Quick Start](https://flutter-instantdb.vercel.app/getting-started/quick-start)
-- Concepts: [Database](https://flutter-instantdb.vercel.app/concepts/database) · [Schema](https://flutter-instantdb.vercel.app/concepts/schema)
-- API Reference: [InstantDB](https://flutter-instantdb.vercel.app/api/instantdb) · [Queries](https://flutter-instantdb.vercel.app/api/queries) · [Transactions](https://flutter-instantdb.vercel.app/api/transactions) · [Presence](https://flutter-instantdb.vercel.app/api/presence-api) · [Widgets](https://flutter-instantdb.vercel.app/api/widgets) · [Types](https://flutter-instantdb.vercel.app/api/types)
-- Typed API: [Typed Queries](https://flutter-instantdb.vercel.app/typed/queries) · [Code Generation](https://flutter-instantdb.vercel.app/typed/codegen) · [Typed Relations](https://flutter-instantdb.vercel.app/typed/relations) · [Typed Transactions](https://flutter-instantdb.vercel.app/typed/transactions)
-- Authentication: [Users](https://flutter-instantdb.vercel.app/auth/users) · [Sessions](https://flutter-instantdb.vercel.app/auth/sessions) · [Permissions](https://flutter-instantdb.vercel.app/auth/permissions)
-- Real-time: [Sync](https://flutter-instantdb.vercel.app/realtime/sync) · [Presence](https://flutter-instantdb.vercel.app/realtime/presence) · [Collaboration](https://flutter-instantdb.vercel.app/realtime/collaboration)
-- Advanced: [Offline](https://flutter-instantdb.vercel.app/advanced/offline) · [Performance](https://flutter-instantdb.vercel.app/advanced/performance) · [Migration](https://flutter-instantdb.vercel.app/advanced/migration) · [Troubleshooting](https://flutter-instantdb.vercel.app/advanced/troubleshooting)
+- Getting Started: [Installation](https://flutter-instantdb.vercel.app/docs/getting-started/installation) · [Quick Start](https://flutter-instantdb.vercel.app/docs/getting-started/quick-start)
+- Concepts: [Database](https://flutter-instantdb.vercel.app/docs/concepts/database) · [Schema](https://flutter-instantdb.vercel.app/docs/concepts/schema)
+- API Reference: [InstantDB](https://flutter-instantdb.vercel.app/docs/api/instantdb) · [Queries](https://flutter-instantdb.vercel.app/docs/api/queries) · [Transactions](https://flutter-instantdb.vercel.app/docs/api/transactions) · [Presence](https://flutter-instantdb.vercel.app/docs/api/presence-api) · [Widgets](https://flutter-instantdb.vercel.app/docs/api/widgets) · [Types](https://flutter-instantdb.vercel.app/docs/api/types)
+- Typed API: [Typed Queries](https://flutter-instantdb.vercel.app/docs/typed/queries) · [Code Generation](https://flutter-instantdb.vercel.app/docs/typed/codegen) · [Typed Relations](https://flutter-instantdb.vercel.app/docs/typed/relations) · [Typed Transactions](https://flutter-instantdb.vercel.app/docs/typed/transactions)
+- Authentication: [Users](https://flutter-instantdb.vercel.app/docs/auth/users) · [Sessions](https://flutter-instantdb.vercel.app/docs/auth/sessions) · [Permissions](https://flutter-instantdb.vercel.app/docs/auth/permissions)
+- Real-time: [Sync](https://flutter-instantdb.vercel.app/docs/realtime/sync) · [Presence](https://flutter-instantdb.vercel.app/docs/realtime/presence) · [Collaboration](https://flutter-instantdb.vercel.app/docs/realtime/collaboration)
+- Advanced: [Offline](https://flutter-instantdb.vercel.app/docs/advanced/offline) · [Performance](https://flutter-instantdb.vercel.app/docs/advanced/performance) · [Migration](https://flutter-instantdb.vercel.app/docs/advanced/migration) · [Troubleshooting](https://flutter-instantdb.vercel.app/docs/advanced/troubleshooting)
 
 ## Quick Start
 
@@ -62,7 +62,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_instantdb: ^1.1.2
+  flutter_instantdb: ^2.0.0
 ```
 
 Or install from the command line:
@@ -768,7 +768,7 @@ Add the generator and `build_runner` as dev dependencies:
 ```yaml
 dev_dependencies:
   build_runner: ^2.4.0
-  flutter_instantdb_generator: ^0.1.0
+  flutter_instantdb_generator: ^0.2.0
 ```
 
 Annotate a model class and add a `part` directive:
@@ -1057,6 +1057,23 @@ final files = await db.queryOnce({r'$files': {}});
 // Remove a local file reference
 await db.transact(db.tx[r'$files'][fileId].delete());
 ```
+
+## Schema CLI (TypeScript ⇆ Dart)
+
+Keep your InstantDB `instant.schema.ts` and your annotated Dart models in sync
+with the bundled schema CLI (`bin/schema.dart`):
+
+```bash
+# instant.schema.ts -> Dart @InstantModel classes
+dart run flutter_instantdb:schema to-dart instant.schema.ts -o lib/models.dart
+
+# Dart @InstantModel classes -> instant.schema.ts
+dart run flutter_instantdb:schema to-ts lib/models.dart -o instant.schema.ts
+```
+
+`@InstantField(unique: ..., indexed: ...)` round-trips to/from the corresponding
+InstantDB schema attributes. See the
+[Schema CLI docs](https://flutter-instantdb.vercel.app/docs/advanced/schema-cli).
 
 ## Schema Validation
 

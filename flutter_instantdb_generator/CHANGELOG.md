@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+- Emit `toMap(Model)` (scalar fields) on each generated table.
+- Emit a `${Model}TxX` extension with `createModel` / `updateModel` /
+  `mergeModel` for whole-model typed writes.
+- Emit `static const ${field}Rel = RelationRef<...>(...)` per relation for typed
+  `linkRel` / `unlinkRel`.
+- Emit a `Table().tx(db)` convenience returning `db.txFor(this)`.
+- Pairs with `flutter_instantdb` `^2.0.0`.
+
 ## 0.1.0
 
 Initial release.

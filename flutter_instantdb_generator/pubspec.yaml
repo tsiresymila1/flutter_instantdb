@@ -2,7 +2,7 @@ name: flutter_instantdb_generator
 description: >-
   Build-time code generator for flutter_instantdb. Emits type-safe query tables,
   typed transactions, and relation accessors from @InstantModel-annotated models.
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/tsiresymila1/flutter_instantdb
 repository: https://github.com/tsiresymila1/flutter_instantdb
 issue_tracker: https://github.com/tsiresymila1/flutter_instantdb/issues

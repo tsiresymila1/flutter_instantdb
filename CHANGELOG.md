@@ -1,5 +1,5 @@
 
-## Unreleased
+## 2.0.0 - 2026-06-14
 
 ### Internal: store/sync refactor (no behavior change)
 - Split `triple_store.dart` and `sync_engine.dart` into focused files (pure restructure, no behavior change). Extracted and added unit tests for the pure query/aggregate helpers (`triple_query_eval.dart`) and the datalog-conversion helpers (`datalog_convert.dart`); moved large private clusters into `part of` extensions.

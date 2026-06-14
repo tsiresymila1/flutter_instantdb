@@ -143,3 +143,17 @@ node_modules/
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+
+website2/
+graphify-out/
+flutter_instantdb_generator
+
+docs/
+
+# dev-only / removed root docs (kept out of the published archive)
+ADVANCED_FEATURES.md
+CONTRIBUTING.md
+DEVELOPMENT.md
+ReleasingWorkflow.md
+Tasks.md
+justfile

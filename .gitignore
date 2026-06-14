@@ -39,3 +39,7 @@ logs.txt
 node_modules/
 example/lib/git_stamp/
 .next/
+
+graphify-out/cache
+graphify-out/.rebuild.lock
+graphify-out/.graphify_root 
