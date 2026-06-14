@@ -201,5 +201,8 @@ new to emit).
 
 ## Next
 
-**nested-4** (future): surface per-relation `pageInfo` (needs a typed
-relation-page wrapper on the result shape).
+**nested-4** (done): per-relation `pageInfo` is now surfaced at
+`QueryResult.pageInfo['<parentType>.<relation>']` (composite dotted key).
+A fully-typed `RelationPage<T>` accessor remains a later generator follow-up.
+
+**6c** (next): typed transactions (`create`/`update`/`lookup` via the typed DSL).

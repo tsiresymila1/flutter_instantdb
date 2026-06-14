@@ -1,6 +1,6 @@
 # nested-4 — Per-relation pageInfo
 
-Status: design. Lifts the limitation deferred by nested-3: cursor pagination on a
+Status: implemented. Lifts the limitation deferred by nested-3: cursor pagination on a
 nested relation applies the window but **discards `page.pageInfo`**. nested-4
 surfaces per-relation `startCursor`/`endCursor`/`hasNextPage`/`hasPreviousPage`
 so a caller can page through a relation.

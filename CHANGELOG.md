@@ -1,6 +1,13 @@
 
 ## Unreleased
 
+### Per-relation pageInfo (nested-4)
+- **Engine**: cursor-paginated nested `include` relations now surface `pageInfo` at `QueryResult.pageInfo['<parentType>.<relation>']` (e.g. `result.pageInfo['goals.todos']`). Deeper nesting produces dotted keys (`'goals.todos.tags'`). The existing read API is unchanged — composite keys (containing `.`) coexist with top-level namespace keys in the same `pageInfo` map.
+- **Mechanism**: a pageInfo sink (the fresh per-query `pageInfo` map) and a dotted `pathPrefix` are threaded through `_processIncludes` on the forward-triple path. Writes go directly into the map — no `_lastPageInfo` shared state, no race for nested relations.
+- **Typed exposure**: `queryOnceTyped`/`queryTyped` return `QueryResult` unchanged, so `result.pageInfo?['goals.todos']` is readable from the typed path with no code change.
+- **Non-paginated includes** add no composite pageInfo key (sink only written when pagination parameters are present).
+- **Limitations**: pageInfo is per relation path, not per parent entity (with multiple parents the key reflects the last parent's window). FK-convention path not threaded (forward-triple / InstantLink only). A fully-typed `RelationPage<T>` accessor is deferred to a later generator follow-up.
+
 ### Relation pagination (nested-3)
 - **Engine**: nested `include` maps now support cursor pagination (`first`/`last`/`after`/`before`/`afterInclusive`/`beforeInclusive`) and `fields` projection on the related set (forward-triple path). The cursor window is computed via `paginate()` — `limit`/`offset` are stripped from the `_applyQueryFilters` pass when any cursor/fields key is present, preventing double-windowing.
 - **Typed DSL**: `TypedQuery._includeOptions()` now serializes `first`/`last`/`after`/`before`/`afterInclusive`/`beforeInclusive` and `limit`/`offset`. `fields` is intentionally not serialized on the typed path.
