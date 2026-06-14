@@ -367,10 +367,39 @@ class QueryEngine {
 
           var out = related;
           if (relationQuery != null) {
-            // Nested where/order/limit/offset only. Cursor pagination
-            // (first/after/last/before) and fields projection on relations are
-            // not applied here (deferred — see nested-1 spec).
-            out = _applyQueryFilters(related, relationQuery);
+            final useNestedPaginate = relationQuery['fields'] != null ||
+                relationQuery['first'] != null ||
+                relationQuery['last'] != null ||
+                relationQuery['after'] != null ||
+                relationQuery['before'] != null;
+
+            // When paginating, let paginate() own limit/offset (it needs the
+            // full ordered set to compute the window correctly) — strip them
+            // from the filter pass to prevent double-windowing.
+            final filterQuery = useNestedPaginate
+                ? (Map<String, dynamic>.from(relationQuery)
+                  ..remove('limit')
+                  ..remove('offset'))
+                : relationQuery;
+            out = _applyQueryFilters(related, filterQuery);
+
+            if (useNestedPaginate) {
+              final page = paginate(
+                out,
+                first: relationQuery['first'] as int?,
+                last: relationQuery['last'] as int?,
+                after: relationQuery['after'] as String?,
+                before: relationQuery['before'] as String?,
+                afterInclusive: relationQuery['afterInclusive'] == true,
+                beforeInclusive: relationQuery['beforeInclusive'] == true,
+                offset: relationQuery['offset'] as int?,
+                limit: relationQuery['limit'] as int?,
+                fields:
+                    (relationQuery['fields'] as List?)?.cast<String>(),
+              );
+              out =
+                  page.items; // per-relation page.pageInfo deferred (nested-4)
+            }
           }
           final nestedInclude =
               relationQuery?['include'] as Map<String, dynamic>?;

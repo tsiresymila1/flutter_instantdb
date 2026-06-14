@@ -130,4 +130,100 @@ void main() {
       expect(tags.single['label'], 'urgent');
     });
   });
+
+  group('Include cursor pagination + fields (nested-3)', () {
+    late InstantDB db;
+
+    setUpAll(() {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    });
+
+    setUp(() async {
+      db = await InstantDB.init(
+        appId: 'test-app-id',
+        config: InstantConfig(
+          syncEnabled: false,
+          persistenceDir:
+              'test_n3_${DateTime.now().microsecondsSinceEpoch}',
+        ),
+      );
+      // Seed: one goal linked to three ordered todos (n=1,2,3).
+      await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
+      await db.transact(
+          db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
+      await db.transact(
+          db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
+      await db.transact(
+          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
+      await db.transact(
+          db.tx['goals']['g1'].link({'todos': ['t1', 't2', 't3']}));
+    });
+
+    tearDown(() async => db.dispose());
+
+    test('nested first windows the related set after order', () async {
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {'order': {'n': 'asc'}, 'first': 1},
+          },
+        },
+      });
+      final todos =
+          (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
+              .cast<Map<String, dynamic>>();
+      expect(todos.length, 1);
+      expect(todos.single['n'], 1);
+    });
+
+    test('nested after cursor advances the window', () async {
+      final firstId = 't1'; // deterministic seed id
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {
+              'order': {'n': 'asc'},
+              'after': firstId,
+              'first': 1,
+            },
+          },
+        },
+      });
+      final todos =
+          (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
+              .cast<Map<String, dynamic>>();
+      expect(todos.single['n'], 2);
+    });
+
+    test('nested fields projection drops non-whitelisted attrs (untyped)',
+        () async {
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {'fields': ['title']},
+          },
+        },
+      });
+      final t =
+          (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
+              .cast<Map<String, dynamic>>()
+              .first;
+      expect(t.keys.toSet(), {'id', 'title'}); // 'n' dropped, id always kept
+    });
+
+    test('nested cursor does not double-apply limit', () async {
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {'order': {'n': 'asc'}, 'first': 2},
+          },
+        },
+      });
+      final todos =
+          (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
+              .cast<Map<String, dynamic>>();
+      expect(todos.map((t) => t['n']).toList(), [1, 2]);
+    });
+  });
 }
