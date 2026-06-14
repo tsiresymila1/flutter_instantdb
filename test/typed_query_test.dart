@@ -122,6 +122,46 @@ void main() {
       expect(a.toQuery()['todos'][r'$']['first'], 2);
     });
   });
+
+  group('Typed include (nested-2)', () {
+    test('include serializes nested where/order/limit under the \$ options', () {
+      final goals = _GoalsTable();
+      final q = goals.query().include(
+            (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
+                .where((t) => t.n.gte(2))
+                .order((t) => t.n.asc())
+                .limit(1),
+          );
+      final m = q.toQuery();
+      final opts = (m['goals'] as Map)[r'$'] as Map;
+      final inc = opts['include'] as Map;
+      expect(inc.keys, ['todos']);
+      final todos = inc['todos'] as Map;
+      expect(todos['where'], {'n': {r'$gte': 2}});
+      expect(todos['order'], {'n': 'asc'});
+      expect(todos['limit'], 1);
+    });
+
+    test('include nests recursively', () {
+      final goals = _GoalsTable();
+      final q = goals.query().include(
+            (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
+                .include((t) =>
+                    TypedQuery<_TagsTable>(_TagsTable(), relationAttr: 'tags')),
+          );
+      final inc =
+          (((q.toQuery()['goals'] as Map)[r'$'] as Map)['include']) as Map;
+      expect(((inc['todos'] as Map)['include'] as Map).keys, ['tags']);
+    });
+
+    test('include does not mutate the source query', () {
+      final goals = _GoalsTable();
+      final base = goals.query();
+      base.include((g) =>
+          TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos'));
+      expect((base.toQuery()['goals'] as Map)[r'$'], isNot(contains('include')));
+    });
+  });
 }
 
 /// Test table used by the TypedQuery tests above.
@@ -130,4 +170,17 @@ class Todos extends InstantTable<Todos> {
   final title = Col<String>('title');
   final priority = Col<int>('priority');
   final createdAt = Col<int>('createdAt');
+}
+
+class _GoalsTable extends InstantTable<_GoalsTable> {
+  _GoalsTable() : super('goals');
+}
+
+class _TodosTable extends InstantTable<_TodosTable> {
+  _TodosTable() : super('todos');
+  final n = const Col<int>('n');
+}
+
+class _TagsTable extends InstantTable<_TagsTable> {
+  _TagsTable() : super('tags');
 }

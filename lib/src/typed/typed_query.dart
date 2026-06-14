@@ -89,8 +89,10 @@ class TypedQuery<E extends InstantTable<E>> {
   final bool? _afterInclusive;
   final bool? _beforeInclusive;
   final List<Col<dynamic>>? _fields;
+  final String? _relationAttr;
+  final Map<String, dynamic>? _includes;
 
-  TypedQuery(this.table)
+  TypedQuery(this.table, {String? relationAttr})
       : _where = null,
         _order = null,
         _first = null,
@@ -101,7 +103,9 @@ class TypedQuery<E extends InstantTable<E>> {
         _before = null,
         _afterInclusive = null,
         _beforeInclusive = null,
-        _fields = null;
+        _fields = null,
+        _relationAttr = relationAttr,
+        _includes = null;
 
   TypedQuery._(
     this.table, {
@@ -116,6 +120,8 @@ class TypedQuery<E extends InstantTable<E>> {
     required bool? afterInclusive,
     required bool? beforeInclusive,
     required List<Col<dynamic>>? fields,
+    required String? relationAttr,
+    required Map<String, dynamic>? includes,
   })  : _where = where,
         _order = order,
         _first = first,
@@ -126,7 +132,9 @@ class TypedQuery<E extends InstantTable<E>> {
         _before = before,
         _afterInclusive = afterInclusive,
         _beforeInclusive = beforeInclusive,
-        _fields = fields;
+        _fields = fields,
+        _relationAttr = relationAttr,
+        _includes = includes;
 
   TypedQuery<E> _copyWith({
     Filter? where,
@@ -140,6 +148,8 @@ class TypedQuery<E extends InstantTable<E>> {
     bool? afterInclusive,
     bool? beforeInclusive,
     List<Col<dynamic>>? fields,
+    String? relationAttr,
+    Map<String, dynamic>? includes,
   }) {
     return TypedQuery._(
       table,
@@ -154,6 +164,8 @@ class TypedQuery<E extends InstantTable<E>> {
       afterInclusive: afterInclusive ?? _afterInclusive,
       beforeInclusive: beforeInclusive ?? _beforeInclusive,
       fields: fields ?? _fields,
+      relationAttr: relationAttr ?? _relationAttr,
+      includes: includes ?? _includes,
     );
   }
 
@@ -183,6 +195,28 @@ class TypedQuery<E extends InstantTable<E>> {
   TypedQuery<E> beforeInclusive(bool value) =>
       _copyWith(beforeInclusive: value);
 
+  /// Add a typed nested relation include. [build] receives the current table
+  /// and returns a [TypedQuery] tagged with a [relationAttr] (the include key).
+  /// Returns a new [TypedQuery] with the include merged in; the original is
+  /// never mutated.
+  TypedQuery<E> include<R extends InstantTable<R>>(
+    TypedQuery<R> Function(E t) build,
+  ) {
+    final sub = build(table);
+    final attr = sub._relationAttr ?? sub.table.entityType;
+    final merged = <String, dynamic>{...?_includes, attr: sub._includeOptions()};
+    return _copyWith(includes: merged);
+  }
+
+  /// Builds the nested options map (no `$` wrapper, no entityType key).
+  Map<String, dynamic> _includeOptions() => {
+        if (_where != null) 'where': _where.toMap(),
+        if (_order != null) 'order': _order.toMap(),
+        if (_limit != null) 'limit': _limit,
+        if (_offset != null) 'offset': _offset,
+        if (_includes != null) 'include': _includes,
+      };
+
   /// Compile to the InstaQL map.
   Map<String, dynamic> toQuery() {
     final options = <String, dynamic>{
@@ -197,6 +231,7 @@ class TypedQuery<E extends InstantTable<E>> {
       if (_limit != null) 'limit': _limit,
       if (_offset != null) 'offset': _offset,
       if (_fields != null) 'fields': _fields.map((c) => c.name).toList(),
+      if (_includes != null) 'include': _includes,
     };
     return {
       table.entityType: {r'$': options},
