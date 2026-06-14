@@ -224,6 +224,7 @@ class QueryEngine {
         entityType,
         entityQuery,
         syncedOnly: syncedOnly,
+        relationPageInfo: pageInfo,
       );
       results[entityType] = entities;
       final pi = _lastPageInfo[entityType];
@@ -237,6 +238,7 @@ class QueryEngine {
     String entityType,
     Map<String, dynamic> query, {
     bool syncedOnly = false,
+    Map<String, dynamic>? relationPageInfo,
   }) async {
     // Check sync engine cache first for immediate data availability
     if (_syncEngine != null) {
@@ -311,7 +313,11 @@ class QueryEngine {
 
     // Process includes (nested queries)
     if (include != null) {
-      entities = await _processIncludes(entities, include);
+      entities = await _processIncludes(
+        entities, include,
+        pathPrefix: entityType,
+        relationPageInfo: relationPageInfo,
+      );
     }
 
     if (usePaginate) {
@@ -338,8 +344,10 @@ class QueryEngine {
 
   Future<List<Map<String, dynamic>>> _processIncludes(
     List<Map<String, dynamic>> entities,
-    Map<String, dynamic> includes,
-  ) async {
+    Map<String, dynamic> includes, {
+    String? pathPrefix,
+    Map<String, dynamic>? relationPageInfo,
+  }) async {
     for (final entity in entities) {
       for (final includeEntry in includes.entries) {
         final relationName = includeEntry.key;
@@ -397,14 +405,22 @@ class QueryEngine {
                 fields:
                     (relationQuery['fields'] as List?)?.cast<String>(),
               );
-              out =
-                  page.items; // per-relation page.pageInfo deferred (nested-4)
+              out = page.items;
+              if (relationPageInfo != null && pathPrefix != null) {
+                relationPageInfo['$pathPrefix.$relationName'] = page.pageInfo;
+              }
             }
           }
           final nestedInclude =
               relationQuery?['include'] as Map<String, dynamic>?;
           if (nestedInclude != null) {
-            out = await _processIncludes(out, nestedInclude);
+            out = await _processIncludes(
+              out, nestedInclude,
+              pathPrefix: pathPrefix != null
+                  ? '$pathPrefix.$relationName'
+                  : relationName,
+              relationPageInfo: relationPageInfo,
+            );
           }
           entity[relationName] = out;
           continue;

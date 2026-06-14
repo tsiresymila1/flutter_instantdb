@@ -226,4 +226,102 @@ void main() {
       expect(todos.map((t) => t['n']).toList(), [1, 2]);
     });
   });
+
+  group('Include per-relation pageInfo (nested-4)', () {
+    late InstantDB db;
+
+    setUpAll(() {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    });
+
+    setUp(() async {
+      db = await InstantDB.init(
+        appId: 'test-app-id',
+        config: InstantConfig(
+          syncEnabled: false,
+          persistenceDir:
+              'test_n4_${DateTime.now().microsecondsSinceEpoch}',
+        ),
+      );
+      // Seed: one goal (g1) linked to three ordered todos (n=1,2,3).
+      await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
+      await db.transact(
+          db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
+      await db.transact(
+          db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
+      await db.transact(
+          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
+      await db.transact(
+          db.tx['goals']['g1'].link({'todos': ['t1', 't2', 't3']}));
+    });
+
+    tearDown(() async => db.dispose());
+
+    test('paginated relation surfaces composite pageInfo', () async {
+      final r = await db.queryOnce({
+        'goals': {'include': {'todos': {'order': {'n': 'asc'}, 'first': 1}}},
+      });
+      final pi = r.pageInfo?['goals.todos'];
+      expect(pi, isNotNull);
+      expect(pi!['hasNextPage'], true);
+      expect(pi['hasPreviousPage'], false);
+      expect(pi['startCursor'], 't1');
+      expect(pi['endCursor'], 't1');
+    });
+
+    test('second page via after cursor flips hasPreviousPage', () async {
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {
+              'order': {'n': 'asc'},
+              'after': 't1',
+              'first': 1,
+            },
+          },
+        },
+      });
+      final todos =
+          (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
+              .cast<Map<String, dynamic>>();
+      expect(todos.single['n'], 2);
+      final pi = r.pageInfo!['goals.todos']!;
+      expect(pi['hasPreviousPage'], true);
+    });
+
+    test('non-paginated include produces no composite pageInfo key', () async {
+      final r = await db.queryOnce({'goals': {'include': {'todos': {}}}});
+      expect(r.pageInfo?['goals.todos'], isNull);
+    });
+
+    test('deep nested paginated relation surfaces a dotted-path key', () async {
+      // Seed g9 + td9 linked to g9; tg9/tg10/tg11 linked to td9.
+      await db.transact(db.tx['goals']['g9'].update({'title': 'G'}));
+      await db.transact(db.tx['todos']['td9'].update({'title': 'T'}));
+      await db.transact(
+          db.tx['tags']['tg9'].update({'label': 'alpha'}));
+      await db.transact(
+          db.tx['tags']['tg10'].update({'label': 'beta'}));
+      await db.transact(
+          db.tx['tags']['tg11'].update({'label': 'gamma'}));
+      await db.transact(
+          db.tx['todos']['td9'].link({'tags': ['tg9', 'tg10', 'tg11']}));
+      await db.transact(db.tx['goals']['g9'].link({'todos': ['td9']}));
+
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {
+            'todos': {
+              'include': {
+                'tags': {'first': 1, 'order': {'label': 'asc'}},
+              },
+            },
+          },
+        },
+      });
+      expect(r.pageInfo?['goals.todos.tags'], isNotNull);
+      expect(r.pageInfo!['goals.todos.tags']!['hasNextPage'], true);
+    });
+  });
 }
