@@ -52,6 +52,70 @@ const schema = i.schema({
 export default schema;
 ''';
 
+const dartModelsSrc = '''
+import 'package:flutter_instantdb/flutter_instantdb.dart';
+
+part 'app_schema.instant.dart';
+
+@InstantModel('todos')
+class Todo {
+  final String id;
+  final String text;
+  final bool completed;
+  final num createdAt;
+  const Todo({
+    required this.id,
+    required this.text,
+    required this.completed,
+    required this.createdAt,
+  });
+}
+''';
+
+// todos.owner -> users (to-one); users.todos -> todos (to-many)
+const linkTs = '''
+const schema = i.schema({
+  entities: {
+    users: i.entity({
+      name: i.string(),
+    }),
+    todos: i.entity({
+      text: i.string(),
+    }),
+  },
+  links: {
+    todoOwner: {
+      forward: { on: 'todos', has: 'one', label: 'owner' },
+      reverse: { on: 'users', has: 'many', label: 'todos' },
+    },
+  },
+  rooms: {},
+});
+export default schema;
+''';
+
+// todos.author -> \$users (system); only the user-side field should appear.
+const sysLinkTs = '''
+const schema = i.schema({
+  entities: {
+    "\$users": i.entity({
+      email: i.string().optional(),
+    }),
+    todos: i.entity({
+      text: i.string(),
+    }),
+  },
+  links: {
+    todoAuthor: {
+      forward: { on: 'todos', has: 'one', label: 'author' },
+      reverse: { on: '\$users', has: 'many', label: 'authoredTodos' },
+    },
+  },
+  rooms: {},
+});
+export default schema;
+''';
+
 void main() {
   group('parseInstantTs', () {
     test('parses i.schema entities + modifiers + system flag', () {
@@ -126,6 +190,74 @@ void main() {
       expect(dart, contains('class Todo'));
       expect(dart, contains('class Tile'));
       expect(dart, contains('class Message'));
+    });
+  });
+
+  group('parseDartModels + emitInstantTs (Dart -> TS)', () {
+    test('emits instant.schema.ts from Dart models', () {
+      final ts = emitInstantTs(parseDartModels(dartModelsSrc));
+      expect(ts, contains("import { i } from '@instantdb/react'"));
+      expect(ts, contains('todos: i.entity({'));
+      expect(ts, contains('i.boolean()'));
+      expect(ts, contains('i.string().unique()')); // id
+      expect(ts, contains('export default schema'));
+      expect(ts, contains('i.number()')); // createdAt
+    });
+
+    test('@InstantField(unique/indexed) round-trips to modifiers', () {
+      final ts = emitInstantTs(parseDartModels(
+        "@InstantModel('users') class User { final String id; "
+        "@InstantField('email', unique: true, indexed: true) final String email; "
+        "const User({required this.id, required this.email}); }",
+      ));
+      expect(ts, contains('i.string().unique().indexed()'));
+    });
+  });
+
+  group('links round-trip', () {
+    test('forward/reverse <-> @InstantLink both sides', () {
+      final s = parseInstantTs(linkTs);
+      final dart = emitDart(s);
+      expect(dart, contains('@InstantLink()'));
+      expect(dart, contains('User? owner')); // to-one
+      expect(dart, contains('List<Todo> todos')); // to-many
+
+      final ts2 = emitInstantTs(parseDartModels(dart));
+      expect(ts2, contains('links: {'));
+      expect(ts2, contains("has: 'one'"));
+      expect(ts2, contains("has: 'many'"));
+    });
+
+    test('system-entity link emits only the user-side @InstantLink', () {
+      final dart = emitDart(parseInstantTs(sysLinkTs));
+      expect(dart, contains('User? author'));
+      expect(dart, isNot(contains('class User')));
+      // no reverse field landing on a system entity
+      expect(dart, isNot(contains('authoredTodos')));
+    });
+  });
+
+  group('round-trip stability', () {
+    test('TS -> Dart -> TS preserves user entities', () {
+      final s1 = parseInstantTs(todosTs);
+      final ts2 = emitInstantTs(parseDartModels(emitDart(s1)));
+      final s2 = parseInstantTs(ts2);
+      expect(
+        s2.entities.map((e) => e.name),
+        containsAll(
+          s1.entities.where((e) => !e.system).map((e) => e.name),
+        ),
+      );
+      // field types preserved (number -> num -> number)
+      final todos2 = s2.entities.firstWhere((e) => e.name == 'todos');
+      expect(
+        todos2.fields.firstWhere((f) => f.name == 'createdAt').instantType,
+        'number',
+      );
+      expect(
+        todos2.fields.firstWhere((f) => f.name == 'completed').instantType,
+        'boolean',
+      );
     });
   });
 }

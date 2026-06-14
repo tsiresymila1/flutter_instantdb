@@ -222,8 +222,9 @@ FieldDef? _parseField(String name, String value) {
 }
 
 LinkDef? _parseLink(String name, String value) {
-  final forward = _extractObjectValue(value, 'forward');
-  final reverse = _extractObjectValue(value, 'reverse');
+  final body = _stripOuterBraces(value);
+  final forward = _extractObjectValue(body, 'forward');
+  final reverse = _extractObjectValue(body, 'reverse');
   if (forward == null || reverse == null) return null;
 
   String? on(String obj) =>
@@ -262,23 +263,25 @@ String emitDart(SchemaDef schema, {String partBase = 'app_schema'}) {
     final fromSys = _isSystem(link.fromEntity, entitiesByName);
     final toSys = _isSystem(link.toEntity, entitiesByName);
 
-    // Forward field lives on fromEntity, points at toEntity.
+    // Forward field lives on fromEntity, points at toEntity. Its cardinality
+    // is the forward `has` (fromMany): has:'one' -> T?, has:'many' -> List<T>.
     if (!fromSys) {
       linkFields.putIfAbsent(link.fromEntity, () => []).add(
             _LinkFieldEmit(
               label: link.fromLabel,
               targetClass: classNameFor(link.toEntity),
-              many: link.toMany,
+              many: link.fromMany,
             ),
           );
     }
-    // Reverse field lives on toEntity, points at fromEntity.
+    // Reverse field lives on toEntity, points at fromEntity. Cardinality is the
+    // reverse `has` (toMany).
     if (!toSys) {
       linkFields.putIfAbsent(link.toEntity, () => []).add(
             _LinkFieldEmit(
               label: link.toLabel,
               targetClass: classNameFor(link.fromEntity),
-              many: link.fromMany,
+              many: link.toMany,
             ),
           );
     }
@@ -394,6 +397,316 @@ class _LinkFieldEmit {
     required this.targetClass,
     required this.many,
   });
+}
+
+// ============================================================================
+// Dart -> SchemaDef  (parseDartModels)
+// ============================================================================
+
+const _dartToInstant = {
+  'String': 'string',
+  'int': 'number',
+  'double': 'number',
+  'num': 'number',
+  'bool': 'boolean',
+  'DateTime': 'date',
+};
+
+/// Parse a Dart source file of `@InstantModel` classes into a [SchemaDef].
+///
+/// Supported subset: one `@InstantModel('ns')` per class, simple
+/// `final <type> <name>;` fields, optional `@InstantField(...)` /
+/// `@InstantLink(...)` annotations on the field above.
+SchemaDef parseDartModels(String dartSource) {
+  final entities = <EntityDef>[];
+  // Map className -> namespace, for resolving link targets.
+  final classToName = <String, String>{};
+
+  final modelRe = RegExp(r"@InstantModel\(\s*'([^']*)'\s*\)");
+  // Pre-pass: collect class->namespace.
+  for (final m in modelRe.allMatches(dartSource)) {
+    final ns = m.group(1)!;
+    final after = dartSource.substring(m.end);
+    final classMatch =
+        RegExp(r'class\s+(\w+)').firstMatch(after);
+    if (classMatch != null) {
+      classToName[classMatch.group(1)!] = ns;
+    }
+  }
+
+  // Track link fields keyed by owning entity for later pairing.
+  final rawLinks = <_RawLink>[];
+
+  for (final m in modelRe.allMatches(dartSource)) {
+    final ns = m.group(1)!;
+    final after = dartSource.substring(m.end);
+    final classMatch = RegExp(r'class\s+(\w+)').firstMatch(after);
+    if (classMatch == null) continue;
+    final className = classMatch.group(1)!;
+
+    // Find class body braces.
+    final braceStart = after.indexOf('{', classMatch.end);
+    if (braceStart < 0) continue;
+    final braceEnd = _matchBrace(after, braceStart);
+    if (braceEnd < 0) continue;
+    final body = after.substring(braceStart + 1, braceEnd);
+
+    final fields = <FieldDef>[];
+    _parseDartFields(
+      body,
+      ownerEntity: ns,
+      ownerClass: className,
+      classToName: classToName,
+      fields: fields,
+      rawLinks: rawLinks,
+    );
+
+    entities.add(EntityDef(
+      name: ns,
+      className: className,
+      system: ns.startsWith(r'$'),
+      fields: fields,
+    ));
+  }
+
+  final links = _pairDartLinks(rawLinks, classToName);
+  return SchemaDef(entities: entities, links: links);
+}
+
+class _RawLink {
+  final String ownerEntity;
+  final String label;
+  final String targetEntity; // resolved namespace
+  final bool many;
+  _RawLink({
+    required this.ownerEntity,
+    required this.label,
+    required this.targetEntity,
+    required this.many,
+  });
+}
+
+void _parseDartFields(
+  String body, {
+  required String ownerEntity,
+  required String ownerClass,
+  required Map<String, String> classToName,
+  required List<FieldDef> fields,
+  required List<_RawLink> rawLinks,
+}) {
+  // Field declaration with optional preceding annotations on the same/prior
+  // line(s): match `final <type> <name>;` and look back for annotations.
+  final fieldRe = RegExp(
+    r'final\s+([\w<>,\s]+?)([?])?\s+(\w+)\s*;',
+  );
+
+  for (final fm in fieldRe.allMatches(body)) {
+    final rawType = fm.group(1)!.trim();
+    final nullable = fm.group(2) == '?';
+    final fieldName = fm.group(3)!;
+
+    // Look back for annotations immediately preceding this field.
+    final preceding = body.substring(0, fm.start);
+    final fieldAnn = _lastFieldAnnotation(preceding);
+    final isLink = _hasLinkAnnotation(preceding);
+
+    if (isLink) {
+      final (targetClass, many) = _linkTarget(rawType);
+      final targetNs = classToName[targetClass] ?? targetClass;
+      rawLinks.add(_RawLink(
+        ownerEntity: ownerEntity,
+        label: fieldName,
+        targetEntity: targetNs,
+        many: many,
+      ));
+      continue;
+    }
+
+    final instantType = _instantTypeForDart(rawType);
+    final attr = fieldAnn?.name ?? fieldName;
+    final isId = fieldName == 'id';
+    fields.add(FieldDef(
+      name: attr,
+      instantType: instantType,
+      dartType: _dartTypeFor(instantType),
+      optional: nullable,
+      unique: (fieldAnn?.unique ?? false) || isId,
+      indexed: fieldAnn?.indexed ?? false,
+      codegenSupported: _isCodegenSupported(instantType),
+    ));
+  }
+}
+
+/// Resolve link target: `List<Todo>` -> (`Todo`, many); `User?`/`User` ->
+/// (`User`, one).
+(String, bool) _linkTarget(String rawType) {
+  final listMatch = RegExp(r'List<\s*(\w+)\s*>').firstMatch(rawType);
+  if (listMatch != null) return (listMatch.group(1)!, true);
+  final bare = rawType.replaceAll('?', '').trim();
+  return (bare, false);
+}
+
+String _instantTypeForDart(String rawType) {
+  final t = rawType.replaceAll('?', '').trim();
+  if (t.startsWith('Map<')) return 'json';
+  return _dartToInstant[t] ?? 'json';
+}
+
+class _FieldAnn {
+  final String name;
+  final bool unique;
+  final bool indexed;
+  _FieldAnn(this.name, this.unique, this.indexed);
+}
+
+/// Parse the closest preceding `@InstantField(...)` to a field, if any.
+_FieldAnn? _lastFieldAnnotation(String preceding) {
+  // Only consider an annotation that is the last token before the field
+  // (allowing whitespace / @InstantLink between is handled by link path).
+  final matches =
+      RegExp(r'@InstantField\(([^)]*)\)').allMatches(preceding).toList();
+  if (matches.isEmpty) return null;
+  final last = matches.last;
+  // Ensure nothing but whitespace/other-annotations between it and field end.
+  final tail = preceding.substring(last.end).trim();
+  if (tail.isNotEmpty && !tail.startsWith('@')) return null;
+  final args = last.group(1)!;
+  final nameMatch = RegExp(r"'([^']*)'").firstMatch(args);
+  final name = nameMatch?.group(1) ?? '';
+  final unique = RegExp(r'unique\s*:\s*true').hasMatch(args);
+  final indexed = RegExp(r'indexed\s*:\s*true').hasMatch(args);
+  return _FieldAnn(name, unique, indexed);
+}
+
+bool _hasLinkAnnotation(String preceding) {
+  final matches =
+      RegExp(r'@InstantLink\([^)]*\)').allMatches(preceding).toList();
+  if (matches.isEmpty) return false;
+  final last = matches.last;
+  final tail = preceding.substring(last.end).trim();
+  return tail.isEmpty || tail.startsWith('@');
+}
+
+/// Pair reciprocal `@InstantLink` fields into [LinkDef]s; dedupe; synthesize a
+/// reverse (`has:'many'`) when only one side is declared.
+List<LinkDef> _pairDartLinks(
+  List<_RawLink> raw,
+  Map<String, String> classToName,
+) {
+  final links = <LinkDef>[];
+  final used = <int>{};
+
+  for (var i = 0; i < raw.length; i++) {
+    if (used.contains(i)) continue;
+    final a = raw[i];
+    // Find a reciprocal: b.owner == a.target && b.target == a.owner.
+    int? matchIdx;
+    for (var j = i + 1; j < raw.length; j++) {
+      if (used.contains(j)) continue;
+      final b = raw[j];
+      if (b.ownerEntity == a.targetEntity &&
+          b.targetEntity == a.ownerEntity) {
+        matchIdx = j;
+        break;
+      }
+    }
+
+    if (matchIdx != null) {
+      final b = raw[matchIdx];
+      used.add(matchIdx);
+      links.add(LinkDef(
+        name: '${a.ownerEntity}${_cap(a.label)}',
+        fromEntity: a.ownerEntity,
+        fromLabel: a.label,
+        fromMany: a.many,
+        toEntity: a.targetEntity,
+        toLabel: b.label,
+        toMany: b.many,
+      ));
+    } else {
+      // Synthesize the reverse: a has-(one/many) target; reverse is many,
+      // labeled by the owner entity name.
+      links.add(LinkDef(
+        name: '${a.ownerEntity}${_cap(a.label)}',
+        fromEntity: a.ownerEntity,
+        fromLabel: a.label,
+        fromMany: a.many,
+        toEntity: a.targetEntity,
+        toLabel: a.ownerEntity,
+        toMany: true,
+      ));
+    }
+  }
+  return links;
+}
+
+String _cap(String s) =>
+    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+// ============================================================================
+// SchemaDef -> TS  (emitInstantTs)
+// ============================================================================
+
+/// Emit `instant.schema.ts` source from a [SchemaDef].
+///
+/// [includeSystem] re-emits `$`-prefixed system entities (off by default, since
+/// instant-cli manages them).
+String emitInstantTs(SchemaDef schema, {bool includeSystem = false}) {
+  final buf = StringBuffer();
+  buf.writeln("import { i } from '@instantdb/react';");
+  buf.writeln();
+  buf.writeln('const schema = i.schema({');
+  buf.writeln('  entities: {');
+
+  for (final e in schema.entities) {
+    if (e.system && !includeSystem) continue;
+    final name = _tsKey(e.name);
+    buf.writeln('    $name: i.entity({');
+    for (final f in _fieldsWithId(e)) {
+      buf.writeln('      ${_tsKey(f.name)}: ${_tsFieldExpr(f)},');
+    }
+    buf.writeln('    }),');
+  }
+
+  buf.writeln('  },');
+
+  // Links.
+  buf.writeln('  links: {');
+  for (final l in schema.links) {
+    final fromSys = l.fromEntity.startsWith(r'$');
+    final toSys = l.toEntity.startsWith(r'$');
+    // Skip links entirely between two system entities.
+    if (fromSys && toSys) continue;
+    buf.writeln('    ${l.name}: {');
+    buf.writeln(
+        "      forward: { on: '${l.fromEntity}', has: '${l.fromMany ? 'many' : 'one'}', label: '${l.fromLabel}' },");
+    buf.writeln(
+        "      reverse: { on: '${l.toEntity}', has: '${l.toMany ? 'many' : 'one'}', label: '${l.toLabel}' },");
+    buf.writeln('    },');
+  }
+  buf.writeln('  },');
+
+  buf.writeln('  rooms: {},');
+  buf.writeln('});');
+  buf.writeln();
+  buf.writeln('export type AppSchema = typeof schema;');
+  buf.writeln('export default schema;');
+  return buf.toString();
+}
+
+/// TS object key: quote `$`-prefixed names, leave plain identifiers bare.
+String _tsKey(String name) {
+  if (RegExp(r'^[A-Za-z_]\w*$').hasMatch(name)) return name;
+  return '"$name"';
+}
+
+String _tsFieldExpr(FieldDef f) {
+  final base = 'i.${f.instantType}()';
+  final mods = StringBuffer();
+  if (f.unique) mods.write('.unique()');
+  if (f.indexed) mods.write('.indexed()');
+  if (f.optional) mods.write('.optional()');
+  return '$base$mods';
 }
 
 // ============================================================================
@@ -574,6 +887,16 @@ int _skipString(String src, int start) {
 }
 
 bool _isSpace(String c) => c == ' ' || c == '\t' || c == '\n' || c == '\r';
+
+/// Strip a single matched pair of outer `{ }` (with surrounding whitespace).
+String _stripOuterBraces(String s) {
+  final t = s.trim();
+  if (t.startsWith('{')) {
+    final close = _matchBrace(t, 0);
+    if (close == t.length - 1) return t.substring(1, close);
+  }
+  return t;
+}
 
 String _unquote(String s) {
   final t = s.trim();
