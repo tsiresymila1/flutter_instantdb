@@ -1,8 +1,9 @@
 # schema-io — instant.schema.ts ⇆ Dart `@InstantModel` converter
 
-Status: design. `bin/schema.dart` shells out to `instant-cli` for pull/push but
-leaves the **TS ⇆ Dart conversion unimplemented** (TODOs in `_pullSchema`,
-`_pushSchema`, `_diffSchema`). This builds a pure-Dart converter and wires it in.
+Status: implemented. `bin/schema.dart` shells out to `instant-cli` for pull/push
+and now performs the **TS ⇆ Dart conversion** via the pure-Dart converter in
+`lib/src/schema/instant_schema_io.dart` (offline `to-dart`/`to-ts` subcommands
+plus pull/push wiring; `diff` is a best-effort normalized line diff).
 
 ## Goal
 

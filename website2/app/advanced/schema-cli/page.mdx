@@ -1,0 +1,71 @@
+---
+title: Schema CLI (TS ⇆ Dart)
+description: Convert instant.schema.ts to and from Dart @InstantModel classes
+
+---
+
+The `schema` CLI (`bin/schema.dart`) converts between InstantDB's
+`instant.schema.ts` and Dart `@InstantModel` classes — the input to the code
+generator. It is pure Dart (no analyzer, no extra dependencies).
+
+## Commands
+
+```bash
+# Cloud round-trips (wrap instant-cli)
+dart run instantdb_flutter:schema pull   # instant-cli pull → convert TS to Dart
+dart run instantdb_flutter:schema push   # convert Dart to TS → instant-cli push
+
+# Offline conversion (no cloud / npx)
+dart run instantdb_flutter:schema to-dart instant.schema.ts -s lib/schema/app_schema.dart
+dart run instantdb_flutter:schema to-ts -s lib/schema/app_schema.dart
+
+# Best-effort normalized diff of the Dart schema vs instant.schema.ts
+dart run instantdb_flutter:schema diff -s lib/schema/app_schema.dart
+```
+
+After `pull`/`to-dart`, run `dart run build_runner build` to regenerate the
+typed tables.
+
+## Type mapping
+
+| `instant.schema.ts` | Dart                    | Notes |
+|---------------------|-------------------------|-------|
+| `i.string()`        | `String`                | |
+| `i.number()`        | `num`                   | `int`/`double`/`num` all collapse to `i.number()` on export |
+| `i.boolean()`       | `bool`                  | |
+| `i.json()`          | `Map<String, dynamic>?` | always nullable + optional ctor param |
+| `i.date()`          | `DateTime?`             | always nullable + optional ctor param |
+
+- `.optional()` → nullable Dart type + optional constructor parameter.
+- Every entity gets a required `final String id`.
+- `$`-prefixed system entities (`$users`, `$files`) are not emitted as Dart
+  classes; they only resolve as link targets.
+
+## Modifiers and constraints
+
+`@InstantField` carries `unique` / `indexed` so constraints survive the round
+trip:
+
+```dart
+@InstantModel('users')
+class User {
+  final String id;
+  @InstantField('email', unique: true, indexed: true)
+  final String email;
+  const User({required this.id, required this.email});
+}
+```
+
+emits `email: i.string().unique().indexed()`. The code generator ignores these
+flags.
+
+## Links
+
+TS `links` (forward/reverse) map to paired `@InstantLink` fields:
+
+- `has: 'one'` → `T?`
+- `has: 'many'` → `List<T>`
+
+The side of a link that lands on a system entity is skipped. On export,
+reciprocal links are deduped and a `has: 'many'` reverse is synthesized when only
+one side is declared — so hand-tuned link names may change.
