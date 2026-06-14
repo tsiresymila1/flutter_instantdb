@@ -33,7 +33,9 @@ class TypedTx<E extends InstantTable<E>> {
   TransactionChunk createFromMap(Map<String, dynamic> data, {String? id}) =>
       EntityBuilder(_type).create({...data, if (id != null) 'id': id});
 
-  /// Build an update op from a whole attribute map.
+  /// Build an update op from a whole attribute map. A generated `toMap` includes
+  /// the `id` attribute; an `id` in [data] duplicates the entity id but is
+  /// harmless (reconstruction skips the `id` attribute).
   TransactionChunk updateFromMap(String id, Map<String, dynamic> data,
           {TxOpts? opts}) =>
       EntityInstanceBuilder(_type, id)

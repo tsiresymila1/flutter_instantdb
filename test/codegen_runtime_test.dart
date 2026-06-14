@@ -71,6 +71,24 @@ void main() {
       expect(got.single.weight, 7);
     });
 
+    test('updateModel round-trips a changed field', () async {
+      await db.transact(
+        db.txFor(Widget2Table()).createModel(
+              const Widget2(id: 'wu', name: 'Before', weight: 1, gadgets: []),
+            ),
+      );
+      await db.transact(
+        db.txFor(Widget2Table()).updateModel(
+              'wu',
+              const Widget2(id: 'wu', name: 'After', weight: 2, gadgets: []),
+            ),
+      );
+      final got =
+          await Widget2Table().query().where((t) => t.id.eq('wu')).getAll(db);
+      expect(got.single.name, 'After');
+      expect(got.single.weight, 2);
+    });
+
     test('linkRel links via the generated RelationRef', () async {
       await db.transact(db.tx['gadgets']['g1'].update({'label': 'A'}));
       await db.transact(
