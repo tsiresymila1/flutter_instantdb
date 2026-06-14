@@ -13,3 +13,61 @@
 .dark {
   --color-fd-primary: #78c4ff;
 }
+
+/* ---- Landing page ------------------------------------------------------- */
+.grad-text {
+  background: linear-gradient(100deg, #78c4ff, #2f7bff 45%, #ffb057);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* atmospheric hero background: azure glow + faint grid, masked to the top */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 120%;
+  background:
+    radial-gradient(45% 40% at 50% 0%, rgba(47, 123, 255, 0.25), transparent 70%),
+    radial-gradient(30% 30% at 82% 8%, rgba(255, 176, 87, 0.12), transparent 70%);
+  filter: blur(6px);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(127, 127, 127, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127, 127, 127, 0.08) 1px, transparent 1px);
+  background-size: 54px 54px;
+  -webkit-mask-image: radial-gradient(60% 60% at 50% 30%, #000, transparent 80%);
+  mask-image: radial-gradient(60% 60% at 50% 30%, #000, transparent 80%);
+}
+
+/* code window */
+.code-window {
+  box-shadow: 0 40px 90px -50px rgba(0, 0, 0, 0.7);
+}
+.code-window .tok-key { color: #78c4ff; }
+.code-window .tok-str { color: #7ee787; }
+.code-window .tok-com { color: var(--color-fd-muted-foreground); }
+.code-window .tok-fn { color: #ffb057; }
+.code-window .tok-typ { color: #d2a8ff; }
+
+@keyframes fid-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fid-rise { animation: fid-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fid-rise { animation: none; }
+}

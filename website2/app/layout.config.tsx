@@ -11,4 +11,15 @@ export const baseOptions: BaseLayoutProps = {
     transparentMode: 'top',
   },
   githubUrl: 'https://github.com/tsiresymila1/flutter_instantdb',
+  links: [
+    {
+      text: 'Documentation',
+      url: '/docs',
+      active: 'nested-url',
+    },
+    {
+      text: 'Quick Start',
+      url: '/docs/getting-started/quick-start',
+    },
+  ],
 };
