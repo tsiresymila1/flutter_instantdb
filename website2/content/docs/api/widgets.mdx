@@ -160,6 +160,93 @@ AuthGuard(
 )
 ```
 
+### `OAuthButton`
+
+A drop-in OAuth sign-in button. Builds an authorization URL (PKCE on by default) and hands the `OAuthFlow` to `onLaunch`; your app opens it and calls `db.auth.exchangeCodeForToken`. Does not bundle `url_launcher`.
+
+```dart
+OAuthButton(
+  provider: OAuthProvider.google, // default label/color/icon
+  clientName: 'google',           // OAuth client from the dashboard
+  redirectUri: 'myapp://oauth',
+  onLaunch: (flow) async {
+    final result = await FlutterWebAuth2.authenticate(
+      url: flow.url, callbackUrlScheme: 'myapp');
+    final code = Uri.parse(result).queryParameters['code']!;
+    await db.auth.exchangeCodeForToken(
+      code: code, codeVerifier: flow.codeVerifier);
+  },
+)
+```
+
+`OAuthProvider` values: `google`, `apple`, `github`, `linkedin`, `clerk`, `firebase`. Override the preset with `label`, `color`, or `icon`; pass `scopes` or `usePKCE: false` as needed. See [User Management](/docs/auth/users#oauth-sign-in).
+
+## Presence Widgets
+
+Reactive equivalents of InstantDB's React presence hooks. Each joins the room and rebuilds on change. See [Presence System](/docs/realtime/presence#reactive-presence-widgets).
+
+### `PresenceBuilder`
+
+Equivalent of `usePresence`. Rebuilds on peer presence changes.
+
+```dart
+PresenceBuilder(
+  roomId: 'doc-42',
+  initialPresence: {'name': 'Alice'},
+  builder: (context, room, peers) => Text('${peers.length} online'),
+)
+```
+
+### `TopicListener`
+
+Equivalent of `useTopicEffect`. Side-effect widget; renders `child`.
+
+```dart
+TopicListener(
+  roomId: 'doc-42',
+  topic: 'emoji',
+  onEvent: (data) => _showFloatingEmoji(data['emoji']),
+  child: const Editor(),
+)
+```
+
+### `TypingIndicatorBuilder`
+
+Rebuilds with the current typing peers.
+
+```dart
+TypingIndicatorBuilder(
+  roomId: 'doc-42',
+  builder: (context, typing) =>
+      typing.isEmpty ? const SizedBox() : Text('${typing.length} typing…'),
+)
+```
+
+### `ReactionsBuilder`
+
+Rebuilds with the live list of reactions.
+
+```dart
+ReactionsBuilder(
+  roomId: 'doc-42',
+  builder: (context, reactions) =>
+      Wrap(children: [for (final r in reactions) Text(r.emoji)]),
+)
+```
+
+### `CursorOverlay`
+
+Multiplayer cursor layer — Flutter equivalent of `<Cursors>`.
+
+```dart
+CursorOverlay(
+  roomId: 'doc-42',
+  userName: 'Alice',
+  userColor: '#E91E63',
+  child: const Canvas(),
+)
+```
+
 ## Connection Widgets
 
 ### `ConnectionStatusBuilder`

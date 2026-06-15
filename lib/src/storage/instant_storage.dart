@@ -39,12 +39,19 @@ class InstantStorage {
   final AuthManager _authManager;
   final Dio _dio;
 
+  /// Runs an InstaQL query once. Injected by [InstantDB] so [list] can read the
+  /// `$files` namespace through the same reactive/sync pipeline as data queries.
+  final Future<QueryResult> Function(Map<String, dynamic> query)?
+      _queryDelegate;
+
   InstantStorage({
     required this.appId,
     required this.baseUrl,
     required AuthManager authManager,
+    Future<QueryResult> Function(Map<String, dynamic> query)? queryDelegate,
     Dio? dio,
   })  : _authManager = authManager,
+        _queryDelegate = queryDelegate,
         _dio = dio ??
             Dio(BaseOptions(
               baseUrl: baseUrl,
@@ -121,6 +128,50 @@ class InstantStorage {
     } on DioException catch (e) {
       throw _error(e, 'Failed to get download url');
     }
+  }
+
+  /// List uploaded files by querying the `$files` namespace.
+  ///
+  /// Mirrors @instantdb/core, where files are entities you read with a normal
+  /// query (`db.useQuery({ $files: {} })`). Pass [where] / [order] / [limit] /
+  /// [offset] to filter and page. Requires sync to be enabled so the `$files`
+  /// namespace is populated.
+  ///
+  /// ```dart
+  /// final files = await db.storage.list(order: {'serverCreatedAt': 'desc'});
+  /// ```
+  Future<List<InstantFile>> list({
+    Map<String, dynamic>? where,
+    Map<String, dynamic>? order,
+    int? limit,
+    int? offset,
+  }) async {
+    if (_queryDelegate == null) {
+      throw InstantException(
+        message: 'Storage.list requires an initialized InstantDB query engine',
+        code: 'storage_error',
+      );
+    }
+    final result = await _queryDelegate(<String, dynamic>{
+      r'$files': <String, dynamic>{
+        if (where != null) 'where': where,
+        if (order != null) 'order': order,
+        if (limit != null) 'limit': limit,
+        if (offset != null) 'offset': offset,
+      },
+    });
+    if (result.hasError) {
+      throw InstantException(
+        message: result.error ?? 'Failed to list files',
+        code: 'storage_error',
+      );
+    }
+    final rows = result.data?[r'$files'];
+    if (rows is! List) return const [];
+    return rows
+        .whereType<Map>()
+        .map((e) => InstantFile.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
   }
 
   /// Delete the file at [path].

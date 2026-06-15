@@ -112,6 +112,7 @@ class InstantDB {
         appId: appId,
         baseUrl: config.baseUrl!,
         authManager: _authManager,
+        queryDelegate: (q) => queryOnce(q),
       );
       // Initialize presence manager first (without sync engine)
       _presenceManager = PresenceManager(
@@ -263,6 +264,60 @@ class InstantDB {
       entityType: entityType,
       pageSize: pageSize,
     );
+  }
+
+  /// Count entities of [entityType], optionally filtered by [where].
+  ///
+  /// Convenience over the `$aggregate` query form:
+  /// `db.queryOnce({type: {'where': ..., r'$aggregate': {'count': '*'}}})`.
+  Future<int> count(String entityType, {Map<String, dynamic>? where}) async {
+    final result = await aggregate(
+      entityType,
+      aggregates: const {'count': '*'},
+      where: where,
+    );
+    if (result.isEmpty) return 0;
+    final value = result.first['count'];
+    return value is num ? value.toInt() : 0;
+  }
+
+  /// Run aggregate functions over [entityType].
+  ///
+  /// [aggregates] maps a function (`count`, `sum`, `avg`, `min`, `max`) to the
+  /// field it operates on (use `'*'` for `count`). When [groupBy] is given, one
+  /// row is returned per group with the group fields plus the computed values;
+  /// otherwise a single summary row is returned.
+  ///
+  /// ```dart
+  /// final byStatus = await db.aggregate(
+  ///   'todos',
+  ///   aggregates: {'count': '*', 'avg': 'priority'},
+  ///   groupBy: ['status'],
+  /// );
+  /// ```
+  Future<List<Map<String, dynamic>>> aggregate(
+    String entityType, {
+    required Map<String, dynamic> aggregates,
+    Map<String, dynamic>? where,
+    List<String>? groupBy,
+  }) async {
+    final result = await queryOnce({
+      entityType: {
+        if (where != null) 'where': where,
+        r'$aggregate': aggregates,
+        if (groupBy != null) r'$groupBy': groupBy,
+      },
+    });
+    if (result.hasError) {
+      throw InstantException(
+        message: result.error ?? 'Aggregate query failed',
+        code: 'aggregate_error',
+      );
+    }
+    final rows = result.data?[entityType];
+    return rows is List
+        ? rows.whereType<Map>().map(Map<String, dynamic>.from).toList()
+        : const [];
   }
 
   /// Execute a transaction with operations or transaction chunk

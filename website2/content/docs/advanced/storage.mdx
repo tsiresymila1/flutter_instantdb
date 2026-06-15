@@ -47,6 +47,32 @@ Delete the file at a path.
 await db.storage.delete('avatars/ada.png');
 ```
 
+### `list`
+
+List uploaded files by reading the `$files` namespace through the query
+pipeline. Pass `where`, `order`, `limit`, and `offset` to filter and page.
+Requires sync to be enabled so the `$files` namespace is populated.
+
+```dart
+Future<List<InstantFile>> list({
+  Map<String, dynamic>? where,
+  Map<String, dynamic>? order,
+  int? limit,
+  int? offset,
+});
+```
+
+```dart
+final files = await db.storage.list(
+  order: {'serverCreatedAt': 'desc'},
+  limit: 50,
+);
+
+for (final f in files) {
+  print('${f.path} (${f.size} bytes)');
+}
+```
+
 ## The `InstantFile` model
 
 `uploadFile` returns an `InstantFile` describing the stored file:

@@ -1,4 +1,4 @@
 {
   "title": "Queries",
-  "pages": ["basics", "operators", "pagination"]
+  "pages": ["basics", "operators", "aggregations", "pagination"]
 }

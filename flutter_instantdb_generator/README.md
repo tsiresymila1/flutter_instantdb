@@ -18,7 +18,7 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.4.13
-  flutter_instantdb_generator: ^0.1.0
+  flutter_instantdb_generator: ^0.2.0
 ```
 
 ## Usage

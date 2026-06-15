@@ -397,6 +397,51 @@ class TodosWithErrorBoundary extends StatelessWidget {
 }
 ```
 
+## Collaboration Widgets
+
+Flutter InstantDB ships reactive widgets that mirror InstantDB's React presence hooks. Each resolves the client via `InstantProvider.of(context)`, joins the room, and rebuilds on change.
+
+```dart
+// usePresence — rebuilds on peer presence changes
+PresenceBuilder(
+  roomId: 'doc-42',
+  initialPresence: {'name': 'Alice'},
+  builder: (context, room, peers) => Text('${peers.length} online'),
+)
+
+// useTopicEffect — side-effect on ephemeral messages
+TopicListener(
+  roomId: 'doc-42',
+  topic: 'emoji',
+  onEvent: (data) => _showFloatingEmoji(data['emoji']),
+  child: const Editor(),
+)
+
+// typing peers
+TypingIndicatorBuilder(
+  roomId: 'doc-42',
+  builder: (context, typing) =>
+      typing.isEmpty ? const SizedBox() : Text('${typing.length} typing…'),
+)
+
+// live reactions
+ReactionsBuilder(
+  roomId: 'doc-42',
+  builder: (context, reactions) =>
+      Wrap(children: [for (final r in reactions) Text(r.emoji)]),
+)
+
+// multiplayer cursors — Flutter equivalent of <Cursors>
+CursorOverlay(
+  roomId: 'doc-42',
+  userName: 'Alice',
+  userColor: '#E91E63',
+  child: const Canvas(),
+)
+```
+
+See [Presence System](/docs/realtime/presence) for the full reference.
+
 ## Next Steps
 
 Learn more about Flutter InstantDB widgets and patterns:

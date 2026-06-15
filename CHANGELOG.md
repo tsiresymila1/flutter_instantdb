@@ -1,4 +1,22 @@
 
+## 2.1.0 - 2026-06-15
+
+### Aggregations
+- **`db.count(entityType, {where})`** and **`db.aggregate(entityType, {aggregates, where, groupBy})`** convenience APIs (`count`/`sum`/`avg`/`min`/`max`, optional `groupBy`). Fixed the cache/sync query path so `$aggregate`/`$groupBy` are honored over cached data instead of returning raw rows.
+
+### Storage
+- **`db.storage.list({where, order, limit, offset})`** lists files via the `$files` namespace (requires sync enabled).
+
+### Auth / OAuth
+- **`db.auth.createAuthorizationUrl({clientName, redirectUri, usePKCE, scopes})`** builds the OAuth redirect-flow URL with PKCE (S256), returning `OAuthFlow{url, codeVerifier, state}`.
+- **Provider helpers**: `signInWithGoogle` / `signInWithApple` / `signInWithClerk` / `signInWithFirebase` (wrap `signInWithIdToken`).
+
+### Reactive widgets
+- New collaboration widgets (Flutter equivalents of React hooks): **`PresenceBuilder`** (`usePresence`), **`TopicListener`** (`useTopicEffect`), **`TypingIndicatorBuilder`**, **`ReactionsBuilder`**, **`CursorOverlay`** (`<Cursors>`), and **`OAuthButton`** (provider sign-in).
+
+### Docs
+- Documentation site now serves `/llms.txt` (index) and `/llms-full.txt` (full docs) generated from the docs content. Rewrote the README. Documented the typed link API without code generation.
+
 ## 2.0.0 - 2026-06-14
 
 ### Internal: store/sync refactor (no behavior change)

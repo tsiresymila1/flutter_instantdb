@@ -1,0 +1,90 @@
+---
+title: Aggregations
+description: Count, sum, average, min, and max over your data with db.count and db.aggregate
+---
+
+Flutter InstantDB can compute aggregates server-side instead of fetching every row and reducing on the client. Use `db.count` for the common case, or `db.aggregate` for sums, averages, grouped results, and more.
+
+## Counting
+
+`db.count` returns the number of matching records as a `Future<int>`:
+
+```dart
+// Count all todos
+final total = await db.count('todos');
+
+// Count with a where clause
+final remaining = await db.count('todos', where: {'done': false});
+```
+
+## Aggregate functions
+
+`db.aggregate` runs one or more aggregate functions over an entity type:
+
+```dart
+Future<List<Map<String, dynamic>>> aggregate(
+  String entityType, {
+  required Map<String, dynamic> aggregates,
+  Map<String, dynamic>? where,
+  List<String>? groupBy,
+});
+```
+
+The `aggregates` map pairs a function with the field it operates on. Supported functions are `count`, `sum`, `avg`, `min`, and `max`. For `count`, use `'*'` as the field.
+
+```dart
+// Single summary row: { 'count': 42, 'avg': 2.3 }
+final summary = await db.aggregate('todos', aggregates: {
+  'count': '*',
+  'avg': 'priority',
+});
+final row = summary.first;
+print('${row['count']} todos, avg priority ${row['avg']}');
+```
+
+### Filtering
+
+Pass `where` to aggregate over a subset:
+
+```dart
+final highPriority = await db.aggregate('todos',
+  aggregates: {'count': '*'},
+  where: {'priority': {'\$gte': 3}},
+);
+```
+
+### Grouping
+
+With `groupBy`, you get one row per group containing the group fields plus the computed values. Without it, a single summary row is returned.
+
+```dart
+// One row per status: [{'status': 'open', 'count': 12, 'avg': 2.1}, ...]
+final byStatus = await db.aggregate('todos',
+  aggregates: {'count': '*', 'avg': 'priority'},
+  groupBy: ['status'],
+);
+
+for (final row in byStatus) {
+  print('${row['status']}: ${row['count']} (avg ${row['avg']})');
+}
+```
+
+## Raw query form
+
+`db.count` and `db.aggregate` are convenience wrappers over the `$aggregate` query form. You can also use it directly with `queryOnce`:
+
+```dart
+final result = await db.queryOnce({
+  'todos': {
+    'where': {'done': false},
+    r'$aggregate': {'count': '*'},
+    r'$groupBy': ['status'],
+  },
+});
+```
+
+## Next Steps
+
+- [Basic Queries](/docs/queries/basics) - Filtering, sorting, and reactive queries
+- [Operators](/docs/queries/operators) - Comparison and logical operators for `where`
+- [Pagination & Fields](/docs/queries/pagination) - Cursor pagination and projection

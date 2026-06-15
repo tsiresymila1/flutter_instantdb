@@ -606,6 +606,83 @@ Widget buildUserCount(int count) {
 }
 ```
 
+## Reactive Presence Widgets
+
+These widgets are the Flutter equivalents of InstantDB's React presence hooks. Each resolves the client via `InstantProvider.of(context)`, joins the room for you, and rebuilds on change.
+
+### PresenceBuilder
+
+Equivalent of React `usePresence`. Joins the room, publishes `initialPresence`, rebuilds whenever a peer's presence changes, and leaves on dispose. The `InstantRoom` handle is passed to the builder so children can call `room.setPresence(...)`.
+
+```dart
+PresenceBuilder(
+  roomId: 'doc-42',
+  initialPresence: {'name': 'Alice'},
+  builder: (context, room, peers) => Text('${peers.length} online'),
+)
+```
+
+### TopicListener
+
+Equivalent of React `useTopicEffect`. A side-effect widget that subscribes to a topic and invokes `onEvent` for each message, rendering `child` unchanged.
+
+```dart
+TopicListener(
+  roomId: 'doc-42',
+  topic: 'emoji',
+  onEvent: (data) => _showFloatingEmoji(data['emoji']),
+  child: const Editor(),
+)
+```
+
+### TypingIndicatorBuilder
+
+Rebuilds with the current set of typing peers keyed by id.
+
+```dart
+TypingIndicatorBuilder(
+  roomId: 'doc-42',
+  builder: (context, typing) =>
+      typing.isEmpty ? const SizedBox() : Text('${typing.length} typing…'),
+)
+```
+
+### ReactionsBuilder
+
+Rebuilds with the live list of reactions broadcast in the room.
+
+```dart
+ReactionsBuilder(
+  roomId: 'doc-42',
+  builder: (context, reactions) => Wrap(
+    children: [for (final r in reactions) Text(r.emoji)],
+  ),
+)
+```
+
+### CursorOverlay
+
+Multiplayer cursor layer — the Flutter equivalent of InstantDB's `<Cursors>`. Wrap any content; it tracks the local pointer via `MouseRegion`, publishes it, and paints peers' cursors on top.
+
+```dart
+CursorOverlay(
+  roomId: 'doc-42',
+  userName: 'Alice',
+  userColor: '#E91E63',
+  child: const Canvas(),
+)
+```
+
+Provide a `cursorBuilder` to customize how remote cursors render:
+
+```dart
+CursorOverlay(
+  roomId: 'doc-42',
+  cursorBuilder: (context, cursor) => Icon(Icons.navigation, color: Colors.pink),
+  child: const Canvas(),
+)
+```
+
 ## Next Steps
 
 Learn more about building collaborative features:

@@ -16,6 +16,7 @@ jobs:
   publish-main:
     if: ${{ startsWith(github.ref_name, 'v') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write # required for pub.dev OIDC
     steps:
@@ -28,11 +29,14 @@ jobs:
       # (The suite has 5 known-flaky database_closed teardown cases that would
       # otherwise block release.)
       - name: Publish
-        run: flutter pub publish --force
+        # </dev/null so a missing OIDC trust fails fast instead of hanging on
+        # the interactive credential prompt.
+        run: flutter pub publish --force < /dev/null
 
   publish-generator:
     if: ${{ startsWith(github.ref_name, 'generator-v') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write # required for pub.dev OIDC
     defaults:

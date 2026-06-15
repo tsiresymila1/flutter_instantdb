@@ -4,11 +4,14 @@ import 'package:flutter_instantdb/flutter_instantdb.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'pages/aggregations_page.dart';
 import 'pages/auth_page.dart';
 import 'pages/avatars_page.dart';
+import 'pages/collab_widgets_page.dart';
 import 'pages/cursors_page.dart';
 import 'pages/custom_cursors_page.dart';
 import 'pages/reactions_page.dart';
+import 'pages/storage_page.dart';
 import 'pages/tile_game_page.dart';
 
 // Import all example pages
@@ -190,6 +193,24 @@ class _ExamplesNavigationScreenState extends State<ExamplesNavigationScreen> {
       icon: Icons.grid_on_outlined,
       color: Colors.red,
       widget: TileGamePage(),
+    ),
+    _ExampleConfig(
+      title: 'Aggregations',
+      icon: Icons.functions,
+      color: Colors.cyan,
+      widget: AggregationsPage(),
+    ),
+    _ExampleConfig(
+      title: 'Collab',
+      icon: Icons.groups_outlined,
+      color: Colors.pink,
+      widget: CollabWidgetsPage(),
+    ),
+    _ExampleConfig(
+      title: 'Storage',
+      icon: Icons.folder_outlined,
+      color: Colors.brown,
+      widget: StoragePage(),
     ),
   ];
 

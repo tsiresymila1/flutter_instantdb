@@ -9,6 +9,7 @@ import '../storage/storage_interface.dart';
 import '../sync/sync_engine.dart';
 import 'where_matcher.dart';
 import 'pagination.dart';
+import '../storage/triple_query_eval.dart' show processAggregations;
 
 /// Query engine that executes InstaQL queries reactively
 class QueryEngine {
@@ -633,6 +634,15 @@ class QueryEngine {
     final offset = query['offset'] as int?;
     if (offset != null && offset > 0) {
       filteredData = filteredData.skip(offset).toList();
+    }
+
+    // Apply aggregations last so cached/synced data honors $aggregate/$groupBy
+    // the same way the store path does (otherwise an aggregate query over
+    // cached data would return raw rows instead of the computed totals).
+    final aggregate = query['\$aggregate'] as Map<String, dynamic>?;
+    if (aggregate != null) {
+      final groupBy = (query['\$groupBy'] as List?)?.cast<String>();
+      return processAggregations(filteredData, aggregate, groupBy);
     }
 
     return filteredData;

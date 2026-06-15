@@ -72,6 +72,75 @@ For each `@InstantLink` field the generator emits:
       const <Gadget>[],
   ```
 
+## Without code generation
+
+The generator is a convenience, not a requirement. The whole typed layer — `Col`,
+`RelationRef`, `InstantTable`, `TypedQuery`, `TypedTx` — is plain Dart you can write by
+hand. A relation is just a `RelationRef<TargetTable>('storedAttr')`; linking is just an
+`update(...).link({attr: id})` under the hood.
+
+Declare the tables yourself: extend `InstantTable<Self>`, expose columns as
+`static const Col<T>` fields, and expose each relation as a
+`static const RelationRef<TargetTable>`:
+
+```dart
+class UserTable extends InstantTable<UserTable> {
+  UserTable() : super('users');
+  static const id = Col<String>('id');
+  static const name = Col<String>('name');
+}
+
+class TodoTable extends InstantTable<TodoTable> {
+  TodoTable() : super('todos');
+  static const id = Col<String>('id');
+  static const text = Col<String>('text');
+  static const done = Col<bool>('done');
+
+  // Relation handle — no generator needed. 'author' is the stored attribute.
+  static const authorRel = RelationRef<UserTable>('author');
+}
+```
+
+### Linking and unlinking
+
+`TypedTx` gives you two link APIs — neither needs generated code:
+
+```dart
+final todos = db.txFor(TodoTable());
+
+// Typed: pass the RelationRef you declared above. `targetIds` is one id or a List.
+await db.transact(todos.linkRel(todoId, TodoTable.authorRel, userId));
+await db.transact(todos.unlinkRel(todoId, TodoTable.authorRel, userId));
+
+// Untyped: pass the relation attribute as a plain string.
+await db.transact(todos.link(todoId, 'author', userId));
+await db.transact(todos.unlink(todoId, 'author', userId));
+```
+
+Both compile to the same `update(todoId).link({'author': userId})` op, so the fully
+untyped form works too if you skip `TypedTx` entirely:
+
+```dart
+await db.transact(db.update(todoId).link({'author': userId}));
+```
+
+### Including a relation by hand
+
+Without a generated relation accessor, build the included sub-query with the
+`relationAttr:` constructor argument — that string becomes the include key:
+
+```dart
+final q = TodoTable().query().include(
+      (t) => TypedQuery<UserTable>(UserTable(), relationAttr: 'author'),
+    );
+final r = await db.queryOnceTyped(q);
+// r.documents[i]['author'] holds the linked user map.
+```
+
+You read results from the raw `r.documents` maps (the recursively-typed `fromRow` is the
+only piece you give up by not generating). Reach for the generator when you want
+`fromRow`, typed relation accessor getters, and `toMap` written for you.
+
 ## Typed includes
 
 Use `TypedQuery.include((t) => t.relation...)` to fetch related entities. The relation

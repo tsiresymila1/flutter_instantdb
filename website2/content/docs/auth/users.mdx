@@ -333,6 +333,80 @@ class MainApp extends StatelessWidget {
 }
 ```
 
+## OAuth Sign-In
+
+InstantDB supports OAuth providers (Google, Apple, GitHub, LinkedIn, Clerk, Firebase) through either the redirect flow or provider-specific ID token helpers.
+
+### Redirect Flow
+
+Build an authorization URL, open it, and exchange the returned `code` for a session. PKCE (S256) is enabled by default.
+
+```dart
+// 1. Build the authorization URL
+final flow = db.auth.createAuthorizationUrl(
+  clientName: 'google',          // OAuth client name from the InstantDB dashboard
+  redirectUri: 'myapp://oauth',  // must match an allowed redirect for the client
+  scopes: ['email', 'profile'],  // optional
+);
+
+// 2. Open flow.url (url_launcher, flutter_web_auth_2, in-app webview, ...)
+//    On redirect you receive ?code=...
+
+// 3. Exchange the code for a session
+await db.auth.exchangeCodeForToken(
+  code: code,
+  codeVerifier: flow.codeVerifier,
+);
+```
+
+`createAuthorizationUrl` returns an `OAuthFlow`:
+
+```dart
+class OAuthFlow {
+  final String url;
+  final String? codeVerifier; // pass back to exchangeCodeForToken
+  final String? state;
+}
+```
+
+### Provider ID Token Helpers
+
+If you already have an ID token from a provider's native SDK (e.g. `google_sign_in`, `sign_in_with_apple`), pass it directly. Each helper wraps `signInWithIdToken` and takes the dashboard `clientName`.
+
+```dart
+await db.auth.signInWithGoogle(idToken: googleIdToken);   // clientName defaults to 'google'
+await db.auth.signInWithApple(idToken: appleIdToken);     // clientName defaults to 'apple'
+await db.auth.signInWithClerk(idToken: clerkToken, clientName: 'clerk');
+await db.auth.signInWithFirebase(idToken: firebaseToken, clientName: 'firebase');
+```
+
+Google and Apple also accept an optional `nonce`.
+
+### OAuthButton Widget
+
+`OAuthButton` is a drop-in sign-in button. It builds the authorization URL and hands the `OAuthFlow` to your `onLaunch` callback — your app opens the URL (it does **not** bundle `url_launcher`) and calls `exchangeCodeForToken` on return.
+
+```dart
+OAuthButton(
+  provider: OAuthProvider.google,
+  clientName: 'google',
+  redirectUri: 'myapp://oauth',
+  onLaunch: (flow) async {
+    final result = await FlutterWebAuth2.authenticate(
+      url: flow.url,
+      callbackUrlScheme: 'myapp',
+    );
+    final code = Uri.parse(result).queryParameters['code']!;
+    await db.auth.exchangeCodeForToken(
+      code: code,
+      codeVerifier: flow.codeVerifier,
+    );
+  },
+)
+```
+
+`OAuthProvider` supplies a default label, color, and icon for `google`, `apple`, `github`, `linkedin`, `clerk`, and `firebase`. Override with `label`, `color`, or `icon`, and pass `scopes` or `usePKCE: false` as needed.
+
 ## Best Practices
 
 ### 1. Handle Authentication States

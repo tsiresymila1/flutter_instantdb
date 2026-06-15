@@ -13,6 +13,9 @@ export 'src/schema/schema.dart';
 // Reactive widget exports
 export 'src/reactive/instant_builder.dart';
 export 'src/reactive/presence.dart';
+export 'src/reactive/presence_widgets.dart';
+export 'src/reactive/auth_widgets.dart';
+export 'src/auth/auth_manager.dart' show AuthManager, OAuthFlow;
 
 // Query engine exports
 export 'src/query/query_engine.dart';
