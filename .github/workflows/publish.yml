@@ -1,10 +1,13 @@
 name: Publish to pub.dev
 
 # Triggered by tags pushed from release-tag.yml. Uses pub.dev automated
-# publishing (OIDC) — no tokens stored. REQUIRED ONE-TIME SETUP on pub.dev:
-#   flutter_instantdb           -> Admin -> Automated publishing -> GitHub Actions
-#     repository: tsiresymila1/flutter_instantdb, tag pattern: v{{version}}
-#   flutter_instantdb_generator -> same, tag pattern: generator-v{{version}}
+# publishing (OIDC) — no tokens stored. REQUIRED ONE-TIME SETUP on pub.dev
+# (package Admin -> Automated publishing -> Publishing from GitHub Actions):
+#   flutter_instantdb           -> repository: tsiresymila1/flutter_instantdb
+#                                  tag pattern: v{{version}}
+#   flutter_instantdb_generator -> same repository, tag pattern: generator-v{{version}}
+# Leave "Require GitHub Actions environment" UNCHECKED (these jobs set no
+# environment). If you check it, add a matching `environment:` to the job below.
 
 on:
   push:
@@ -13,26 +16,18 @@ on:
       - 'generator-v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
+  # Main package: use Dart's official reusable publish workflow. It performs the
+  # GitHub -> pub.dev OIDC token exchange and fails fast on misconfig (no
+  # interactive auth prompt / 15-minute hang).
   publish-main:
     if: ${{ startsWith(github.ref_name, 'v') }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
     permissions:
       id-token: write # required for pub.dev OIDC
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-      - run: flutter pub get
-      # Tests run pre-merge; the publish job only ships an already-merged tag.
-      # (The suite has 5 known-flaky database_closed teardown cases that would
-      # otherwise block release.)
-      - name: Publish
-        # </dev/null so a missing OIDC trust fails fast instead of hanging on
-        # the interactive credential prompt.
-        run: flutter pub publish --force < /dev/null
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
 
+  # Generator subpackage: kept custom because the root .pubignore must be
+  # stripped before the archive is built, which the reusable workflow can't do.
+  # `timeout 180` makes an OIDC misconfig fail in 3 min instead of hanging 15.
   publish-generator:
     if: ${{ startsWith(github.ref_name, 'generator-v') }}
     runs-on: ubuntu-latest
@@ -54,4 +49,4 @@ jobs:
       - run: dart pub get
       - run: dart test
       - name: Publish
-        run: dart pub publish --force
+        run: timeout 180 dart pub publish --force
