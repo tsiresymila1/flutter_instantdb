@@ -1,4 +1,9 @@
 
+## 2.2.0 - 2026-06-15
+
+### CI / release
+- Main package now publishes through the official `dart-lang/setup-dart` reusable workflow (proper GitHub→pub.dev OIDC token exchange, fails fast instead of hanging on interactive auth). Generator publish keeps a 180s timeout guard.
+
 ## 2.1.0 - 2026-06-15
 
 ### Aggregations
