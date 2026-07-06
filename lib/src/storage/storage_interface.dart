@@ -47,6 +47,9 @@ abstract class StorageInterface {
   /// Same name returns the same id across restarts; different names differ.
   Future<String> getLocalId(String name);
 
+  /// Distinct entity-type names present in the store (for the devtool explorer).
+  Future<List<String>> listNamespaces();
+
   /// Close the store and clean up resources
   Future<void> close();
 }

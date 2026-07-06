@@ -126,6 +126,17 @@ extension _TripleStoreApply on TripleStore {
         // Add operation with data map
         if (operation.data != null) {
           for (final entry in operation.data!.entries) {
+            // Retract any existing value for this scalar attribute first, so a
+            // re-created / re-synced entity doesn't accumulate duplicate triples
+            // (which queryEntities would surface as a spurious List). Mirrors the
+            // update path; relations use link/unlink, not add.
+            await txn.update(
+              'triples',
+              {'retracted': 1},
+              where: 'entity_id = ? AND attribute = ? AND retracted = FALSE',
+              whereArgs: [operation.entityId, entry.key],
+            );
+
             await txn.insert('triples', {
               'entity_id': operation.entityId,
               'attribute': entry.key,

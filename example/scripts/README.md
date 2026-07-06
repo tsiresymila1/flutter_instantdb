@@ -9,22 +9,23 @@ This directory contains InstantDB schema and permissions files for server-side c
 
 ## Usage
 
-These files are managed via the justfile commands from the project root:
+Run the InstantDB CLI from this directory (it reads `instant.schema.ts` and
+`instant.perms.ts` from the current folder). Use your app id from the Flutter
+app's `.env` (`INSTANTDB_API_ID`).
 
 ```bash
-# Push schema to InstantDB server
-just schema-push
+cd example/scripts
 
-# Pull current schema from server
-just schema-pull  
+# One-time login
+npx instant-cli@latest login
 
-# Validate schema files locally
-just schema-validate
+# Push BOTH schema and permissions (no subcommand = both).
+# Perms MUST be pushed or storage uploads fail with `not-has-permission`.
+npx instant-cli@latest push --app <YOUR_APP_ID>
 
-# Check schema status
-just schema-status
+# Pull the live schema/perms back down
+npx instant-cli@latest pull --app <YOUR_APP_ID>
 ```
 
-## No Dependencies Required
-
-These scripts use `npx` to run the InstantDB CLI directly without requiring local Node.js dependencies or a `package.json` file. This keeps the Flutter project clean and eliminates the need for `node_modules`.
+> The Dart helper (`dart run bin/schema.dart push`) only pushes the **schema**.
+> To apply `instant.perms.ts` you must run `instant-cli push` (or `push perms`).

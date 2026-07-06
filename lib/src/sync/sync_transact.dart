@@ -291,66 +291,27 @@ extension _SyncTransact on SyncEngine {
                     // id handled above; skip type marker
                     if (attrName == '__type' || attrName == 'id') continue;
 
-                    // Look up the attribute ID from cache
-                    String? attrId = _attributeCache[ns]?[attrName];
-
-                    if (attrId != null) {
-                      // Use known attribute UUID
-                      txSteps.add([
-                        'add-triple',
-                        op.entityId,
-                        attrId,
-                        attrValue,
-                      ]);
-                      InstantDBLogging.root.debug(
-                        'Added tx-step for $ns.$attrName = $attrValue (UUID: $attrId)',
-                      );
-                    } else {
-                      // Fail loudly instead of silently skipping
-                      final errorMsg =
-                          'Unknown attribute $ns.$attrName - not in attribute cache. '
-                          'This may indicate the schema is out of sync or the attribute '
-                          'was created by another client. Available attributes for $ns: '
-                          '${_attributeCache[ns]?.keys.join(", ") ?? "none"}';
-
-                      InstantDBLogging.root.severe(errorMsg);
-
-                      throw InstantException(
-                        message: errorMsg,
-                        code: 'missing_attribute',
-                      );
-                    }
+                    // Resolve (or auto-create) the attribute UUID.
+                    final attrId = _resolveAttr(ns, attrName, txSteps);
+                    txSteps.add([
+                      'add-triple',
+                      op.entityId,
+                      attrId,
+                      attrValue,
+                    ]);
                   }
                 }
                 // Legacy format support (for backwards compatibility)
                 else if (op.attribute != null && op.attribute != '__type') {
                   // Look up the attribute ID from cache
                   final ns = namespace ?? 'todos';
-                  String? attrId = _attributeCache[ns]?[op.attribute];
-
-                  if (attrId != null) {
-                    // Use known attribute UUID
-                    txSteps.add([
-                      'add-triple',
-                      op.entityId,
-                      attrId,
-                      op.value ?? '',
-                    ]);
-                  } else {
-                    // Fail loudly instead of silently skipping
-                    final errorMsg =
-                        'Unknown attribute ${op.attribute} for namespace $ns - not in attribute cache. '
-                        'This may indicate the schema is out of sync or the attribute '
-                        'was created by another client. Available attributes for $ns: '
-                        '${_attributeCache[ns]?.keys.join(", ") ?? "none"}';
-
-                    InstantDBLogging.root.severe(errorMsg);
-
-                    throw InstantException(
-                      message: errorMsg,
-                      code: 'missing_attribute',
-                    );
-                  }
+                  final attrId = _resolveAttr(ns, op.attribute!, txSteps);
+                  txSteps.add([
+                    'add-triple',
+                    op.entityId,
+                    attrId,
+                    op.value ?? '',
+                  ]);
                 }
               } else if (op.type == OperationType.update ||
                   op.type == OperationType.merge) {
@@ -365,25 +326,13 @@ extension _SyncTransact on SyncEngine {
                   for (final entry in op.data!.entries) {
                     final attrName = entry.key;
                     if (attrName == '__type' || attrName == 'id') continue;
-                    final attrId = _attributeCache[ns]?[attrName];
-                    if (attrId != null) {
-                      txSteps.add([
-                        'add-triple',
-                        op.entityId,
-                        attrId,
-                        entry.value,
-                      ]);
-                    } else {
-                      final errorMsg =
-                          'Unknown attribute $ns.$attrName in update - not in '
-                          'attribute cache. Available: '
-                          '${_attributeCache[ns]?.keys.join(", ") ?? "none"}';
-                      InstantDBLogging.root.severe(errorMsg);
-                      throw InstantException(
-                        message: errorMsg,
-                        code: 'missing_attribute',
-                      );
-                    }
+                    final attrId = _resolveAttr(ns, attrName, txSteps);
+                    txSteps.add([
+                      'add-triple',
+                      op.entityId,
+                      attrId,
+                      entry.value,
+                    ]);
                   }
                 }
                 // Legacy single-attribute form.
@@ -391,25 +340,13 @@ extension _SyncTransact on SyncEngine {
                   final ns = op.entityType.isNotEmpty
                       ? op.entityType
                       : (namespace ?? 'todos');
-                  final attrId = _attributeCache[ns]?[op.attribute];
-                  if (attrId != null) {
-                    txSteps.add([
-                      'add-triple',
-                      op.entityId,
-                      attrId,
-                      op.value ?? '',
-                    ]);
-                  } else {
-                    final errorMsg =
-                        'Unknown attribute ${op.attribute} for namespace $ns in '
-                        'update - not in attribute cache. Available: '
-                        '${_attributeCache[ns]?.keys.join(", ") ?? "none"}';
-                    InstantDBLogging.root.severe(errorMsg);
-                    throw InstantException(
-                      message: errorMsg,
-                      code: 'missing_attribute',
-                    );
-                  }
+                  final attrId = _resolveAttr(ns, op.attribute!, txSteps);
+                  txSteps.add([
+                    'add-triple',
+                    op.entityId,
+                    attrId,
+                    op.value ?? '',
+                  ]);
                 }
               } else if (op.type == OperationType.delete) {
                 // For deletes, we need to ensure entity ID is a proper string
@@ -556,12 +493,38 @@ extension _SyncTransact on SyncEngine {
   /// Emit the required `id` triple (entity id set as the `id` attribute) unless
   /// already present. InstantDB rejects a create without it.
   void _addIdTriple(List<dynamic> txSteps, String ns, String entityId) {
-    final idAttrId = _attributeCache[ns]?['id'];
-    if (idAttrId == null) return;
+    final idAttrId = _resolveAttr(ns, 'id', txSteps);
     final exists = txSteps.any((s) =>
         s is List && s.length >= 3 && s[0] == 'add-triple' && s[2] == idAttrId);
     if (!exists) {
       txSteps.add(['add-triple', entityId, idAttrId, entityId]);
     }
+  }
+
+  /// Cached attribute UUID for [ns].[attrName], creating it via an `add-attr`
+  /// tx-step (and caching it) when unknown. Mirrors @instantdb/core: a first
+  /// write to a new namespace/attribute provisions the attribute inline instead
+  /// of throwing — which previously turned such writes into a poison message
+  /// that jammed the whole sync queue. The server dedupes add-attr by
+  /// forward-identity (ns + label), so re-sending a known attr is harmless.
+  String _resolveAttr(String ns, String attrName, List<dynamic> txSteps) {
+    final cached = _attributeCache[ns]?[attrName];
+    if (cached != null) return cached;
+    final attrId = _uuid.v4();
+    final isId = attrName == 'id';
+    txSteps.add([
+      'add-attr',
+      {
+        'id': attrId,
+        'forward-identity': [_uuid.v4(), ns, attrName],
+        'value-type': 'blob',
+        'cardinality': 'one',
+        'unique?': isId,
+        'index?': isId,
+      },
+    ]);
+    (_attributeCache[ns] ??= {})[attrName] = attrId;
+    InstantDBLogging.root.info('Auto-created attribute $ns.$attrName ($attrId)');
+    return attrId;
   }
 }

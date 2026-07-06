@@ -87,7 +87,9 @@ class InstantStorage {
   }) async {
     final type = contentType ?? 'application/octet-stream';
     try {
-      final response = await _dio.post(
+      // InstantDB's /storage/upload expects PUT (a POST 200s but never stores
+      // the file). Matches @instantdb/core's uploadFile.
+      final response = await _dio.put(
         '/storage/upload',
         data: Stream<List<int>>.fromIterable([bytes]),
         options: Options(

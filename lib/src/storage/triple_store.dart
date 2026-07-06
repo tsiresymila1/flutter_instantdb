@@ -190,6 +190,31 @@ class TripleStore implements StorageInterface {
   }
 
   @override
+  Future<List<String>> listNamespaces() async {
+    final results = await _db.query(
+      'triples',
+      columns: ['value'],
+      where: 'attribute = ? AND retracted = FALSE',
+      whereArgs: ['__type'],
+      distinct: true,
+    );
+    final names = results
+        .map((row) {
+          final raw = row['value'];
+          // __type values are stored JSON-encoded (e.g. "\"todos\"").
+          try {
+            return jsonDecode(raw as String).toString();
+          } catch (_) {
+            return raw.toString();
+          }
+        })
+        .toSet()
+        .toList()
+      ..sort();
+    return names;
+  }
+
+  @override
   Future<String> getLocalId(String name) async {
     final key = 'localId:$name';
     return await _db.transaction((txn) async {

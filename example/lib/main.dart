@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pages/aggregations_page.dart';
+import 'pages/playground_page.dart';
 import 'pages/auth_page.dart';
 import 'pages/avatars_page.dart';
 import 'pages/collab_widgets_page.dart';
@@ -18,6 +19,38 @@ import 'pages/tile_game_page.dart';
 import 'pages/todos_page.dart';
 import 'pages/typing_page.dart';
 
+/// Mirrors example/scripts/instant.schema.ts. Only used so the devtool lists
+/// every table (todos, tiles, messages) even before any rows exist.
+final _exampleSchema = InstantSchema(
+  entities: {
+    'todos': InstantEntity(
+      validator: Schema.object({
+        'text': Schema.string(),
+        'completed': Schema.boolean(),
+        'createdAt': Schema.optional(Schema.number()),
+      }),
+    ),
+    'tiles': InstantEntity(
+      validator: Schema.object({
+        'row': Schema.number(),
+        'col': Schema.number(),
+        'userId': Schema.string(),
+        'userName': Schema.string(),
+        'color': Schema.number(),
+        'timestamp': Schema.number(),
+      }),
+    ),
+    'messages': InstantEntity(
+      validator: Schema.object({
+        'userId': Schema.string(),
+        'userName': Schema.string(),
+        'text': Schema.string(),
+        'timestamp': Schema.number(),
+      }),
+    ),
+  },
+);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -27,6 +60,9 @@ void main() async {
   final appId = dotenv.env['INSTANTDB_API_ID']!;
   final db = await InstantDB.init(
     appId: appId,
+    // Declaring the schema makes every table show in the devtool Explorer even
+    // when empty (the explorer lists schema entities, not just tables with rows).
+    schema: _exampleSchema,
     config: InstantConfig(
       syncEnabled: true, // Enable real-time sync
       verboseLogging: true, // Use the debug preference
@@ -47,7 +83,9 @@ class InstantDBExamplesApp extends StatelessWidget {
       child: MaterialApp(
         title: 'InstantDB Examples',
         theme: ThemeData(useMaterial3: true),
-        home: const ExamplesRootScreen(),
+        // Devtool must sit UNDER the Navigator (so it can open sheets/dialogs),
+        // so wrap the screen — not MaterialApp.builder, which is above it.
+        home: const InstantDevTool(child: ExamplesRootScreen()),
       ),
     );
   }
@@ -146,6 +184,12 @@ class _ExamplesNavigationScreenState extends State<ExamplesNavigationScreen> {
   String? _userIdSuffix;
 
   static const List<_ExampleConfig> _examples = [
+    _ExampleConfig(
+      title: 'Playground',
+      icon: Icons.science_outlined,
+      color: Colors.red,
+      widget: PlaygroundPage(),
+    ),
     _ExampleConfig(
       title: 'Todos',
       icon: Icons.checklist,
@@ -288,6 +332,24 @@ class _ExamplesNavigationScreenState extends State<ExamplesNavigationScreen> {
             },
           ),
         ],
+        // Scrollable top tabs (replaces the cramped bottom nav for 12+ pages).
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(46),
+          child: Container(
+            color: Colors.white,
+            height: 46,
+            alignment: Alignment.centerLeft,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (int i = 0; i < _examples.length; i++)
+                    _buildTab(i, currentExample.color),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
@@ -296,21 +358,38 @@ class _ExamplesNavigationScreenState extends State<ExamplesNavigationScreen> {
           child: currentExample.widget,
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: _examples.map((example) {
-          return BottomNavigationBarItem(
-            icon: Icon(example.icon),
-            label: example.title,
-          );
-        }).toList(),
-        currentIndex: _selectedIndex,
-        selectedItemColor: currentExample.color,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
-        backgroundColor: Colors.white,
-        elevation: 8,
+    );
+  }
+
+  Widget _buildTab(int i, Color activeColor) {
+    final example = _examples[i];
+    final selected = i == _selectedIndex;
+    final color = selected ? activeColor : Colors.grey;
+    return InkWell(
+      onTap: () => _onItemTapped(i),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: selected ? activeColor : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(example.icon, size: 18, color: color),
+            const SizedBox(width: 6),
+            Text(
+              example.title,
+              style: TextStyle(
+                color: color,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

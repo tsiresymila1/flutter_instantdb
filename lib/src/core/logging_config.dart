@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 /// Logging configuration for InstantDB with hierarchical loggers
@@ -35,7 +36,6 @@ class InstantDBLogging {
       if (enableHierarchical) {
         hierarchicalLoggingEnabled = true;
       }
-      Logger.root.onRecord.listen(_logHandler);
       _isConfigured = true;
     }
 
@@ -48,6 +48,8 @@ class InstantDBLogging {
     webSocket.level = level;
     transaction.level = level;
     auth.level = level;
+    Logger.root.onRecord.listen(_logHandler);
+    
 
     root.info('InstantDB logging configured for $_instanceId');
     root.info('Log level: ${level.name}, Hierarchical: $enableHierarchical');

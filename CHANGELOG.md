@@ -1,4 +1,19 @@
 
+## 2.2.2 - 2026-07-06
+
+### Fixed
+- **Sync queue no longer jams on unknown attributes.** A write to a namespace/attribute the client hadn't cached threw `missing_attribute` and was re-queued to the front forever, blocking every later transaction. Unknown attributes are now provisioned inline via `add-attr` (mirrors `@instantdb/core`), so first writes to a new namespace sync instead of poisoning the queue.
+- **`create` no longer accumulates duplicate scalar triples.** A local create plus the server echo left two triples for the same attribute, which surfaced as a spurious `List` (e.g. `type 'List<dynamic>' is not a subtype of 'int?'`). `add` now retracts the prior value first, mirroring `update` — creates are idempotent on re-sync.
+- **`storage.uploadFile` now uses `PUT`.** The InstantDB `/storage/upload` endpoint only stores on `PUT`; the previous `POST` returned 200 but never persisted the file.
+- **`aggregate` / `count` with `groupBy` no longer crash** with `type 'List<dynamic>' is not a subtype of 'List<String>'` on a reactive re-run (the query is read back via `jsonDecode`); `$groupBy` is now cast defensively.
+
+### Added
+- **`db.listNamespaces()`** — distinct entity-type names present in local storage.
+- **`InstantDevTool`** — a React-devtool-style draggable overlay: **Status** (appId / connection / user), **Explorer** (browse namespaces → rows → create/edit/delete), and **Query** (run raw InstaQL). Place it under the app's `Navigator`; gate with `kDebugMode`.
+
+### Example
+- New pages: **Playground** (exercises every flow), **Aggregations**, **Collaboration widgets**, **Storage**. Navigation moved from bottom nav to a scrollable top tab bar. Devtool wired in. Corrected `instant.schema.ts` / `instant.perms.ts` (adds `$files` permission so uploads work).
+
 ## 2.2.1 - 2026-06-15
 
 ### Fixed

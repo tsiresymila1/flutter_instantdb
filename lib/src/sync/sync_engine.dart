@@ -51,6 +51,15 @@ class SyncEngine {
   // Cache attribute UUIDs from InstantDB
   final Map<String, Map<String, String>> _attributeCache = {};
 
+  /// Namespaces the server has told us about (via add-attr), including system
+  /// tables like `$users` / `$files`. Used by the devtool to list all tables,
+  /// not just those with local rows.
+  List<String> get knownNamespaces => _attributeCache.keys.toList();
+
+  /// Attribute names the server has registered for [ns] (via add-attr).
+  List<String> attributesOf(String ns) =>
+      _attributeCache[ns]?.keys.toList() ?? const [];
+
   // Track our own client event IDs to avoid processing echoed transactions
   final Set<String> _sentEventIds = {};
 

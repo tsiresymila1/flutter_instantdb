@@ -291,12 +291,16 @@ class _TodosPageState extends State<TodosPage> {
             transformer: (data) {
               final todos = (data['todos'] as List)
                   .cast<Map<String, dynamic>>();
-              // Sort client-side by createdAt in descending order
-              todos.sort((a, b) {
-                final aTime = a['createdAt'] as int? ?? 0;
-                final bTime = b['createdAt'] as int? ?? 0;
-                return bTime.compareTo(aTime); // Descending order
-              });
+              // Sort client-side by createdAt in descending order. Coerce
+              // defensively: a triple attribute can come back as a List if
+              // legacy data has duplicates.
+              int createdAt(Map<String, dynamic> m) {
+                var v = m['createdAt'];
+                if (v is List) v = v.isEmpty ? null : v.last;
+                return v is num ? v.toInt() : 0;
+              }
+
+              todos.sort((a, b) => createdAt(b).compareTo(createdAt(a)));
               return todos;
             },
             loadingBuilder: (context) =>

@@ -291,7 +291,9 @@ class QueryEngine {
     final limit = usePaginate ? null : query['limit'] as int?;
     final offset = usePaginate ? null : query['offset'] as int?;
     final aggregate = query['\$aggregate'] as Map<String, dynamic>?;
-    final groupBy = query['\$groupBy'] as List<String>?;
+    // Cast defensively: a reactive re-run reads the query back via jsonDecode,
+    // which yields List<dynamic> (not List<String>).
+    final groupBy = (query['\$groupBy'] as List?)?.cast<String>();
 
     // Query entities from store
     var entities = await _store.queryEntities(

@@ -90,7 +90,7 @@ class InstantDB {
     try {
       // Configure the new hierarchical logging system
       InstantDBLogging.configure(
-        level: config.verboseLogging ? Level.FINE : Level.INFO,
+        level: config.verboseLogging ? Level.ALL : Level.INFO,
         enableHierarchical: true,
         instanceId: 'Instance-${DateTime.now().millisecondsSinceEpoch % 10000}',
       );
@@ -264,6 +264,57 @@ class InstantDB {
       entityType: entityType,
       pageSize: pageSize,
     );
+  }
+
+  /// All known namespaces (tables) for the devtool explorer: the union of
+  /// locally-stored types, schema-declared entities, server-known namespaces
+  /// (from the attribute cache, incl. system tables), plus the always-present
+  /// `$users` / `$files`. Sorted, so empty and system tables show up too — not
+  /// just the ones that already have local rows.
+  Future<List<String>> listNamespaces() async {
+    final names = <String>{
+      ...await _store.listNamespaces(),
+      ...?schema?.entities.keys,
+      ..._syncEngine.knownNamespaces,
+      r'$users',
+      r'$files',
+    };
+    return names.toList()..sort();
+  }
+
+  /// Known field names for [ns] (for the devtool's create/edit form), from the
+  /// declared schema plus the server-registered attributes. `id` / `__type` are
+  /// excluded (managed by the store). Empty until the schema is set or the
+  /// server has sent the namespace's attributes.
+  List<String> namespaceFields(String ns) {
+    final fields = <String>{};
+    final validator = schema?.entities[ns]?.validator;
+    if (validator is ObjectSchema) fields.addAll(validator.properties.keys);
+    fields.addAll(_syncEngine.attributesOf(ns));
+    fields
+      ..remove('id')
+      ..remove('__type');
+    return fields.toList()..sort();
+  }
+
+  /// Declared type of each field in [ns] (`'string'` | `'number'` | `'boolean'`),
+  /// from the schema, so the devtool form can render typed inputs. Empty when no
+  /// schema is set. Dates are stored as numbers, so a date field reads as
+  /// `'number'` (the devtool applies a name heuristic for the picker).
+  Map<String, String> namespaceFieldTypes(String ns) {
+    final validator = schema?.entities[ns]?.validator;
+    if (validator is! ObjectSchema) return const {};
+    String kindOf(SchemaValidator s) {
+      final inner = s is OptionalSchema ? s.schema : s;
+      if (inner is NumberSchema) return 'number';
+      if (inner is BooleanSchema) return 'boolean';
+      return 'string';
+    }
+
+    return {
+      for (final e in validator.properties.entries)
+        if (e.key != 'id' && e.key != '__type') e.key: kindOf(e.value),
+    };
   }
 
   /// Count entities of [entityType], optionally filtered by [where].

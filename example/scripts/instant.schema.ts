@@ -1,49 +1,45 @@
 import { i } from '@instantdb/react';
 
+// `id` is implicit on every entity — do NOT declare it here (the CLI rejects it).
 const schema = i.schema({
   entities: {
-    // System entities - required by InstantDB
-    "$files": i.entity({
-      "path": i.string().unique().indexed(),
-      "url": i.string().optional(),
+    // System entities.
+    $files: i.entity({
+      path: i.string().unique().indexed(),
+      url: i.string().optional(),
     }),
-    "$users": i.entity({
-      "email": i.string().unique().indexed().optional(),
+    $users: i.entity({
+      email: i.string().unique().indexed().optional(),
     }),
-    
-    // Todo items - for the TodosPage
+
+    // Todo items — TodosPage / Aggregations / Playground.
     todos: i.entity({
-      id: i.string().unique(),
       text: i.string(),
       completed: i.boolean(),
-      createdAt: i.number(),
+      createdAt: i.number().optional(),
     }),
-    
-    // Tile game tiles - for the TileGamePage collaborative painting
+
+    // Collaborative painting tiles — TileGamePage.
     tiles: i.entity({
-      id: i.string().unique(),
       row: i.number(),
-      col: i.number(), 
+      col: i.number(),
       userId: i.string(),
       userName: i.string(),
       color: i.number(),
       timestamp: i.number(),
     }),
-    
-    // Chat messages - for the TypingPage collaborative messaging  
+
+    // Chat messages — TypingPage.
     messages: i.entity({
-      id: i.string().unique(),
       userId: i.string(),
       userName: i.string(),
       text: i.string(),
       timestamp: i.number(),
     }),
   },
-  
   links: {},
   rooms: {},
 });
 
-// Export type for use in permissions
 export type AppSchema = typeof schema;
 export default schema;
