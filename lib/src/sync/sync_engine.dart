@@ -64,6 +64,11 @@ class SyncEngine {
   final Queue<Map<String, dynamic>> _pendingQueries =
       Queue<Map<String, dynamic>>();
 
+  // All active query subscriptions, keyed by their JSON. Re-sent on every
+  // (re)connect so subscriptions survive reconnects/re-authentication —
+  // otherwise a query subscribed before login stays pending forever.
+  final Map<String, Map<String, dynamic>> _activeQueries = {};
+
   // Track last processed data to avoid duplicates
   final Map<String, String> _lastProcessedData = {};
   int _refreshOkCount = 0;
@@ -128,6 +133,9 @@ class SyncEngine {
       'SyncEngine: sendQuery called with: ${jsonEncode(query)}',
     );
 
+    // Remember the subscription so it can be re-sent after any reconnect.
+    _activeQueries[jsonEncode(query)] = query;
+
     if (!_connectionStatus.value || _webSocket == null || !_webSocket.isOpen) {
       InstantDBLogging.root.debug(
         'SyncEngine: Cannot send query - WebSocket not connected, queuing for later (${_pendingQueries.length} already queued)',
@@ -136,6 +144,12 @@ class SyncEngine {
       return;
     }
 
+    _dispatchQuery(query);
+  }
+
+  /// Send an `add-query` subscription message on the open socket.
+  void _dispatchQuery(Map<String, dynamic> query) {
+    if (_webSocket == null || !_webSocket.isOpen) return;
     final clientEventId = _generateEventId();
     final queryMessage = {
       'op': 'add-query',
@@ -725,10 +739,15 @@ class SyncEngine {
   }
 
   void _processPendingQueries() {
-    InstantDBLogging.root.debug('Processing pending queries');
-    while (_pendingQueries.isNotEmpty) {
-      final query = _pendingQueries.removeFirst();
-      sendQuery(query);
+    // Re-subscribe every active query on the freshly authenticated session.
+    // The active set already includes anything that was queued while offline,
+    // so drop the pending queue to avoid double-sends.
+    _pendingQueries.clear();
+    InstantDBLogging.root.debug(
+      'Re-subscribing ${_activeQueries.length} active queries after init-ok',
+    );
+    for (final query in _activeQueries.values) {
+      _dispatchQuery(query);
     }
   }
 
