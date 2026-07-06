@@ -1,4 +1,9 @@
 
+## 2.2.1 - 2026-06-15
+
+### Fixed
+- `storage.uploadFile` no longer throws `Unexpected upload response shape`: the InstantDB upload endpoint returns 200 with an empty body, so the file record is synthesized from the path (resolve the URL via `getDownloadUrl` / `$files`). Also decode string-JSON responses in `uploadFile` / `getDownloadUrl`.
+
 ## 2.2.0 - 2026-06-15
 
 ### CI / release
