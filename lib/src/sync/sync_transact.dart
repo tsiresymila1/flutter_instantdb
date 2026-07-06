@@ -347,14 +347,45 @@ extension _SyncTransact on SyncEngine {
                     );
                   }
                 }
-              } else if (op.type == OperationType.update) {
-                if (op.attribute != null) {
-                  // Look up the attribute ID from cache
-                  final ns = namespace ?? 'todos';
-                  String? attrId = _attributeCache[ns]?[op.attribute];
-
+              } else if (op.type == OperationType.update ||
+                  op.type == OperationType.merge) {
+                // Data-map form (upsert): emit an add-triple per attribute,
+                // same as create. This is the common path (tx[...].update({...})).
+                if (op.data != null && op.data!.isNotEmpty) {
+                  final ns = op.entityType.isNotEmpty
+                      ? op.entityType
+                      : (namespace ?? 'todos');
+                  for (final entry in op.data!.entries) {
+                    final attrName = entry.key;
+                    if (attrName == '__type' || attrName == 'id') continue;
+                    final attrId = _attributeCache[ns]?[attrName];
+                    if (attrId != null) {
+                      txSteps.add([
+                        'add-triple',
+                        op.entityId,
+                        attrId,
+                        entry.value,
+                      ]);
+                    } else {
+                      final errorMsg =
+                          'Unknown attribute $ns.$attrName in update - not in '
+                          'attribute cache. Available: '
+                          '${_attributeCache[ns]?.keys.join(", ") ?? "none"}';
+                      InstantDBLogging.root.severe(errorMsg);
+                      throw InstantException(
+                        message: errorMsg,
+                        code: 'missing_attribute',
+                      );
+                    }
+                  }
+                }
+                // Legacy single-attribute form.
+                else if (op.attribute != null && op.attribute != '__type') {
+                  final ns = op.entityType.isNotEmpty
+                      ? op.entityType
+                      : (namespace ?? 'todos');
+                  final attrId = _attributeCache[ns]?[op.attribute];
                   if (attrId != null) {
-                    // Use known attribute UUID
                     txSteps.add([
                       'add-triple',
                       op.entityId,
@@ -362,15 +393,11 @@ extension _SyncTransact on SyncEngine {
                       op.value ?? '',
                     ]);
                   } else {
-                    // Fail loudly instead of silently skipping
                     final errorMsg =
-                        'Unknown attribute ${op.attribute} for namespace $ns in update - not in attribute cache. '
-                        'This may indicate the schema is out of sync or the attribute '
-                        'was created by another client. Available attributes for $ns: '
+                        'Unknown attribute ${op.attribute} for namespace $ns in '
+                        'update - not in attribute cache. Available: '
                         '${_attributeCache[ns]?.keys.join(", ") ?? "none"}';
-
                     InstantDBLogging.root.severe(errorMsg);
-
                     throw InstantException(
                       message: errorMsg,
                       code: 'missing_attribute',
