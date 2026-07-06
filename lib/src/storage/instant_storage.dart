@@ -125,6 +125,7 @@ class InstantStorage {
       final response = await _dio.get(
         '/storage/signed-download-url',
         queryParameters: {'app_id': appId, 'filename': path},
+        options: Options(headers: {..._authHeader()}),
       );
       final data = _decode(response.data);
       final url = (data is Map)
