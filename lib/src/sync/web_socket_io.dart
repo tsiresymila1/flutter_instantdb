@@ -28,7 +28,9 @@ class WebSocketAdapter {
     try {
       _webSocket.add(data);
     } catch (e) {
-      _logger.fine('WebSocket IO: send skipped (socket closing): $e');
+      InstantDBLogging.webSocket.fine(
+        'WebSocket IO: send skipped (socket closing): $e',
+      );
     }
   }
 
