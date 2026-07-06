@@ -10,6 +10,42 @@ import '../core/logging_config.dart';
 /// became an optional `log` parameter and `_attributeCache` became the
 /// `attributeCache` parameter. No logic was changed — only relocated.
 
+/// InstaQL option keys the server requires nested under `$`.
+const _instaqlOptionKeys = {
+  'where', 'order', 'limit', 'offset', 'first', 'last',
+  'after', 'before', 'cursor', 'fields', 'aggregate',
+};
+
+/// Normalize an InstaQL query so options (where/order/limit/…) sit under `$`,
+/// as the InstantDB server requires. Relations stay as direct keys (recursively
+/// normalized). Idempotent: an already-`$`-wrapped query is returned unchanged.
+Map<String, dynamic> normalizeInstaQL(Map<String, dynamic> query) {
+  final out = <String, dynamic>{};
+  query.forEach((entity, spec) {
+    out[entity] =
+        spec is Map<String, dynamic> ? _normalizeInstaQLSpec(spec) : spec;
+  });
+  return out;
+}
+
+Map<String, dynamic> _normalizeInstaQLSpec(Map<String, dynamic> spec) {
+  final dollar = <String, dynamic>{};
+  final result = <String, dynamic>{};
+  spec.forEach((k, v) {
+    if (k == r'$' && v is Map<String, dynamic>) {
+      dollar.addAll(v);
+    } else if (_instaqlOptionKeys.contains(k)) {
+      dollar[k] = v;
+    } else if (v is Map<String, dynamic>) {
+      result[k] = _normalizeInstaQLSpec(v); // relation
+    } else {
+      result[k] = v;
+    }
+  });
+  if (dollar.isNotEmpty) result[r'$'] = dollar;
+  return result;
+}
+
 /// Enhanced datalog conversion method that handles multiple format variations
 Map<String, List<Map<String, dynamic>>> tryConvertDatalogToCollectionFormat(
   dynamic resultData,
@@ -50,6 +86,15 @@ Map<String, List<Map<String, dynamic>>> tryConvertDatalogToCollectionFormat(
       log?.debug(
         'Successfully converted datalog format to ${convertedData.length} entity types',
       );
+      return convertedData;
+    }
+
+    // A datalog result was present but empty → a valid empty collection.
+    // Return it as such so the query resolves to loaded-empty instead of
+    // being treated as an unrecognized format (which leaves it loading).
+    if (queryEntityType != null) {
+      convertedData[queryEntityType] = <Map<String, dynamic>>[];
+      log?.debug('Empty datalog result for $queryEntityType');
       return convertedData;
     }
   }

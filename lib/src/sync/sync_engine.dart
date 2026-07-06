@@ -129,6 +129,10 @@ class SyncEngine {
 
   /// Send a query to establish subscription
   void sendQuery(Map<String, dynamic> query) {
+    // Normalize to valid InstaQL (options under `$`) — the server rejects
+    // flat where/order/limit with a validation error.
+    query = normalizeInstaQL(query);
+
     InstantDBLogging.root.debug(
       'SyncEngine: sendQuery called with: ${jsonEncode(query)}',
     );
