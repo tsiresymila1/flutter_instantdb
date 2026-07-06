@@ -165,8 +165,15 @@ class SyncEngine {
       'SyncEngine: Sending query to WebSocket - EventId: $clientEventId, SessionId: $_sessionId',
     );
     _wsLogger.fine('🔍 QUERY MESSAGE: $queryJson');
-    _webSocket.send(queryJson);
-    InstantDBLogging.root.debug('SyncEngine: Query sent successfully');
+    try {
+      _webSocket.send(queryJson);
+      InstantDBLogging.root.debug('SyncEngine: Query sent successfully');
+    } catch (e) {
+      // Socket was closing/closed mid-send (isOpen can lag a close). The query
+      // is retained in _activeQueries and re-dispatched on the next init-ok.
+      InstantDBLogging.root.debug('Query send failed (socket closing): $e');
+      _pendingQueries.add(query);
+    }
   }
 
   void sendJoinRoom(String roomType, String roomId) {

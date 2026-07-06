@@ -22,7 +22,14 @@ class WebSocketAdapter {
   Stream<dynamic> get stream => _webSocket;
 
   void send(String data) {
-    _webSocket.add(data);
+    // readyState can lag an in-flight close, so `add` may still throw
+    // "StreamSink is closed". Guard + swallow: callers re-send on reconnect.
+    if (_webSocket.readyState != WebSocket.open) return;
+    try {
+      _webSocket.add(data);
+    } catch (e) {
+      _logger.fine('WebSocket IO: send skipped (socket closing): $e');
+    }
   }
 
   Future<void> close() async {
