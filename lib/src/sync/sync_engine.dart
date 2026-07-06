@@ -795,8 +795,12 @@ class SyncEngine {
           _wsLogger.info(
             '   ✅ Found instaql-result in computation ${i + 1}, processing...',
           );
-          // Process the query result
+          // Process the query result. Include the query so the entity type is
+          // known — otherwise entities are misgrouped under the 'todos' default
+          // and cached under the wrong collection (the real query never sees
+          // them, so live updates don't reach the UI).
           _handleQueryResponse({
+            'q': computation['instaql-query'],
             'result': computation['instaql-result'],
           }, skipDuplicateCheck: true);
         } else {
