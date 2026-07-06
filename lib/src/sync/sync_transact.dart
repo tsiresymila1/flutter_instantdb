@@ -278,13 +278,18 @@ extension _SyncTransact on SyncEngine {
                   );
                   InstantDBLogging.root.debug('Operation data: ${op.data}');
 
+                  // InstantDB requires the `id` attribute to be set (the entity
+                  // id itself). Emit it so a create isn't rejected with
+                  // "Missing required attribute <ns>/id".
+                  _addIdTriple(txSteps, ns, op.entityId);
+
                   // Convert each attribute in the data map to a tx-step
                   for (final entry in op.data!.entries) {
                     final attrName = entry.key;
                     final attrValue = entry.value;
 
-                    // Skip __type attribute for now - we'll handle it separately
-                    if (attrName == '__type') continue;
+                    // id handled above; skip type marker
+                    if (attrName == '__type' || attrName == 'id') continue;
 
                     // Look up the attribute ID from cache
                     String? attrId = _attributeCache[ns]?[attrName];
@@ -355,6 +360,8 @@ extension _SyncTransact on SyncEngine {
                   final ns = op.entityType.isNotEmpty
                       ? op.entityType
                       : (namespace ?? 'todos');
+                  // Required `id` attribute (see add branch).
+                  _addIdTriple(txSteps, ns, op.entityId);
                   for (final entry in op.data!.entries) {
                     final attrName = entry.key;
                     if (attrName == '__type' || attrName == 'id') continue;
@@ -543,6 +550,18 @@ extension _SyncTransact on SyncEngine {
 
     if (_syncQueue.isNotEmpty) {
       _processQueue();
+    }
+  }
+
+  /// Emit the required `id` triple (entity id set as the `id` attribute) unless
+  /// already present. InstantDB rejects a create without it.
+  void _addIdTriple(List<dynamic> txSteps, String ns, String entityId) {
+    final idAttrId = _attributeCache[ns]?['id'];
+    if (idAttrId == null) return;
+    final exists = txSteps.any((s) =>
+        s is List && s.length >= 3 && s[0] == 'add-triple' && s[2] == idAttrId);
+    if (!exists) {
+      txSteps.add(['add-triple', entityId, idAttrId, entityId]);
     }
   }
 }
