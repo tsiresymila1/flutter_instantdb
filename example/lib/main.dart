@@ -1,3 +1,6 @@
+// getAnonymousUserId is intentionally used for a synchronous guest id (the
+// getLocalId replacement is async and doesn't fit these initState call sites).
+// ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_instantdb/flutter_instantdb.dart';
@@ -307,20 +310,21 @@ class _ExamplesNavigationScreenState extends State<ExamplesNavigationScreen> {
                 : 'Enable Debug Logging',
             onPressed: widget.onToggleDebug,
           ),
-          ConnectionStatusBuilder(
-            builder: (context, isOnline) {
+          ConnectionStateBuilder(
+            builder: (context, status) {
+              final online = status == ConnectionStatus.authenticated;
               return Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      isOnline ? Icons.cloud_done : Icons.cloud_off,
+                      online ? Icons.cloud_done : Icons.cloud_off,
                       color: Colors.white70,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      isOnline ? 'Online' : 'Offline',
+                      online ? 'Online' : 'Offline',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.white70,

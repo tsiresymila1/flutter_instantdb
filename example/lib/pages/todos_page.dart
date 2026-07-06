@@ -169,6 +169,10 @@ class _TodosPageState extends State<TodosPage> {
                 label: const Text('Clear DB'),
                 style: TextButton.styleFrom(foregroundColor: Colors.purple),
                 onPressed: () async {
+                  // Capture before the await so no BuildContext is used across
+                  // the async gap.
+                  final db = InstantProvider.of(context);
+                  final messenger = ScaffoldMessenger.of(context);
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -193,28 +197,21 @@ class _TodosPageState extends State<TodosPage> {
                   );
 
                   if (confirmed == true) {
-                    final db = InstantProvider.of(context);
                     try {
                       await db.clearLocalDatabase();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Local database cleared successfully',
-                            ),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      }
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('Local database cleared successfully'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
                     } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to clear database: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
+                      messenger.showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to clear database: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
                     }
                   }
                 },

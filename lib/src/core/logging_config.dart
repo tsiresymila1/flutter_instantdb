@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 /// Logging configuration for InstantDB with hierarchical loggers
@@ -126,9 +126,9 @@ class InstantDBLogging {
 
     // Use different output streams based on log level
     if (record.level >= Level.SEVERE) {
-      stderr.writeln(formattedMessage);
+      debugPrint(formattedMessage);
     } else {
-      stdout.writeln(formattedMessage);
+      debugPrint(formattedMessage);
     }
   }
 

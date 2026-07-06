@@ -52,10 +52,22 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
-  # To add assets to your package, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  # Bundled with the package so InstantDevTool can show the logo in any app.
+  assets:
+    - assets/logo.png
+
+  # Switzer — bundled font used only by InstantDevTool. Drop the .otf files in
+  # assets/fonts/. Referenced from code as 'packages/flutter_instantdb/Switzer'.
+  fonts:
+    - family: Switzer
+      fonts:
+        - asset: assets/fonts/Switzer-Regular.otf
+        - asset: assets/fonts/Switzer-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Switzer-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/Switzer-Bold.otf
+          weight: 700
   #
   # For details regarding assets in packages, see
   # https://flutter.dev/to/asset-from-package

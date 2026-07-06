@@ -51,6 +51,8 @@ class _InstantDevToolState extends State<InstantDevTool> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      // M3 caps sheet width at 640 on wide screens; force full width on desktop.
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       backgroundColor:
           Colors.transparent, // _DevSheet paints its own themed surface
       builder: (_) => InstantProvider(
@@ -79,10 +81,20 @@ class _InstantDevToolState extends State<InstantDevTool> {
               );
             }),
             child: FloatingActionButton.small(
-              elevation: 2,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
               heroTag: 'instant-devtool',
               onPressed: _open,
-              child: const Icon(Icons.bug_report_outlined),
+              // package: needed — the asset ships with this package, not the app.
+              child: Image.asset(
+                'assets/logo.png',
+                package: 'flutter_instantdb',
+                width: 24,
+                height: 24,
+              ),
             ),
           ),
         ),
@@ -98,62 +110,93 @@ class _DevSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     // Fixed-tall sheet; each tab owns its own scrolling. Wrapped in its own
     // Theme so the dark/light toggle only affects the debugger, not the app.
-    final height = MediaQuery.of(context).size.height * 0.6;
+    final mq = MediaQuery.of(context);
+    final height = mq.size.height * 0.6;
     return ValueListenableBuilder<bool>(
       valueListenable: _devDark,
       builder: (context, dark, _) {
+        // Very small radius on every surface/control in the devtool.
+        final r = BorderRadius.circular(3);
+        final shape = RoundedRectangleBorder(borderRadius: r);
+        final btn = ButtonStyle(shape: WidgetStatePropertyAll(shape));
         final theme = ThemeData(
           brightness: dark ? Brightness.dark : Brightness.light,
           useMaterial3: true,
+          // Small, dense text everywhere in the devtool.
+          visualDensity: VisualDensity.comfortable,
+          // Switzer, bundled with this package — scoped to the devtool only.
+          // Package-bundled fonts must be referenced with the packages/ prefix.
+          fontFamily: 'packages/flutter_instantdb/Switzer',
+          cardTheme: CardThemeData(shape: shape),
+          dialogTheme: DialogThemeData(shape: shape),
+          bottomSheetTheme: BottomSheetThemeData(shape: shape),
+          popupMenuTheme: PopupMenuThemeData(shape: shape),
+          filledButtonTheme: FilledButtonThemeData(style: btn),
+          elevatedButtonTheme: ElevatedButtonThemeData(style: btn),
+          outlinedButtonTheme: OutlinedButtonThemeData(style: btn),
+          textButtonTheme: TextButtonThemeData(style: btn),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(borderRadius: r),
+          ),
         );
         return Theme(
           data: theme,
-          child: Material(
-            color: theme.colorScheme.surface,
-            clipBehavior: Clip.antiAlias,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: SizedBox(
-              height: height,
-              child: DefaultTabController(
-                length: 3,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        const SizedBox(width: 48),
-                        Expanded(
-                          child: Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              decoration: BoxDecoration(
-                                color: theme.dividerColor,
-                                borderRadius: BorderRadius.circular(2),
+          // Shrink every text in the devtool uniformly (incl. explicit sizes).
+          child: MediaQuery(
+            data: mq.copyWith(textScaler: const TextScaler.linear(0.95)),
+            child: Material(
+              color: theme.colorScheme.surface,
+              clipBehavior: Clip.antiAlias,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(4),
+              ),
+              child: SizedBox(
+                height: height,
+                child: DefaultTabController(
+                  length: 3,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(width: 48),
+                          Expanded(
+                            child: Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: theme.dividerColor,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(dark ? Icons.light_mode : Icons.dark_mode),
-                          tooltip: 'Toggle debugger theme',
-                          onPressed: () => _devDark.value = !dark,
-                        ),
-                      ],
-                    ),
-                    const TabBar(
-                      tabs: [
-                        Tab(text: 'Status'),
-                        Tab(text: 'Explorer'),
-                        Tab(text: 'Query'),
-                      ],
-                    ),
-                    const Expanded(
-                      child: TabBarView(
-                        children: [_StatusTab(), _ExplorerTab(), _QueryTab()],
+                          IconButton(
+                            icon: Icon(
+                              dark ? Icons.light_mode : Icons.dark_mode,
+                            ),
+                            tooltip: 'Toggle debugger theme',
+                            onPressed: () => _devDark.value = !dark,
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const TabBar(
+                        isScrollable: true,
+                        tabAlignment: TabAlignment.start,
+                        tabs: [
+                          Tab(text: 'Status'),
+                          Tab(text: 'Explorer'),
+                          Tab(text: 'Query'),
+                        ],
+                      ),
+                      const Expanded(
+                        child: TabBarView(
+                          children: [_StatusTab(), _ExplorerTab(), _QueryTab()],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -187,137 +230,157 @@ class _StatusTab extends StatelessWidget {
     final db = InstantProvider.of(context);
     final entities = db.schema?.entities.keys.toList() ?? const [];
 
-    return ListView(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(12),
-      children: [
-        _section(context, 'Connection'),
-        ConnectionStateBuilder(
-          builder: (context, status) => _row(
-            context,
-            icon: Icons.circle,
-            iconColor: _statusColor(status),
-            label: 'Status',
-            value: status.name,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          _header(context, 'Connection'),
+          ConnectionStateBuilder(
+            builder: (context, status) => _stat(
+              context,
+              Icons.circle,
+              'Status',
+              status.name,
+              dotColor: _statusColor(status),
+            ),
           ),
-        ),
-        _row(
-          context,
-          icon: Icons.cloud_outlined,
-          label: 'App ID',
-          value: db.appId,
-          copy: true,
-        ),
-        _row(
-          context,
-          icon: Icons.storage_outlined,
-          label: 'Storage',
-          value: 'SQLite (triple store)',
-        ),
-
-        _section(context, 'Auth'),
-        AuthBuilder(
-          builder: (context, user) {
-            if (user == null) {
-              return _row(
-                context,
-                icon: Icons.person_off_outlined,
-                label: 'User',
-                value: '(signed out)',
-              );
-            }
-            return Column(
-              children: [
-                _row(
-                  context,
-                  icon: Icons.person_outline,
-                  label: 'Email',
-                  value: user.email.isEmpty ? '(none)' : user.email,
-                ),
-                _row(
-                  context,
-                  icon: Icons.badge_outlined,
-                  label: 'User ID',
-                  value: user.id,
-                  copy: true,
-                ),
-                _row(
-                  context,
-                  icon: Icons.verified_user_outlined,
-                  label: 'Type',
-                  value: user.isGuest == true ? 'guest' : 'registered',
-                ),
-              ],
-            );
-          },
-        ),
-
-        _section(context, 'Schema'),
-        _row(
-          context,
-          icon: Icons.table_chart_outlined,
-          label: 'Entities',
-          value: entities.isEmpty
-              ? '(no schema)'
-              : '${entities.length}: ${entities.join(", ")}',
-        ),
-        FutureBuilder<List<String>>(
-          future: db.listNamespaces(),
-          builder: (context, snap) => _row(
+          _stat(context, Icons.cloud_outlined, 'App ID', db.appId, copy: true),
+          _stat(
             context,
-            icon: Icons.list_alt_outlined,
-            label: 'Namespaces',
-            value: snap.hasData ? '${snap.data!.length}' : '…',
+            Icons.storage_outlined,
+            'Storage',
+            'SQLite (triple store)',
           ),
-        ),
-      ],
+          _header(context, 'Auth'),
+          AuthBuilder(
+            builder: (context, user) => user == null
+                ? _stat(
+                    context,
+                    Icons.person_off_outlined,
+                    'User',
+                    '(signed out)',
+                  )
+                : Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _stat(
+                        context,
+                        Icons.person_outline,
+                        'Email',
+                        user.email.isEmpty ? '(none)' : user.email,
+                      ),
+                      _stat(
+                        context,
+                        Icons.badge_outlined,
+                        'User ID',
+                        user.id,
+                        copy: true,
+                      ),
+                      _stat(
+                        context,
+                        Icons.verified_user_outlined,
+                        'Type',
+                        user.isGuest == true ? 'guest' : 'registered',
+                      ),
+                    ],
+                  ),
+          ),
+          _header(context, 'Schema'),
+          _stat(
+            context,
+            Icons.table_chart_outlined,
+            'Entities',
+            entities.isEmpty ? '(no schema)' : entities.join(', '),
+          ),
+          FutureBuilder<List<String>>(
+            future: db.listNamespaces(),
+            builder: (context, snap) => _stat(
+              context,
+              Icons.list_alt_outlined,
+              'Namespaces',
+              snap.hasData ? '${snap.data!.length}' : '…',
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _section(BuildContext context, String title) => Padding(
-    padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
-    child: Text(
-      title.toUpperCase(),
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1,
-        color: Theme.of(context).colorScheme.primary,
+  // Full-width header — forces a new line in the Wrap.
+  Widget _header(BuildContext context, String title) => SizedBox(
+    width: double.infinity,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 2),
+      child: Text(
+        title.toUpperCase(),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
     ),
   );
 
-  Widget _row(
-    BuildContext context, {
-    required IconData icon,
-    Color? iconColor,
-    required String label,
-    required String value,
+  Widget _stat(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    Color? dotColor,
     bool copy = false,
   }) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-      leading: Icon(icon, size: 18, color: iconColor),
-      title: Text(label, style: const TextStyle(fontSize: 12)),
-      subtitle: Text(
-        value,
-        style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+    return Container(
+      constraints: const BoxConstraints(minWidth: 150, maxWidth: 300),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).dividerColor),
+        borderRadius: BorderRadius.circular(8),
       ),
-      trailing: copy
-          ? IconButton(
-              icon: const Icon(Icons.copy, size: 16),
-              tooltip: 'Copy',
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: value));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Copied $label'),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-              },
-            )
-          : null,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: dotColor),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (copy) ...[
+                const SizedBox(width: 4),
+                InkWell(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: value));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Copied $label'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.copy, size: 12),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -340,6 +403,12 @@ class _ExplorerTabState extends State<_ExplorerTab> {
   // Rows from the latest reactive query value; kept so _columns / _typeOf can
   // read them outside the Watch.
   List<Map<String, dynamic>> _rows = const [];
+
+  // Selection (row ids) + client-side pagination.
+  final Set<String> _selected = {};
+  int _page = 0;
+  int _pageSize = 25;
+  static const _pageSizes = [10, 25, 50, 100];
 
   InstantDB get _db => InstantProvider.of(context);
 
@@ -369,6 +438,8 @@ class _ExplorerTabState extends State<_ExplorerTab> {
     setState(() {
       _ns = ns;
       _rows = const [];
+      _selected.clear();
+      _page = 0;
       _fields = _db.namespaceFields(ns);
       _fieldTypes = _db.namespaceFieldTypes(ns);
       // Reactive: the table rebuilds on every store change (local writes AND
@@ -428,12 +499,13 @@ class _ExplorerTabState extends State<_ExplorerTab> {
     return ['id', ...cols];
   }
 
-  Future<void> _delete(String id) async {
+  Future<void> _deleteSelected() async {
+    final ids = _selected.toList();
+    if (ids.isEmpty) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete row?'),
-        content: Text(id),
+        title: Text('Delete ${ids.length} row${ids.length == 1 ? '' : 's'}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -447,8 +519,10 @@ class _ExplorerTabState extends State<_ExplorerTab> {
       ),
     );
     if (ok != true) return;
-    await _db.transact(_db.tx[_ns!][id].delete());
-    // Table is reactive — it refreshes itself from the store change.
+    for (final id in ids) {
+      await _db.transact(_db.tx[_ns!][id].delete());
+    }
+    if (mounted) setState(() => _selected.clear());
   }
 
   Future<void> _edit({Map<String, dynamic>? row}) async {
@@ -472,71 +546,114 @@ class _ExplorerTabState extends State<_ExplorerTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (_ns == null) {
-      final names = _namespaces ?? const <String>[];
-      return Column(
+    final wide = MediaQuery.of(context).size.width >= 720;
+    final names = _namespaces ?? const <String>[];
+
+    // Desktop: persistent sidebar + table side by side (dashboard layout).
+    if (wide) {
+      if (_ns == null && names.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _ns == null && names.isNotEmpty) _open(names.first);
+        });
+      }
+      return Row(
         children: [
-          Row(
-            children: [
-              const SizedBox(width: 16),
-              const Expanded(
-                child: Text(
-                  'Tables',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: 'Reload tables',
-                onPressed: _nsLoading ? null : _loadNamespaces,
-              ),
-            ],
-          ),
-          const Divider(height: 1),
+          SizedBox(width: 190, child: _sidebar(names)),
+          const VerticalDivider(width: 1),
           Expanded(
-            child: _nsLoading && _namespaces == null
-                ? const Center(child: CircularProgressIndicator())
-                : names.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No namespaces yet — tap refresh once '
-                      'connected',
-                    ),
-                  )
-                : ListView(
-                    children: [
-                      for (final n in names)
-                        ListTile(
-                          leading: const Icon(Icons.table_chart_outlined),
-                          title: Text(n),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => _open(n),
-                        ),
-                    ],
-                  ),
+            child: _ns == null
+                ? const Center(child: Text('Select a table'))
+                : _detail(_ns!, wide: true),
           ),
         ],
       );
     }
 
-    final ns = _ns!;
+    // Mobile: drill-in (sidebar → table).
+    if (_ns == null) return _sidebar(names);
+    return _detail(_ns!, wide: false);
+  }
+
+  Widget _sidebar(List<String> names) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 6, 6),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Namespaces',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              InkWell(
+                onTap: _nsLoading ? null : _loadNamespaces,
+                child: const Icon(Icons.refresh, size: 16),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: _nsLoading && _namespaces == null
+              ? const Center(child: CircularProgressIndicator())
+              : names.isEmpty
+              ? const Center(child: Text('No tables'))
+              : ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    for (final n in names)
+                      ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity.compact,
+                        selected: n == _ns,
+                        selectedTileColor: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer,
+                        title: Text(
+                          n,
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                        onTap: () => _open(n),
+                      ),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _detail(String ns, {required bool wide}) {
     return Column(
       children: [
         Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => setState(() {
-                _ns = null;
-                _rows = const [];
-              }),
-            ),
+            if (!wide)
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => setState(() {
+                  _ns = null;
+                  _rows = const [];
+                  _selected.clear();
+                }),
+              )
+            else
+              const SizedBox(width: 12),
             Expanded(
               child: Text(
                 '$ns  (${_rows.length})',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
+            if (_selected.isNotEmpty)
+              TextButton.icon(
+                icon: const Icon(Icons.delete_outline, size: 18),
+                label: Text('Delete ${_selected.length}'),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                onPressed: _deleteSelected,
+              ),
             IconButton(icon: const Icon(Icons.refresh), onPressed: _reload),
             IconButton(
               icon: const Icon(Icons.add),
@@ -563,47 +680,160 @@ class _ExplorerTabState extends State<_ExplorerTab> {
               return const Center(child: Text('empty — tap + to add a row'));
             }
             final columns = _columns;
-            return SingleChildScrollView(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: DataTable(
-                  columns: [
-                    const DataColumn(label: Text('')),
-                    for (final c in columns) DataColumn(label: Text(c)),
-                  ],
-                  rows: [
-                    for (final row in rows)
-                      DataRow(
-                        cells: [
-                          DataCell(
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () => _edit(row: row),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    size: 18,
+            final pageCount = (rows.length / _pageSize).ceil();
+            final page = _page.clamp(0, pageCount - 1);
+            final start = page * _pageSize;
+            final pageRows = rows.skip(start).take(_pageSize).toList();
+            final pageIds = {for (final r in pageRows) r['id'] as String};
+
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: LayoutBuilder(
+                      builder: (context, box) => SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        // Fill the available width; scroll only if columns
+                        // overflow it.
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(minWidth: box.maxWidth),
+                          child: DataTable(
+                            showCheckboxColumn: true,
+                            headingRowHeight: 34,
+                            dataRowMinHeight: 28,
+                            dataRowMaxHeight: 34,
+                            columnSpacing: 18,
+                            horizontalMargin: 10,
+                            dividerThickness: 0.5,
+                            onSelectAll: (v) => setState(() {
+                              if (v == true) {
+                                _selected.addAll(pageIds);
+                              } else {
+                                _selected.removeAll(pageIds);
+                              }
+                            }),
+                            columns: [
+                              const DataColumn(label: Text('')),
+                              for (final c in columns)
+                                DataColumn(
+                                  label: Text(
+                                    c,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  onPressed: () => _delete(row['id'] as String),
                                 ),
-                              ],
-                            ),
+                            ],
+                            rows: [
+                              for (final row in pageRows)
+                                DataRow(
+                                  selected: _selected.contains(row['id']),
+                                  onSelectChanged: (v) => setState(() {
+                                    final id = row['id'] as String;
+                                    if (v == true) {
+                                      _selected.add(id);
+                                    } else {
+                                      _selected.remove(id);
+                                    }
+                                  }),
+                                  cells: [
+                                    DataCell(
+                                      IconButton(
+                                        icon: const Icon(Icons.edit, size: 16),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        onPressed: () => _edit(row: row),
+                                      ),
+                                    ),
+                                    for (final c in columns)
+                                      DataCell(
+                                        Text(
+                                          '${row[c] ?? ''}',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                            ],
                           ),
-                          for (final c in columns)
-                            DataCell(Text('${row[c] ?? ''}')),
-                        ],
+                        ),
                       ),
-                  ],
+                    ),
+                  ),
                 ),
-              ),
+                const Divider(height: 1),
+                _paginationBar(
+                  rows.length,
+                  page,
+                  pageCount,
+                  start,
+                  pageRows.length,
+                ),
+              ],
             );
           }),
         ),
       ],
+    );
+  }
+
+  Widget _paginationBar(
+    int total,
+    int page,
+    int pageCount,
+    int start,
+    int shown,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Row(
+        children: [
+          const Text('Rows:', style: TextStyle(fontSize: 12)),
+          const SizedBox(width: 6),
+          // PopupMenuButton, not DropdownButton: the latter asserts on menu
+          // placement inside a scaled/short bottom sheet.
+          PopupMenuButton<int>(
+            initialValue: _pageSize,
+            tooltip: 'Rows per page',
+            padding: EdgeInsets.zero,
+            onSelected: (v) => setState(() {
+              _pageSize = v;
+              _page = 0;
+            }),
+            itemBuilder: (context) => [
+              for (final n in _pageSizes)
+                PopupMenuItem(value: n, height: 36, child: Text('$n')),
+            ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('$_pageSize', style: const TextStyle(fontSize: 12)),
+                const Icon(Icons.arrow_drop_down, size: 18),
+              ],
+            ),
+          ),
+          const Spacer(),
+          Text(
+            '${total == 0 ? 0 : start + 1}–${start + shown} of $total',
+            style: const TextStyle(fontSize: 12),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_left, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            onPressed: page > 0 ? () => setState(() => _page = page - 1) : null,
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            onPressed: page < pageCount - 1
+                ? () => setState(() => _page = page + 1)
+                : null,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -752,7 +982,7 @@ class _RowEditorState extends State<_RowEditor> {
     return AlertDialog(
       title: Text(widget.row == null ? 'New row' : 'Edit row'),
       content: SizedBox(
-        width: double.maxFinite,
+        width: 360,
         child: widget.fields.isEmpty
             ? const Text(
                 'No known fields yet — set a schema or connect so the '
@@ -820,7 +1050,7 @@ class _QueryTabState extends State<_QueryTab> {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
             controller: _input,

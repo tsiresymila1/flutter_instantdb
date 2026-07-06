@@ -34,22 +34,19 @@ jobs:
         run: |
           v=$(grep -E '^version:' pubspec.yaml | head -1 | sed 's/version:[[:space:]]*//')
           tag="v$v"
-          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
-            echo "Tag $tag already exists — skipping."
-          else
-            git tag "$tag"
-            git push origin "$tag"
-            echo "Pushed $tag"
-          fi
+          # Delete the remote tag if it exists, then recreate at HEAD, so a
+          # re-push of the same version re-triggers publish.yml (e.g. after
+          # fixing a publish that failed on an earlier commit).
+          git push origin ":refs/tags/$tag" 2>/dev/null || true
+          git tag -f "$tag"
+          git push origin "$tag"
+          echo "Tagged $tag at $(git rev-parse --short HEAD)"
 
       - name: Tag flutter_instantdb_generator if version bumped
         run: |
           v=$(grep -E '^version:' flutter_instantdb_generator/pubspec.yaml | head -1 | sed 's/version:[[:space:]]*//')
           tag="generator-v$v"
-          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
-            echo "Tag $tag already exists — skipping."
-          else
-            git tag "$tag"
-            git push origin "$tag"
-            echo "Pushed $tag"
-          fi
+          git push origin ":refs/tags/$tag" 2>/dev/null || true
+          git tag -f "$tag"
+          git push origin "$tag"
+          echo "Tagged $tag at $(git rev-parse --short HEAD)"

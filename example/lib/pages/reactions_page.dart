@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use — getAnonymousUserId used for a
+// synchronous guest id (the getLocalId replacement is async).
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_instantdb/flutter_instantdb.dart';
