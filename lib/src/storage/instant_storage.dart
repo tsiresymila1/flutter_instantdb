@@ -107,12 +107,11 @@ class InstantStorage {
       final Map? record = (data is Map && data['data'] is Map)
           ? data['data'] as Map
           : (data is Map ? data : null);
+      // The upload endpoint returns 200 with an empty body; there is no record
+      // to parse. On success, synthesize a file record from the known path —
+      // callers resolve the URL via [getDownloadUrl].
       if (record == null) {
-        throw InstantException(
-          message: 'Unexpected upload response shape: '
-              '${response.data.runtimeType} $data',
-          code: 'storage_error',
-        );
+        return InstantFile(id: '', path: path);
       }
       return InstantFile.fromJson(Map<String, dynamic>.from(record));
     } on DioException catch (e) {
