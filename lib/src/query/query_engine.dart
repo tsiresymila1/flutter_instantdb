@@ -241,17 +241,10 @@ class QueryEngine {
     bool syncedOnly = false,
     Map<String, dynamic>? relationPageInfo,
   }) async {
-    // Check sync engine cache first for immediate data availability
-    if (_syncEngine != null) {
-      final cachedData = _syncEngine!.getCachedQueryResult(entityType);
-      if (cachedData != null && cachedData.isNotEmpty) {
-        InstantDBLogging.root.debug(
-          'Using cached query result for $entityType: ${cachedData.length} documents',
-        );
-        // Apply query filters to cached data if needed
-        return _applyQueryFilters(cachedData, query);
-      }
-    }
+    // NOTE: always resolve from the local store — it holds synced server data
+    // AND local optimistic writes merged together. Returning the sync-engine
+    // cache here instead would drop local writes (and vice-versa), making the
+    // list flip between local-only and server-only as each source updates.
 
     // Extract query parameters
     final where = query['where'] as Map<String, dynamic>?;
