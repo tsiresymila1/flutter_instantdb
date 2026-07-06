@@ -1,4 +1,6 @@
-// Web implementation
+// Web implementation — only imported on web via conditional import, where
+// dart:html is the platform API.
+// ignore_for_file: deprecated_member_use, avoid_web_libraries_in_flutter
 import 'dart:async';
 import 'dart:html' as html;
 import '../core/logging_config.dart';

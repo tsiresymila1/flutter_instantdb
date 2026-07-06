@@ -1,4 +1,6 @@
 #!/usr/bin/env dart
+// ignore_for_file: avoid_print, dangling_library_doc_comments, unintended_html_in_doc_comment
+// Command-line tool — print IS the intended output mechanism.
 
 /// InstantDB Schema Management CLI
 ///
