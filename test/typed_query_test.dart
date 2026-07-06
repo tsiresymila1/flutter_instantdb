@@ -11,21 +11,41 @@ void main() {
     });
 
     test('ne / isNull / inList', () {
-      expect(title.ne('Run').toMap(), {'title': {r'$ne': 'Run'}});
-      expect(title.isNull(true).toMap(), {'title': {r'$isNull': true}});
-      expect(priority.inList([1, 2]).toMap(), {'priority': {r'$in': [1, 2]}});
+      expect(title.ne('Run').toMap(), {
+        'title': {r'$ne': 'Run'},
+      });
+      expect(title.isNull(true).toMap(), {
+        'title': {r'$isNull': true},
+      });
+      expect(priority.inList([1, 2]).toMap(), {
+        'priority': {
+          r'$in': [1, 2],
+        },
+      });
     });
 
     test('comparable operators', () {
-      expect(priority.gt(5).toMap(), {'priority': {r'$gt': 5}});
-      expect(priority.gte(5).toMap(), {'priority': {r'$gte': 5}});
-      expect(priority.lt(5).toMap(), {'priority': {r'$lt': 5}});
-      expect(priority.lte(5).toMap(), {'priority': {r'$lte': 5}});
+      expect(priority.gt(5).toMap(), {
+        'priority': {r'$gt': 5},
+      });
+      expect(priority.gte(5).toMap(), {
+        'priority': {r'$gte': 5},
+      });
+      expect(priority.lt(5).toMap(), {
+        'priority': {r'$lt': 5},
+      });
+      expect(priority.lte(5).toMap(), {
+        'priority': {r'$lte': 5},
+      });
     });
 
     test('string like / ilike', () {
-      expect(title.like('%x%').toMap(), {'title': {r'$like': '%x%'}});
-      expect(title.ilike('%x%').toMap(), {'title': {r'$ilike': '%x%'}});
+      expect(title.like('%x%').toMap(), {
+        'title': {r'$like': '%x%'},
+      });
+      expect(title.ilike('%x%').toMap(), {
+        'title': {r'$ilike': '%x%'},
+      });
     });
   });
 
@@ -37,8 +57,12 @@ void main() {
       final f = priority.gte(8) & title.ilike('%x%');
       expect(f.toMap(), {
         'and': [
-          {'priority': {r'$gte': 8}},
-          {'title': {r'$ilike': '%x%'}},
+          {
+            'priority': {r'$gte': 8},
+          },
+          {
+            'title': {r'$ilike': '%x%'},
+          },
         ],
       });
     });
@@ -81,8 +105,12 @@ void main() {
           r'$': {
             'where': {
               'and': [
-                {'priority': {r'$gte': 8}},
-                {'title': {r'$ilike': '%x%'}},
+                {
+                  'priority': {r'$gte': 8},
+                },
+                {
+                  'title': {r'$ilike': '%x%'},
+                },
               ],
             },
             'order': {'createdAt': 'desc'},
@@ -118,37 +146,45 @@ void main() {
       final base = Todos().query();
       final a = base.where((t) => t.priority.gte(1)).first(2);
       // base must remain empty; a must carry its options
-      expect(base.toQuery(), {'todos': {r'$': <String, dynamic>{}}});
+      expect(base.toQuery(), {
+        'todos': {r'$': <String, dynamic>{}},
+      });
       expect(a.toQuery()['todos'][r'$']['first'], 2);
     });
   });
 
   group('Typed include (nested-2)', () {
-    test('include serializes nested where/order/limit under the \$ options', () {
-      final goals = _GoalsTable();
-      final q = goals.query().include(
-            (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
-                .where((t) => t.n.gte(2))
-                .order((t) => t.n.asc())
-                .limit(1),
-          );
-      final m = q.toQuery();
-      final opts = (m['goals'] as Map)[r'$'] as Map;
-      final inc = opts['include'] as Map;
-      expect(inc.keys, ['todos']);
-      final todos = inc['todos'] as Map;
-      expect(todos['where'], {'n': {r'$gte': 2}});
-      expect(todos['order'], {'n': 'asc'});
-      expect(todos['limit'], 1);
-    });
+    test(
+      'include serializes nested where/order/limit under the \$ options',
+      () {
+        final goals = _GoalsTable();
+        final q = goals.query().include(
+          (g) => TypedQuery<_TodosTable>(
+            _TodosTable(),
+            relationAttr: 'todos',
+          ).where((t) => t.n.gte(2)).order((t) => t.n.asc()).limit(1),
+        );
+        final m = q.toQuery();
+        final opts = (m['goals'] as Map)[r'$'] as Map;
+        final inc = opts['include'] as Map;
+        expect(inc.keys, ['todos']);
+        final todos = inc['todos'] as Map;
+        expect(todos['where'], {
+          'n': {r'$gte': 2},
+        });
+        expect(todos['order'], {'n': 'asc'});
+        expect(todos['limit'], 1);
+      },
+    );
 
     test('include nests recursively', () {
       final goals = _GoalsTable();
       final q = goals.query().include(
-            (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
-                .include((t) =>
-                    TypedQuery<_TagsTable>(_TagsTable(), relationAttr: 'tags')),
-          );
+        (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
+            .include(
+              (t) => TypedQuery<_TagsTable>(_TagsTable(), relationAttr: 'tags'),
+            ),
+      );
       final inc =
           (((q.toQuery()['goals'] as Map)[r'$'] as Map)['include']) as Map;
       expect(((inc['todos'] as Map)['include'] as Map).keys, ['tags']);
@@ -157,22 +193,28 @@ void main() {
     test('include does not mutate the source query', () {
       final goals = _GoalsTable();
       final base = goals.query();
-      base.include((g) =>
-          TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos'));
-      expect((base.toQuery()['goals'] as Map)[r'$'], isNot(contains('include')));
+      base.include(
+        (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos'),
+      );
+      expect(
+        (base.toQuery()['goals'] as Map)[r'$'],
+        isNot(contains('include')),
+      );
     });
 
     test('include serializes nested cursor keys', () {
       final goals = _GoalsTable();
       final q = goals.query().include(
-            (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
-                .order((t) => t.n.asc())
-                .first(2)
-                .after('cursor-1')
-                .afterInclusive(true),
-          );
-      final todos = ((((q.toQuery()['goals'] as Map)[r'$'] as Map)['include'])
-          as Map)['todos'] as Map;
+        (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
+            .order((t) => t.n.asc())
+            .first(2)
+            .after('cursor-1')
+            .afterInclusive(true),
+      );
+      final todos =
+          ((((q.toQuery()['goals'] as Map)[r'$'] as Map)['include'])
+                  as Map)['todos']
+              as Map;
       expect(todos['first'], 2);
       expect(todos['after'], 'cursor-1');
       expect(todos['afterInclusive'], true);
@@ -184,9 +226,11 @@ void main() {
       final goals = _GoalsTable();
       expect(
         () => goals.query().include(
-              (g) => TypedQuery<_TodosTable>(_TodosTable(), relationAttr: 'todos')
-                  .select((t) => [t.n]),
-            ),
+          (g) => TypedQuery<_TodosTable>(
+            _TodosTable(),
+            relationAttr: 'todos',
+          ).select((t) => [t.n]),
+        ),
         throwsArgumentError,
       );
     });

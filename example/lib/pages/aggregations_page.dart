@@ -160,7 +160,9 @@ class _AggregationsPageState extends State<AggregationsPage> {
               return Card(
                 child: ListTile(
                   leading: Icon(
-                    completed ? Icons.check_circle : Icons.radio_button_unchecked,
+                    completed
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
                     color: completed ? Colors.green : Colors.grey,
                   ),
                   title: Text(completed ? 'Completed' : 'Not completed'),

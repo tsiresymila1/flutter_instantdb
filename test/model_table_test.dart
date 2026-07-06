@@ -19,10 +19,10 @@ class SampleTable extends InstantModelTable<SampleTable, Sample> {
 
   @override
   Sample fromRow(Map<String, dynamic> m) => Sample(
-        id: m['id'] as String,
-        title: m['title'] as String,
-        n: m['n'] as int,
-      );
+    id: m['id'] as String,
+    title: m['title'] as String,
+    n: m['n'] as int,
+  );
 }
 
 void main() {
@@ -30,7 +30,13 @@ void main() {
     test('is usable as a 6a InstantTable (query compiles)', () {
       final q = SampleTable().query().where((t) => t.n.gte(1));
       expect(q.toQuery(), {
-        'samples': {r'$': {'where': {'n': {r'$gte': 1}}}},
+        'samples': {
+          r'$': {
+            'where': {
+              'n': {r'$gte': 1},
+            },
+          },
+        },
       });
     });
 
@@ -57,8 +63,9 @@ void main() {
         );
       }
       final table = SampleTable();
-      final result =
-          await db.queryOnceTyped(table.query().where((t) => t.n.gte(1)));
+      final result = await db.queryOnceTyped(
+        table.query().where((t) => t.n.gte(1)),
+      );
       final samples = result.documents.map(table.fromRow).toList();
       expect(samples.map((s) => s.n).toList()..sort(), [1, 2]);
       await db.dispose();

@@ -119,8 +119,9 @@ export default schema;
 void main() {
   group('parseInstantTs', () {
     test('parses i.schema entities + modifiers + system flag', () {
-      final sample =
-          File('example/scripts/instant.schema.ts').readAsStringSync();
+      final sample = File(
+        'example/scripts/instant.schema.ts',
+      ).readAsStringSync();
       final s = parseInstantTs(sample);
 
       final todos = s.entities.firstWhere((e) => e.name == 'todos');
@@ -182,8 +183,9 @@ void main() {
     });
 
     test('system entities not emitted as Dart classes', () {
-      final sample =
-          File('example/scripts/instant.schema.ts').readAsStringSync();
+      final sample = File(
+        'example/scripts/instant.schema.ts',
+      ).readAsStringSync();
       final dart = emitDart(parseInstantTs(sample));
       expect(dart, isNot(contains('class File')));
       expect(dart, isNot(contains('class User')));
@@ -205,11 +207,13 @@ void main() {
     });
 
     test('@InstantField(unique/indexed) round-trips to modifiers', () {
-      final ts = emitInstantTs(parseDartModels(
-        "@InstantModel('users') class User { final String id; "
-        "@InstantField('email', unique: true, indexed: true) final String email; "
-        "const User({required this.id, required this.email}); }",
-      ));
+      final ts = emitInstantTs(
+        parseDartModels(
+          "@InstantModel('users') class User { final String id; "
+          "@InstantField('email', unique: true, indexed: true) final String email; "
+          "const User({required this.id, required this.email}); }",
+        ),
+      );
       expect(ts, contains('i.string().unique().indexed()'));
     });
   });
@@ -244,9 +248,7 @@ void main() {
       final s2 = parseInstantTs(ts2);
       expect(
         s2.entities.map((e) => e.name),
-        containsAll(
-          s1.entities.where((e) => !e.system).map((e) => e.name),
-        ),
+        containsAll(s1.entities.where((e) => !e.system).map((e) => e.name)),
       );
       // field types preserved (number -> num -> number)
       final todos2 = s2.entities.firstWhere((e) => e.name == 'todos');
@@ -273,8 +275,7 @@ const schema = i.schema({
   links: {},
 });
 ''';
-      final f = parseInstantTs(ts)
-          .entities
+      final f = parseInstantTs(ts).entities
           .firstWhere((e) => e.name == 'users')
           .fields
           .firstWhere((f) => f.name == 'handle');

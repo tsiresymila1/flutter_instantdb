@@ -27,7 +27,11 @@ void main() {
       await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
       await db.transact(db.tx['todos']['t1'].update({'title': 'Run'}));
       await db.transact(db.tx['todos']['t2'].update({'title': 'Lift'}));
-      await db.transact(db.tx['goals']['g1'].link({'todos': ['t1', 't2']}));
+      await db.transact(
+        db.tx['goals']['g1'].link({
+          'todos': ['t1', 't2'],
+        }),
+      );
 
       final r = await db.queryOnce({'goals': {}});
       final goal = r.documents.firstWhere((g) => g['id'] == 'g1');
@@ -68,12 +72,20 @@ void main() {
       await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
       await db.transact(db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
       await db.transact(db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
-      await db.transact(db.tx['goals']['g1'].link({'todos': ['t1', 't2']}));
+      await db.transact(
+        db.tx['goals']['g1'].link({
+          'todos': ['t1', 't2'],
+        }),
+      );
     }
 
     test('to-many include populates full related entities', () async {
       await seed();
-      final r = await db.queryOnce({'goals': {'include': {'todos': {}}}});
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {'todos': {}},
+        },
+      });
       final goal = r.documents.firstWhere((g) => g['id'] == 'g1');
       final todos = (goal['todos'] as List).cast<Map<String, dynamic>>();
       expect(todos.length, 2);
@@ -86,7 +98,9 @@ void main() {
         'goals': {
           'include': {
             'todos': {
-              'where': {'n': {r'$gte': 2}},
+              'where': {
+                'n': {r'$gte': 2},
+              },
               'order': {'n': 'asc'},
               'limit': 1,
             },
@@ -104,7 +118,11 @@ void main() {
       await db.transact(db.tx['users']['u1'].update({'name': 'Ana'}));
       await db.transact(db.tx['posts']['p1'].link({'owner': 'u1'}));
 
-      final r = await db.queryOnce({'posts': {'include': {'owner': {}}}});
+      final r = await db.queryOnce({
+        'posts': {
+          'include': {'owner': {}},
+        },
+      });
       final post = r.documents.firstWhere((p) => p['id'] == 'p1');
       final owner = (post['owner'] as List).cast<Map<String, dynamic>>();
       expect(owner.single['name'], 'Ana');
@@ -114,13 +132,23 @@ void main() {
       await db.transact(db.tx['goals']['g9'].update({'title': 'G'}));
       await db.transact(db.tx['todos']['td9'].update({'title': 'T'}));
       await db.transact(db.tx['tags']['tg9'].update({'label': 'urgent'}));
-      await db.transact(db.tx['todos']['td9'].link({'tags': ['tg9']}));
-      await db.transact(db.tx['goals']['g9'].link({'todos': ['td9']}));
+      await db.transact(
+        db.tx['todos']['td9'].link({
+          'tags': ['tg9'],
+        }),
+      );
+      await db.transact(
+        db.tx['goals']['g9'].link({
+          'todos': ['td9'],
+        }),
+      );
 
       final r = await db.queryOnce({
         'goals': {
           'include': {
-            'todos': {'include': {'tags': {}}},
+            'todos': {
+              'include': {'tags': {}},
+            },
           },
         },
       });
@@ -144,20 +172,19 @@ void main() {
         appId: 'test-app-id',
         config: InstantConfig(
           syncEnabled: false,
-          persistenceDir:
-              'test_n3_${DateTime.now().microsecondsSinceEpoch}',
+          persistenceDir: 'test_n3_${DateTime.now().microsecondsSinceEpoch}',
         ),
       );
       // Seed: one goal linked to three ordered todos (n=1,2,3).
       await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
+      await db.transact(db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
+      await db.transact(db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
+      await db.transact(db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
       await db.transact(
-          db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
-      await db.transact(
-          db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
-      await db.transact(
-          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
-      await db.transact(
-          db.tx['goals']['g1'].link({'todos': ['t1', 't2', 't3']}));
+        db.tx['goals']['g1'].link({
+          'todos': ['t1', 't2', 't3'],
+        }),
+      );
     });
 
     tearDown(() async => db.dispose());
@@ -166,7 +193,10 @@ void main() {
       final r = await db.queryOnce({
         'goals': {
           'include': {
-            'todos': {'order': {'n': 'asc'}, 'first': 1},
+            'todos': {
+              'order': {'n': 'asc'},
+              'first': 1,
+            },
           },
         },
       });
@@ -196,27 +226,34 @@ void main() {
       expect(todos.single['n'], 2);
     });
 
-    test('nested fields projection drops non-whitelisted attrs (untyped)',
-        () async {
-      final r = await db.queryOnce({
-        'goals': {
-          'include': {
-            'todos': {'fields': ['title']},
+    test(
+      'nested fields projection drops non-whitelisted attrs (untyped)',
+      () async {
+        final r = await db.queryOnce({
+          'goals': {
+            'include': {
+              'todos': {
+                'fields': ['title'],
+              },
+            },
           },
-        },
-      });
-      final t =
-          (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
-              .cast<Map<String, dynamic>>()
-              .first;
-      expect(t.keys.toSet(), {'id', 'title'}); // 'n' dropped, id always kept
-    });
+        });
+        final t =
+            (r.documents.firstWhere((g) => g['id'] == 'g1')['todos'] as List)
+                .cast<Map<String, dynamic>>()
+                .first;
+        expect(t.keys.toSet(), {'id', 'title'}); // 'n' dropped, id always kept
+      },
+    );
 
     test('nested cursor does not double-apply limit', () async {
       final r = await db.queryOnce({
         'goals': {
           'include': {
-            'todos': {'order': {'n': 'asc'}, 'first': 2},
+            'todos': {
+              'order': {'n': 'asc'},
+              'first': 2,
+            },
           },
         },
       });
@@ -240,27 +277,33 @@ void main() {
         appId: 'test-app-id',
         config: InstantConfig(
           syncEnabled: false,
-          persistenceDir:
-              'test_n4_${DateTime.now().microsecondsSinceEpoch}',
+          persistenceDir: 'test_n4_${DateTime.now().microsecondsSinceEpoch}',
         ),
       );
       // Seed: one goal (g1) linked to three ordered todos (n=1,2,3).
       await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
+      await db.transact(db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
+      await db.transact(db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
+      await db.transact(db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
       await db.transact(
-          db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
-      await db.transact(
-          db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
-      await db.transact(
-          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
-      await db.transact(
-          db.tx['goals']['g1'].link({'todos': ['t1', 't2', 't3']}));
+        db.tx['goals']['g1'].link({
+          'todos': ['t1', 't2', 't3'],
+        }),
+      );
     });
 
     tearDown(() async => db.dispose());
 
     test('paginated relation surfaces composite pageInfo', () async {
       final r = await db.queryOnce({
-        'goals': {'include': {'todos': {'order': {'n': 'asc'}, 'first': 1}}},
+        'goals': {
+          'include': {
+            'todos': {
+              'order': {'n': 'asc'},
+              'first': 1,
+            },
+          },
+        },
       });
       final pi = r.pageInfo?['goals.todos'];
       expect(pi, isNotNull);
@@ -291,7 +334,11 @@ void main() {
     });
 
     test('non-paginated include produces no composite pageInfo key', () async {
-      final r = await db.queryOnce({'goals': {'include': {'todos': {}}}});
+      final r = await db.queryOnce({
+        'goals': {
+          'include': {'todos': {}},
+        },
+      });
       expect(r.pageInfo?['goals.todos'], isNull);
     });
 
@@ -299,22 +346,29 @@ void main() {
       // Seed g9 + td9 linked to g9; tg9/tg10/tg11 linked to td9.
       await db.transact(db.tx['goals']['g9'].update({'title': 'G'}));
       await db.transact(db.tx['todos']['td9'].update({'title': 'T'}));
+      await db.transact(db.tx['tags']['tg9'].update({'label': 'alpha'}));
+      await db.transact(db.tx['tags']['tg10'].update({'label': 'beta'}));
+      await db.transact(db.tx['tags']['tg11'].update({'label': 'gamma'}));
       await db.transact(
-          db.tx['tags']['tg9'].update({'label': 'alpha'}));
+        db.tx['todos']['td9'].link({
+          'tags': ['tg9', 'tg10', 'tg11'],
+        }),
+      );
       await db.transact(
-          db.tx['tags']['tg10'].update({'label': 'beta'}));
-      await db.transact(
-          db.tx['tags']['tg11'].update({'label': 'gamma'}));
-      await db.transact(
-          db.tx['todos']['td9'].link({'tags': ['tg9', 'tg10', 'tg11']}));
-      await db.transact(db.tx['goals']['g9'].link({'todos': ['td9']}));
+        db.tx['goals']['g9'].link({
+          'todos': ['td9'],
+        }),
+      );
 
       final r = await db.queryOnce({
         'goals': {
           'include': {
             'todos': {
               'include': {
-                'tags': {'first': 1, 'order': {'label': 'asc'}},
+                'tags': {
+                  'first': 1,
+                  'order': {'label': 'asc'},
+                },
               },
             },
           },

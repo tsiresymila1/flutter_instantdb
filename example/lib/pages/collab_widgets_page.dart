@@ -202,7 +202,9 @@ class _CollabWidgetsPageState extends State<CollabWidgetsPage> {
                               const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                               const SizedBox(width: 8),
                               Text('${typing.length} typing…'),

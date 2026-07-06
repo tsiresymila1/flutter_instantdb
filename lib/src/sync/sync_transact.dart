@@ -293,12 +293,7 @@ extension _SyncTransact on SyncEngine {
 
                     // Resolve (or auto-create) the attribute UUID.
                     final attrId = _resolveAttr(ns, attrName, txSteps);
-                    txSteps.add([
-                      'add-triple',
-                      op.entityId,
-                      attrId,
-                      attrValue,
-                    ]);
+                    txSteps.add(['add-triple', op.entityId, attrId, attrValue]);
                   }
                 }
                 // Legacy format support (for backwards compatibility)
@@ -494,8 +489,13 @@ extension _SyncTransact on SyncEngine {
   /// already present. InstantDB rejects a create without it.
   void _addIdTriple(List<dynamic> txSteps, String ns, String entityId) {
     final idAttrId = _resolveAttr(ns, 'id', txSteps);
-    final exists = txSteps.any((s) =>
-        s is List && s.length >= 3 && s[0] == 'add-triple' && s[2] == idAttrId);
+    final exists = txSteps.any(
+      (s) =>
+          s is List &&
+          s.length >= 3 &&
+          s[0] == 'add-triple' &&
+          s[2] == idAttrId,
+    );
     if (!exists) {
       txSteps.add(['add-triple', entityId, idAttrId, entityId]);
     }
@@ -524,7 +524,9 @@ extension _SyncTransact on SyncEngine {
       },
     ]);
     (_attributeCache[ns] ??= {})[attrName] = attrId;
-    InstantDBLogging.root.info('Auto-created attribute $ns.$attrName ($attrId)');
+    InstantDBLogging.root.info(
+      'Auto-created attribute $ns.$attrName ($attrId)',
+    );
     return attrId;
   }
 }

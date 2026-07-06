@@ -10,7 +10,11 @@ enum OAuthProvider {
   github('Continue with GitHub', Color(0xFF24292E), Icons.code),
   linkedin('Continue with LinkedIn', Color(0xFF0A66C2), Icons.business),
   clerk('Continue with Clerk', Color(0xFF6C47FF), Icons.lock_outline),
-  firebase('Continue with Firebase', Color(0xFFFFA000), Icons.local_fire_department);
+  firebase(
+    'Continue with Firebase',
+    Color(0xFFFFA000),
+    Icons.local_fire_department,
+  );
 
   const OAuthProvider(this.label, this.color, this.icon);
   final String label;

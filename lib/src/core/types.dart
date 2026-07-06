@@ -127,8 +127,7 @@ class QueryResult {
   factory QueryResult.success(
     Map<String, dynamic> data, {
     Map<String, dynamic>? pageInfo,
-  }) =>
-      QueryResult(isLoading: false, data: data, pageInfo: pageInfo);
+  }) => QueryResult(isLoading: false, data: data, pageInfo: pageInfo);
 
   factory QueryResult.error(String error) =>
       QueryResult(isLoading: false, error: error);
@@ -460,14 +459,16 @@ class TransactionChunk implements ToTransaction {
   /// Mirrors `db.tx.ns[id].update({...}).ruleParams({...})` from @instantdb/core.
   TransactionChunk ruleParams(Map<String, dynamic> args) {
     final updated = operations
-        .map((op) => Operation(
-              type: op.type,
-              entityType: op.entityType,
-              entityId: op.entityId,
-              data: op.data,
-              options: {...?op.options, 'ruleParams': args},
-              lookupRef: op.lookupRef,
-            ))
+        .map(
+          (op) => Operation(
+            type: op.type,
+            entityType: op.entityType,
+            entityId: op.entityId,
+            data: op.data,
+            options: {...?op.options, 'ruleParams': args},
+            lookupRef: op.lookupRef,
+          ),
+        )
         .toList();
     return TransactionChunk(updated);
   }

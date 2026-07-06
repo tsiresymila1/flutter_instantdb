@@ -115,8 +115,7 @@ bool _isCodegenSupported(String instantType) =>
     instantType == 'number' ||
     instantType == 'boolean';
 
-String _dartTypeFor(String instantType) =>
-    _tsToDart[instantType] ?? 'Object';
+String _dartTypeFor(String instantType) => _tsToDart[instantType] ?? 'Object';
 
 // ============================================================================
 // Naming helpers
@@ -137,8 +136,11 @@ String _singularize(String word) {
   if (word.endsWith('ies') && word.length > 3) {
     return '${word.substring(0, word.length - 3)}y';
   }
-  if (word.endsWith('ses') || word.endsWith('xes') || word.endsWith('zes') ||
-      word.endsWith('ches') || word.endsWith('shes')) {
+  if (word.endsWith('ses') ||
+      word.endsWith('xes') ||
+      word.endsWith('zes') ||
+      word.endsWith('ches') ||
+      word.endsWith('shes')) {
     return word.substring(0, word.length - 2);
   }
   if (word.endsWith('s') && word.length > 1) {
@@ -149,9 +151,7 @@ String _singularize(String word) {
 
 String _pascalCase(String word) {
   final parts = word.split(RegExp(r'[_\s-]+')).where((p) => p.isNotEmpty);
-  return parts
-      .map((p) => p[0].toUpperCase() + p.substring(1))
-      .join();
+  return parts.map((p) => p[0].toUpperCase() + p.substring(1)).join();
 }
 
 // ============================================================================
@@ -282,7 +282,9 @@ String emitDart(SchemaDef schema, {String partBase = 'app_schema'}) {
     // Forward field lives on fromEntity, points at toEntity. Its cardinality
     // is the forward `has` (fromMany): has:'one' -> T?, has:'many' -> List<T>.
     if (!fromSys) {
-      linkFields.putIfAbsent(link.fromEntity, () => []).add(
+      linkFields
+          .putIfAbsent(link.fromEntity, () => [])
+          .add(
             _LinkFieldEmit(
               label: link.fromLabel,
               targetClass: classNameFor(link.toEntity),
@@ -293,7 +295,9 @@ String emitDart(SchemaDef schema, {String partBase = 'app_schema'}) {
     // Reverse field lives on toEntity, points at fromEntity. Cardinality is the
     // reverse `has` (toMany).
     if (!toSys) {
-      linkFields.putIfAbsent(link.toEntity, () => []).add(
+      linkFields
+          .putIfAbsent(link.toEntity, () => [])
+          .add(
             _LinkFieldEmit(
               label: link.toLabel,
               targetClass: classNameFor(link.fromEntity),
@@ -304,14 +308,19 @@ String emitDart(SchemaDef schema, {String partBase = 'app_schema'}) {
   }
 
   final buf = StringBuffer();
-  buf.writeln('// Generated from instant.schema.ts by '
-      '`dart run flutter_instantdb:schema`.');
-  buf.writeln('// Note: i.number() maps to `num` (the int/double distinction is '
-      'not in the');
-  buf.writeln('// InstantDB schema) — narrow a field to `int`/`double` by hand '
-      'if you need it.');
   buf.writeln(
-      "import 'package:flutter_instantdb/flutter_instantdb.dart';");
+    '// Generated from instant.schema.ts by '
+    '`dart run flutter_instantdb:schema`.',
+  );
+  buf.writeln(
+    '// Note: i.number() maps to `num` (the int/double distinction is '
+    'not in the',
+  );
+  buf.writeln(
+    '// InstantDB schema) — narrow a field to `int`/`double` by hand '
+    'if you need it.',
+  );
+  buf.writeln("import 'package:flutter_instantdb/flutter_instantdb.dart';");
   buf.writeln();
   buf.writeln("part '$partBase.instant.dart';");
 
@@ -449,8 +458,7 @@ SchemaDef parseDartModels(String dartSource) {
   for (final m in modelRe.allMatches(dartSource)) {
     final ns = m.group(1)!;
     final after = dartSource.substring(m.end);
-    final classMatch =
-        RegExp(r'class\s+(\w+)').firstMatch(after);
+    final classMatch = RegExp(r'class\s+(\w+)').firstMatch(after);
     if (classMatch != null) {
       classToName[classMatch.group(1)!] = ns;
     }
@@ -483,12 +491,14 @@ SchemaDef parseDartModels(String dartSource) {
       rawLinks: rawLinks,
     );
 
-    entities.add(EntityDef(
-      name: ns,
-      className: className,
-      system: ns.startsWith(r'$'),
-      fields: fields,
-    ));
+    entities.add(
+      EntityDef(
+        name: ns,
+        className: className,
+        system: ns.startsWith(r'$'),
+        fields: fields,
+      ),
+    );
   }
 
   final links = _pairDartLinks(rawLinks, classToName);
@@ -518,9 +528,7 @@ void _parseDartFields(
 }) {
   // Field declaration with optional preceding annotations on the same/prior
   // line(s): match `final <type> <name>;` and look back for annotations.
-  final fieldRe = RegExp(
-    r'final\s+([\w<>,\s]+?)([?])?\s+(\w+)\s*;',
-  );
+  final fieldRe = RegExp(r'final\s+([\w<>,\s]+?)([?])?\s+(\w+)\s*;');
 
   for (final fm in fieldRe.allMatches(body)) {
     final rawType = fm.group(1)!.trim();
@@ -535,27 +543,31 @@ void _parseDartFields(
     if (isLink) {
       final (targetClass, many) = _linkTarget(rawType);
       final targetNs = classToName[targetClass] ?? targetClass;
-      rawLinks.add(_RawLink(
-        ownerEntity: ownerEntity,
-        label: fieldName,
-        targetEntity: targetNs,
-        many: many,
-      ));
+      rawLinks.add(
+        _RawLink(
+          ownerEntity: ownerEntity,
+          label: fieldName,
+          targetEntity: targetNs,
+          many: many,
+        ),
+      );
       continue;
     }
 
     final instantType = _instantTypeForDart(rawType);
     final attr = fieldAnn?.name ?? fieldName;
     final isId = fieldName == 'id';
-    fields.add(FieldDef(
-      name: attr,
-      instantType: instantType,
-      dartType: _dartTypeFor(instantType),
-      optional: nullable,
-      unique: (fieldAnn?.unique ?? false) || isId,
-      indexed: fieldAnn?.indexed ?? false,
-      codegenSupported: _isCodegenSupported(instantType),
-    ));
+    fields.add(
+      FieldDef(
+        name: attr,
+        instantType: instantType,
+        dartType: _dartTypeFor(instantType),
+        optional: nullable,
+        unique: (fieldAnn?.unique ?? false) || isId,
+        indexed: fieldAnn?.indexed ?? false,
+        codegenSupported: _isCodegenSupported(instantType),
+      ),
+    );
   }
 }
 
@@ -585,8 +597,9 @@ class _FieldAnn {
 _FieldAnn? _lastFieldAnnotation(String preceding) {
   // Only consider an annotation that is the last token before the field
   // (allowing whitespace / @InstantLink between is handled by link path).
-  final matches =
-      RegExp(r'@InstantField\(([^)]*)\)').allMatches(preceding).toList();
+  final matches = RegExp(
+    r'@InstantField\(([^)]*)\)',
+  ).allMatches(preceding).toList();
   if (matches.isEmpty) return null;
   final last = matches.last;
   // Ensure nothing but whitespace/other-annotations between it and field end.
@@ -602,8 +615,9 @@ _FieldAnn? _lastFieldAnnotation(String preceding) {
 }
 
 bool _hasLinkAnnotation(String preceding) {
-  final matches =
-      RegExp(r'@InstantLink\([^)]*\)').allMatches(preceding).toList();
+  final matches = RegExp(
+    r'@InstantLink\([^)]*\)',
+  ).allMatches(preceding).toList();
   if (matches.isEmpty) return false;
   final last = matches.last;
   final tail = preceding.substring(last.end).trim();
@@ -627,8 +641,7 @@ List<LinkDef> _pairDartLinks(
     for (var j = i + 1; j < raw.length; j++) {
       if (used.contains(j)) continue;
       final b = raw[j];
-      if (b.ownerEntity == a.targetEntity &&
-          b.targetEntity == a.ownerEntity) {
+      if (b.ownerEntity == a.targetEntity && b.targetEntity == a.ownerEntity) {
         matchIdx = j;
         break;
       }
@@ -637,34 +650,37 @@ List<LinkDef> _pairDartLinks(
     if (matchIdx != null) {
       final b = raw[matchIdx];
       used.add(matchIdx);
-      links.add(LinkDef(
-        name: '${a.ownerEntity}${_cap(a.label)}',
-        fromEntity: a.ownerEntity,
-        fromLabel: a.label,
-        fromMany: a.many,
-        toEntity: a.targetEntity,
-        toLabel: b.label,
-        toMany: b.many,
-      ));
+      links.add(
+        LinkDef(
+          name: '${a.ownerEntity}${_cap(a.label)}',
+          fromEntity: a.ownerEntity,
+          fromLabel: a.label,
+          fromMany: a.many,
+          toEntity: a.targetEntity,
+          toLabel: b.label,
+          toMany: b.many,
+        ),
+      );
     } else {
       // Synthesize the reverse: a has-(one/many) target; reverse is many,
       // labeled by the owner entity name.
-      links.add(LinkDef(
-        name: '${a.ownerEntity}${_cap(a.label)}',
-        fromEntity: a.ownerEntity,
-        fromLabel: a.label,
-        fromMany: a.many,
-        toEntity: a.targetEntity,
-        toLabel: a.ownerEntity,
-        toMany: true,
-      ));
+      links.add(
+        LinkDef(
+          name: '${a.ownerEntity}${_cap(a.label)}',
+          fromEntity: a.ownerEntity,
+          fromLabel: a.label,
+          fromMany: a.many,
+          toEntity: a.targetEntity,
+          toLabel: a.ownerEntity,
+          toMany: true,
+        ),
+      );
     }
   }
   return links;
 }
 
-String _cap(String s) =>
-    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+String _cap(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
 // ============================================================================
 // SchemaDef -> TS  (emitInstantTs)
@@ -702,9 +718,11 @@ String emitInstantTs(SchemaDef schema, {bool includeSystem = false}) {
     if (fromSys && toSys) continue;
     buf.writeln('    ${l.name}: {');
     buf.writeln(
-        "      forward: { on: '${l.fromEntity}', has: '${l.fromMany ? 'many' : 'one'}', label: '${l.fromLabel}' },");
+      "      forward: { on: '${l.fromEntity}', has: '${l.fromMany ? 'many' : 'one'}', label: '${l.fromLabel}' },",
+    );
     buf.writeln(
-        "      reverse: { on: '${l.toEntity}', has: '${l.toMany ? 'many' : 'one'}', label: '${l.toLabel}' },");
+      "      reverse: { on: '${l.toEntity}', has: '${l.toMany ? 'many' : 'one'}', label: '${l.toLabel}' },",
+    );
     buf.writeln('    },');
   }
   buf.writeln('  },');

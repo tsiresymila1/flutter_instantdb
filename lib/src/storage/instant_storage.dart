@@ -23,13 +23,12 @@ class InstantFile {
   });
 
   factory InstantFile.fromJson(Map<String, dynamic> json) => InstantFile(
-        id: (json['id'] ?? '').toString(),
-        path: (json['path'] ?? json['filename'] ?? '').toString(),
-        url: json['url'] as String?,
-        size: json['size'] is int ? json['size'] as int : null,
-        contentType:
-            (json['content-type'] ?? json['contentType'])?.toString(),
-      );
+    id: (json['id'] ?? '').toString(),
+    path: (json['path'] ?? json['filename'] ?? '').toString(),
+    url: json['url'] as String?,
+    size: json['size'] is int ? json['size'] as int : null,
+    contentType: (json['content-type'] ?? json['contentType'])?.toString(),
+  );
 }
 
 /// Client for the InstantDB storage REST API. Mirrors @instantdb/core
@@ -43,7 +42,7 @@ class InstantStorage {
   /// Runs an InstaQL query once. Injected by [InstantDB] so [list] can read the
   /// `$files` namespace through the same reactive/sync pipeline as data queries.
   final Future<QueryResult> Function(Map<String, dynamic> query)?
-      _queryDelegate;
+  _queryDelegate;
 
   InstantStorage({
     required this.appId,
@@ -51,14 +50,17 @@ class InstantStorage {
     required AuthManager authManager,
     Future<QueryResult> Function(Map<String, dynamic> query)? queryDelegate,
     Dio? dio,
-  })  : _authManager = authManager,
-        _queryDelegate = queryDelegate,
-        _dio = dio ??
-            Dio(BaseOptions(
-              baseUrl: baseUrl,
-              connectTimeout: const Duration(seconds: 30),
-              receiveTimeout: const Duration(seconds: 30),
-            ));
+  }) : _authManager = authManager,
+       _queryDelegate = queryDelegate,
+       _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               baseUrl: baseUrl,
+               connectTimeout: const Duration(seconds: 30),
+               receiveTimeout: const Duration(seconds: 30),
+             ),
+           );
 
   String? get _token => _authManager.refreshToken;
 
@@ -132,8 +134,8 @@ class InstantStorage {
       final data = _decode(response.data);
       final url = (data is Map)
           ? (data['data'] is Map
-              ? (data['data'] as Map)['url']
-              : data['data'] ?? data['url'])
+                ? (data['data'] as Map)['url']
+                : data['data'] ?? data['url'])
           : data;
       if (url == null || url.toString().isEmpty) {
         throw InstantException(
@@ -205,8 +207,7 @@ class InstantStorage {
   }
 
   InstantException _error(DioException e, String fallback) {
-    final message =
-        e.response?.data?['message'] ?? e.message ?? fallback;
+    final message = e.response?.data?['message'] ?? e.message ?? fallback;
     return InstantException(
       message: message.toString(),
       code: 'storage_error',

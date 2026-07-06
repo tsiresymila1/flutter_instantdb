@@ -29,16 +29,20 @@ void main() {
       return r.documents;
     }
 
-    test('lookup().update() creates entity when absent (upsert by attr)',
-        () async {
-      await db.transact(
-        db.tx['profiles'].lookup('email', 'a@b.com').update({'name': 'Alice'}),
-      );
-      final rows = await profiles();
-      expect(rows.length, 1);
-      expect(rows.single['email'], 'a@b.com');
-      expect(rows.single['name'], 'Alice');
-    });
+    test(
+      'lookup().update() creates entity when absent (upsert by attr)',
+      () async {
+        await db.transact(
+          db.tx['profiles'].lookup('email', 'a@b.com').update({
+            'name': 'Alice',
+          }),
+        );
+        final rows = await profiles();
+        expect(rows.length, 1);
+        expect(rows.single['email'], 'a@b.com');
+        expect(rows.single['name'], 'Alice');
+      },
+    );
 
     test('lookup().update() updates existing entity, no duplicate', () async {
       await db.transact(
@@ -54,8 +58,9 @@ void main() {
 
     test('update upsert:false is a no-op on missing entity', () async {
       await db.transact(
-        db.tx['goals']['missing-id']
-            .update({'title': 'x'}, opts: const TxOpts(upsert: false)),
+        db.tx['goals']['missing-id'].update({
+          'title': 'x',
+        }, opts: const TxOpts(upsert: false)),
       );
       final r = await db.queryOnce({'goals': {}});
       expect(r.documents, isEmpty);
@@ -65,8 +70,9 @@ void main() {
       final id = db.id();
       await db.transact(db.tx['goals'][id].update({'title': 'orig'}));
       await db.transact(
-        db.tx['goals'][id]
-            .update({'title': 'new'}, opts: const TxOpts(upsert: false)),
+        db.tx['goals'][id].update({
+          'title': 'new',
+        }, opts: const TxOpts(upsert: false)),
       );
       final r = await db.queryOnce({'goals': {}});
       expect(r.documents.single['title'], 'new');

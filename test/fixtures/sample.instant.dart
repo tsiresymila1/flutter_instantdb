@@ -12,30 +12,24 @@ class GadgetTable extends InstantModelTable<GadgetTable, Gadget> {
   final label = const Col<String>('label');
 
   @override
-  Gadget fromRow(Map<String, dynamic> m) => Gadget(
-        id: m['id'] as String,
-        label: m['label'] as String,
-      );
+  Gadget fromRow(Map<String, dynamic> m) =>
+      Gadget(id: m['id'] as String, label: m['label'] as String);
 
-  Map<String, dynamic> toMap(Gadget m) => {
-        'id': m.id,
-        'label': m.label,
-      };
+  Map<String, dynamic> toMap(Gadget m) => {'id': m.id, 'label': m.label};
 
   TypedTx<GadgetTable> tx(InstantDB db) => db.txFor(this);
 }
 
 extension GadgetQueryX on TypedQuery<GadgetTable> {
-  Future<List<Gadget>> getAll(InstantDB db) async =>
-      (await db.queryOnceTyped(this))
-          .documents
-          .map(GadgetTable().fromRow)
-          .toList();
+  Future<List<Gadget>> getAll(InstantDB db) async => (await db.queryOnceTyped(
+    this,
+  )).documents.map(GadgetTable().fromRow).toList();
 
   ReadonlySignal<List<Gadget>> watchAll(InstantDB db) {
     final src = db.queryTyped(this);
     return computed(
-        () => src.value.documents.map(GadgetTable().fromRow).toList());
+      () => src.value.documents.map(GadgetTable().fromRow).toList(),
+    );
   }
 }
 
@@ -62,36 +56,36 @@ class Widget2Table extends InstantModelTable<Widget2Table, Widget2> {
 
   @override
   Widget2 fromRow(Map<String, dynamic> m) => Widget2(
-        id: m['id'] as String,
-        name: m['name'] as String,
-        weight: m['weight'] as int,
-        gadgets: (m['gadgets'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>()
-                .map(GadgetTable().fromRow)
-                .toList() ??
-            const <Gadget>[],
-      );
+    id: m['id'] as String,
+    name: m['name'] as String,
+    weight: m['weight'] as int,
+    gadgets:
+        (m['gadgets'] as List<dynamic>?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(GadgetTable().fromRow)
+            .toList() ??
+        const <Gadget>[],
+  );
 
   Map<String, dynamic> toMap(Widget2 m) => {
-        'id': m.id,
-        'name': m.name,
-        'weight': m.weight,
-      };
+    'id': m.id,
+    'name': m.name,
+    'weight': m.weight,
+  };
 
   TypedTx<Widget2Table> tx(InstantDB db) => db.txFor(this);
 }
 
 extension Widget2QueryX on TypedQuery<Widget2Table> {
-  Future<List<Widget2>> getAll(InstantDB db) async =>
-      (await db.queryOnceTyped(this))
-          .documents
-          .map(Widget2Table().fromRow)
-          .toList();
+  Future<List<Widget2>> getAll(InstantDB db) async => (await db.queryOnceTyped(
+    this,
+  )).documents.map(Widget2Table().fromRow).toList();
 
   ReadonlySignal<List<Widget2>> watchAll(InstantDB db) {
     final src = db.queryTyped(this);
     return computed(
-        () => src.value.documents.map(Widget2Table().fromRow).toList());
+      () => src.value.documents.map(Widget2Table().fromRow).toList(),
+    );
   }
 }
 

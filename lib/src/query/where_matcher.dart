@@ -116,9 +116,9 @@ bool _likeMatch(dynamic v, dynamic pattern, {required bool caseSensitive}) {
   if (v == null || pattern is! String) return false;
   // `%` and `_` are not regex metacharacters, so RegExp.escape leaves them
   // intact; translate them to regex wildcards afterwards.
-  final escaped = RegExp.escape(pattern)
-      .replaceAll('%', '.*')
-      .replaceAll('_', '.');
+  final escaped = RegExp.escape(
+    pattern,
+  ).replaceAll('%', '.*').replaceAll('_', '.');
   final re = RegExp('^$escaped\$', caseSensitive: caseSensitive);
   return re.hasMatch(v.toString());
 }

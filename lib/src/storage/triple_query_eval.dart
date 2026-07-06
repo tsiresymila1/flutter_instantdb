@@ -192,12 +192,14 @@ bool matchesOperator(dynamic entityValue, Map<String, dynamic> operators) {
 }
 
 Operation withEntityId(Operation op, String id) => Operation(
-      type: op.type,
-      entityType: op.entityType.isNotEmpty ? op.entityType : op.lookupRef!.entityType,
-      entityId: id,
-      data: op.data,
-      options: op.options,
-    );
+  type: op.type,
+  entityType: op.entityType.isNotEmpty
+      ? op.entityType
+      : op.lookupRef!.entityType,
+  entityId: id,
+  data: op.data,
+  options: op.options,
+);
 
 int compareEntities(
   Map<String, dynamic> a,
@@ -335,9 +337,7 @@ Map<String, dynamic> calculateAggregates(
               .whereType<Comparable>()
               .cast<Comparable>();
           if (values.isNotEmpty) {
-            result['min'] = values.reduce(
-              (a, b) => a.compareTo(b) < 0 ? a : b,
-            );
+            result['min'] = values.reduce((a, b) => a.compareTo(b) < 0 ? a : b);
           }
         }
         break;
@@ -349,9 +349,7 @@ Map<String, dynamic> calculateAggregates(
               .whereType<Comparable>()
               .cast<Comparable>();
           if (values.isNotEmpty) {
-            result['max'] = values.reduce(
-              (a, b) => a.compareTo(b) > 0 ? a : b,
-            );
+            result['max'] = values.reduce((a, b) => a.compareTo(b) > 0 ? a : b);
           }
         }
         break;
@@ -398,8 +396,7 @@ Map<String, dynamic> deepMerge(
     final key = entry.key;
     final value = entry.value;
 
-    if (value is Map<String, dynamic> &&
-        result[key] is Map<String, dynamic>) {
+    if (value is Map<String, dynamic> && result[key] is Map<String, dynamic>) {
       result[key] = deepMerge(result[key] as Map<String, dynamic>, value);
     } else {
       result[key] = value;

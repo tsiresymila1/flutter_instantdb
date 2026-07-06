@@ -51,7 +51,8 @@ class _InstantDevToolState extends State<InstantDevTool> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // _DevSheet paints its own themed surface
+      backgroundColor:
+          Colors.transparent, // _DevSheet paints its own themed surface
       builder: (_) => InstantProvider(
         db: InstantProvider.of(context),
         child: const _DevSheet(),
@@ -62,8 +63,7 @@ class _InstantDevToolState extends State<InstantDevTool> {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final pos = _pos ??
-        Offset(media.size.width - 72, media.size.height - 100);
+    final pos = _pos ?? Offset(media.size.width - 72, media.size.height - 100);
     return Stack(
       children: [
         widget.child,
@@ -111,8 +111,7 @@ class _DevSheet extends StatelessWidget {
           child: Material(
             color: theme.colorScheme.surface,
             clipBehavior: Clip.antiAlias,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             child: SizedBox(
               height: height,
               child: DefaultTabController(
@@ -136,24 +135,23 @@ class _DevSheet extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          icon: Icon(
-                              dark ? Icons.light_mode : Icons.dark_mode),
+                          icon: Icon(dark ? Icons.light_mode : Icons.dark_mode),
                           tooltip: 'Toggle debugger theme',
                           onPressed: () => _devDark.value = !dark,
                         ),
                       ],
                     ),
-                    const TabBar(tabs: [
-                      Tab(text: 'Status'),
-                      Tab(text: 'Explorer'),
-                      Tab(text: 'Query'),
-                    ]),
+                    const TabBar(
+                      tabs: [
+                        Tab(text: 'Status'),
+                        Tab(text: 'Explorer'),
+                        Tab(text: 'Query'),
+                      ],
+                    ),
                     const Expanded(
-                      child: TabBarView(children: [
-                        _StatusTab(),
-                        _ExplorerTab(),
-                        _QueryTab(),
-                      ]),
+                      child: TabBarView(
+                        children: [_StatusTab(), _ExplorerTab(), _QueryTab()],
+                      ),
                     ),
                   ],
                 ),
@@ -202,73 +200,91 @@ class _StatusTab extends StatelessWidget {
             value: status.name,
           ),
         ),
-        _row(context,
-            icon: Icons.cloud_outlined, label: 'App ID', value: db.appId,
-            copy: true),
-        _row(context,
-            icon: Icons.storage_outlined,
-            label: 'Storage',
-            value: 'SQLite (triple store)'),
+        _row(
+          context,
+          icon: Icons.cloud_outlined,
+          label: 'App ID',
+          value: db.appId,
+          copy: true,
+        ),
+        _row(
+          context,
+          icon: Icons.storage_outlined,
+          label: 'Storage',
+          value: 'SQLite (triple store)',
+        ),
 
         _section(context, 'Auth'),
         AuthBuilder(
           builder: (context, user) {
             if (user == null) {
-              return _row(context,
-                  icon: Icons.person_off_outlined,
-                  label: 'User',
-                  value: '(signed out)');
+              return _row(
+                context,
+                icon: Icons.person_off_outlined,
+                label: 'User',
+                value: '(signed out)',
+              );
             }
             return Column(
               children: [
-                _row(context,
-                    icon: Icons.person_outline,
-                    label: 'Email',
-                    value: user.email.isEmpty ? '(none)' : user.email),
-                _row(context,
-                    icon: Icons.badge_outlined,
-                    label: 'User ID',
-                    value: user.id,
-                    copy: true),
-                _row(context,
-                    icon: Icons.verified_user_outlined,
-                    label: 'Type',
-                    value: user.isGuest == true ? 'guest' : 'registered'),
+                _row(
+                  context,
+                  icon: Icons.person_outline,
+                  label: 'Email',
+                  value: user.email.isEmpty ? '(none)' : user.email,
+                ),
+                _row(
+                  context,
+                  icon: Icons.badge_outlined,
+                  label: 'User ID',
+                  value: user.id,
+                  copy: true,
+                ),
+                _row(
+                  context,
+                  icon: Icons.verified_user_outlined,
+                  label: 'Type',
+                  value: user.isGuest == true ? 'guest' : 'registered',
+                ),
               ],
             );
           },
         ),
 
         _section(context, 'Schema'),
-        _row(context,
-            icon: Icons.table_chart_outlined,
-            label: 'Entities',
-            value: entities.isEmpty
-                ? '(no schema)'
-                : '${entities.length}: ${entities.join(", ")}'),
+        _row(
+          context,
+          icon: Icons.table_chart_outlined,
+          label: 'Entities',
+          value: entities.isEmpty
+              ? '(no schema)'
+              : '${entities.length}: ${entities.join(", ")}',
+        ),
         FutureBuilder<List<String>>(
           future: db.listNamespaces(),
-          builder: (context, snap) => _row(context,
-              icon: Icons.list_alt_outlined,
-              label: 'Namespaces',
-              value: snap.hasData ? '${snap.data!.length}' : '…'),
+          builder: (context, snap) => _row(
+            context,
+            icon: Icons.list_alt_outlined,
+            label: 'Namespaces',
+            value: snap.hasData ? '${snap.data!.length}' : '…',
+          ),
         ),
       ],
     );
   }
 
   Widget _section(BuildContext context, String title) => Padding(
-        padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
-        child: Text(
-          title.toUpperCase(),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
+    child: Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    ),
+  );
 
   Widget _row(
     BuildContext context, {
@@ -283,8 +299,10 @@ class _StatusTab extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 4),
       leading: Icon(icon, size: 18, color: iconColor),
       title: Text(label, style: const TextStyle(fontSize: 12)),
-      subtitle: Text(value,
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 13)),
+      subtitle: Text(
+        value,
+        style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+      ),
       trailing: copy
           ? IconButton(
               icon: const Icon(Icons.copy, size: 16),
@@ -293,8 +311,9 @@ class _StatusTab extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: value));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      content: Text('Copied $label'),
-                      duration: const Duration(seconds: 1)),
+                    content: Text('Copied $label'),
+                    duration: const Duration(seconds: 1),
+                  ),
                 );
               },
             )
@@ -354,7 +373,9 @@ class _ExplorerTabState extends State<_ExplorerTab> {
       _fieldTypes = _db.namespaceFieldTypes(ns);
       // Reactive: the table rebuilds on every store change (local writes AND
       // remote sync), so no manual refresh is needed.
-      _query = _db.query({ns: {'limit': 200}});
+      _query = _db.query({
+        ns: {'limit': 200},
+      });
     });
   }
 
@@ -384,7 +405,11 @@ class _ExplorerTabState extends State<_ExplorerTab> {
   /// it, e.g. after connecting so newly-known rows appear).
   void _reload() {
     if (_ns != null) {
-      setState(() => _query = _db.query({_ns!: {'limit': 200}}));
+      setState(
+        () => _query = _db.query({
+          _ns!: {'limit': 200},
+        }),
+      );
     }
   }
 
@@ -410,8 +435,14 @@ class _ExplorerTabState extends State<_ExplorerTab> {
         title: const Text('Delete row?'),
         content: Text(id),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
         ],
       ),
     );
@@ -449,8 +480,10 @@ class _ExplorerTabState extends State<_ExplorerTab> {
             children: [
               const SizedBox(width: 16),
               const Expanded(
-                child: Text('Tables',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  'Tables',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
               IconButton(
                 icon: const Icon(Icons.refresh),
@@ -464,21 +497,23 @@ class _ExplorerTabState extends State<_ExplorerTab> {
             child: _nsLoading && _namespaces == null
                 ? const Center(child: CircularProgressIndicator())
                 : names.isEmpty
-                    ? const Center(
-                        child: Text('No namespaces yet — tap refresh once '
-                            'connected'))
-                    : ListView(
-                        children: [
-                          for (final n in names)
-                            ListTile(
-                              leading:
-                                  const Icon(Icons.table_chart_outlined),
-                              title: Text(n),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () => _open(n),
-                            ),
-                        ],
-                      ),
+                ? const Center(
+                    child: Text(
+                      'No namespaces yet — tap refresh once '
+                      'connected',
+                    ),
+                  )
+                : ListView(
+                    children: [
+                      for (final n in names)
+                        ListTile(
+                          leading: const Icon(Icons.table_chart_outlined),
+                          title: Text(n),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => _open(n),
+                        ),
+                    ],
+                  ),
           ),
         ],
       );
@@ -497,8 +532,10 @@ class _ExplorerTabState extends State<_ExplorerTab> {
               }),
             ),
             Expanded(
-              child: Text('$ns  (${_rows.length})',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(
+                '$ns  (${_rows.length})',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
             IconButton(icon: const Icon(Icons.refresh), onPressed: _reload),
             IconButton(
@@ -536,23 +573,30 @@ class _ExplorerTabState extends State<_ExplorerTab> {
                   ],
                   rows: [
                     for (final row in rows)
-                      DataRow(cells: [
-                        DataCell(Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, size: 18),
-                              onPressed: () => _edit(row: row),
+                      DataRow(
+                        cells: [
+                          DataCell(
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 18),
+                                  onPressed: () => _edit(row: row),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    size: 18,
+                                  ),
+                                  onPressed: () => _delete(row['id'] as String),
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 18),
-                              onPressed: () => _delete(row['id'] as String),
-                            ),
-                          ],
-                        )),
-                        for (final c in columns)
-                          DataCell(Text('${row[c] ?? ''}')),
-                      ]),
+                          ),
+                          for (final c in columns)
+                            DataCell(Text('${row[c] ?? ''}')),
+                        ],
+                      ),
                   ],
                 ),
               ),
@@ -622,8 +666,13 @@ class _RowEditorState extends State<_RowEditor> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(current),
     );
-    final dt = DateTime(date.year, date.month, date.day,
-        time?.hour ?? 0, time?.minute ?? 0);
+    final dt = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time?.hour ?? 0,
+      time?.minute ?? 0,
+    );
     setState(() => _dates[name] = dt.millisecondsSinceEpoch);
   }
 
@@ -659,7 +708,9 @@ class _RowEditorState extends State<_RowEditor> {
         final ms = _dates[f.name];
         final label = ms == null
             ? 'not set'
-            : DateTime.fromMillisecondsSinceEpoch(ms).toString().split('.').first;
+            : DateTime.fromMillisecondsSinceEpoch(
+                ms,
+              ).toString().split('.').first;
         return ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(f.name),
@@ -682,8 +733,10 @@ class _RowEditorState extends State<_RowEditor> {
       case 'number':
         return TextField(
           controller: _text[f.name],
-          keyboardType:
-              const TextInputType.numberWithOptions(decimal: true, signed: true),
+          keyboardType: const TextInputType.numberWithOptions(
+            decimal: true,
+            signed: true,
+          ),
           decoration: InputDecoration(labelText: f.name, isDense: true),
         );
       default:
@@ -701,8 +754,10 @@ class _RowEditorState extends State<_RowEditor> {
       content: SizedBox(
         width: double.maxFinite,
         child: widget.fields.isEmpty
-            ? const Text('No known fields yet — set a schema or connect so the '
-                'table\'s attributes are known.')
+            ? const Text(
+                'No known fields yet — set a schema or connect so the '
+                'table\'s attributes are known.',
+              )
             : SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -718,7 +773,9 @@ class _RowEditorState extends State<_RowEditor> {
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
         if (widget.fields.isNotEmpty)
           FilledButton(onPressed: _save, child: const Text('Save')),
       ],

@@ -8,8 +8,5 @@ Future<void> main() async {
   );
 
   initializeBuildLogTracking();
-  testAnnotatedElements<InstantModel>(
-    reader,
-    InstantGenerator(),
-  );
+  testAnnotatedElements<InstantModel>(reader, InstantGenerator());
 }

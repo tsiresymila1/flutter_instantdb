@@ -307,10 +307,7 @@ Future<void> _toDart({
 }
 
 /// Offline Dart -> TS (no cloud / npx).
-Future<void> _toTs({
-  required String schemaFile,
-  required bool verbose,
-}) async {
+Future<void> _toTs({required String schemaFile, required bool verbose}) async {
   final dartSchema = File(schemaFile);
   if (!await dartSchema.exists()) {
     _error('Dart schema file not found: $schemaFile');
@@ -422,7 +419,9 @@ Future<void> _diffSchema({
   }
 
   // Normalize both sides to TS and do a best-effort line diff.
-  final localTs = emitInstantTs(parseDartModels(await dartSchema.readAsString()));
+  final localTs = emitInstantTs(
+    parseDartModels(await dartSchema.readAsString()),
+  );
   final cloudTs = emitInstantTs(parseInstantTs(await tsFile.readAsString()));
 
   if (localTs == cloudTs) {
@@ -444,8 +443,10 @@ Future<void> _diffSchema({
       if (c.isNotEmpty) print('  + cloud: $c');
     }
   }
-  _info('Note: diff is best-effort on normalized output (number->num, '
-      'link reverse synthesis).');
+  _info(
+    'Note: diff is best-effort on normalized output (number->num, '
+    'link reverse synthesis).',
+  );
 }
 
 // ============================================================================

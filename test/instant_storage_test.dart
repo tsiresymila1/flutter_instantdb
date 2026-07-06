@@ -13,10 +13,10 @@ class _FakeAuth extends AuthManager {
 }
 
 Response<dynamic> _resp(dynamic data, String path) => Response<dynamic>(
-      data: data,
-      statusCode: 200,
-      requestOptions: RequestOptions(path: path),
-    );
+  data: data,
+  statusCode: 200,
+  requestOptions: RequestOptions(path: path),
+);
 
 void main() {
   late _MockDio dio;
@@ -55,14 +55,17 @@ void main() {
 
   group('uploadFile', () {
     test('POSTs to /storage/upload and returns InstantFile', () async {
-      when(() => dio.post(
-            any(),
-            data: any(named: 'data'),
-            options: any(named: 'options'),
-          )).thenAnswer((_) async => _resp(
-            {'data': {'id': 'f1', 'path': 'photos/x.png'}},
-            '/storage/upload',
-          ));
+      when(
+        () => dio.post(
+          any(),
+          data: any(named: 'data'),
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer(
+        (_) async => _resp({
+          'data': {'id': 'f1', 'path': 'photos/x.png'},
+        }, '/storage/upload'),
+      );
 
       final file = await storage.uploadFile(
         'photos/x.png',
@@ -73,11 +76,13 @@ void main() {
       expect(file.id, 'f1');
       expect(file.path, 'photos/x.png');
 
-      final captured = verify(() => dio.post(
-            captureAny(),
-            data: captureAny(named: 'data'),
-            options: captureAny(named: 'options'),
-          )).captured;
+      final captured = verify(
+        () => dio.post(
+          captureAny(),
+          data: captureAny(named: 'data'),
+          options: captureAny(named: 'options'),
+        ),
+      ).captured;
       expect(captured[0], '/storage/upload');
       expect(captured[1], isA<Stream<List<int>>>());
       final opts = captured[2] as Options;
@@ -90,21 +95,23 @@ void main() {
 
   group('getDownloadUrl', () {
     test('GETs signed-download-url and returns the url', () async {
-      when(() => dio.get(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-          )).thenAnswer((_) async => _resp(
-            {'data': 'https://cdn/x.png?sig=abc'},
-            '/storage/signed-download-url',
-          ));
+      when(
+        () => dio.get(any(), queryParameters: any(named: 'queryParameters')),
+      ).thenAnswer(
+        (_) async => _resp({
+          'data': 'https://cdn/x.png?sig=abc',
+        }, '/storage/signed-download-url'),
+      );
 
       final url = await storage.getDownloadUrl('photos/x.png');
       expect(url, 'https://cdn/x.png?sig=abc');
 
-      final captured = verify(() => dio.get(
-            captureAny(),
-            queryParameters: captureAny(named: 'queryParameters'),
-          )).captured;
+      final captured = verify(
+        () => dio.get(
+          captureAny(),
+          queryParameters: captureAny(named: 'queryParameters'),
+        ),
+      ).captured;
       expect(captured[0], '/storage/signed-download-url');
       final qp = captured[1] as Map;
       expect(qp['app_id'], 'app1');
@@ -114,19 +121,23 @@ void main() {
 
   group('delete', () {
     test('DELETEs /storage/files with filename', () async {
-      when(() => dio.delete(
-            any(),
-            queryParameters: any(named: 'queryParameters'),
-            options: any(named: 'options'),
-          )).thenAnswer((_) async => _resp({'ok': true}, '/storage/files'));
+      when(
+        () => dio.delete(
+          any(),
+          queryParameters: any(named: 'queryParameters'),
+          options: any(named: 'options'),
+        ),
+      ).thenAnswer((_) async => _resp({'ok': true}, '/storage/files'));
 
       await storage.delete('photos/x.png');
 
-      final captured = verify(() => dio.delete(
-            captureAny(),
-            queryParameters: captureAny(named: 'queryParameters'),
-            options: any(named: 'options'),
-          )).captured;
+      final captured = verify(
+        () => dio.delete(
+          captureAny(),
+          queryParameters: captureAny(named: 'queryParameters'),
+          options: any(named: 'options'),
+        ),
+      ).captured;
       expect(captured[0], '/storage/files');
       final qp = captured[1] as Map;
       expect(qp['app_id'], 'app1');

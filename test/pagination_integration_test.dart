@@ -25,7 +25,10 @@ void main() {
       final id = DateTime.now().microsecondsSinceEpoch.toString();
       db = await InstantDB.init(
         appId: 'test-app-id',
-        config: InstantConfig(syncEnabled: false, persistenceDir: 'test_pg_$id'),
+        config: InstantConfig(
+          syncEnabled: false,
+          persistenceDir: 'test_pg_$id',
+        ),
       );
       // Seed 5 todos with a sortable index.
       for (var i = 0; i < 5; i++) {
@@ -54,14 +57,21 @@ void main() {
     test('after cursor pages forward', () async {
       final first = await db.queryOnce({
         'todos': {
-          '\$': {'order': {'n': 'asc'}, 'first': 2},
+          '\$': {
+            'order': {'n': 'asc'},
+            'first': 2,
+          },
         },
       });
       final cursor = first.pageInfo?['todos']?['endCursor'] as String;
 
       final next = await db.queryOnce({
         'todos': {
-          '\$': {'order': {'n': 'asc'}, 'first': 2, 'after': cursor},
+          '\$': {
+            'order': {'n': 'asc'},
+            'first': 2,
+            'after': cursor,
+          },
         },
       });
       expect(next.documents.map((e) => e['n']), [2, 3]);
@@ -70,7 +80,9 @@ void main() {
     test('fields projection limits returned keys', () async {
       final r = await db.queryOnce({
         'todos': {
-          '\$': {'fields': ['n']},
+          '\$': {
+            'fields': ['n'],
+          },
         },
       });
       for (final doc in r.documents) {
@@ -79,11 +91,18 @@ void main() {
     });
 
     test('infiniteQuery accumulates pages via loadMore', () async {
-      final inf = db.infiniteQuery({
-        'todos': {
-          '\$': {'order': {'n': 'asc'}, 'first': 2},
+      final inf = db.infiniteQuery(
+        {
+          'todos': {
+            '\$': {
+              'order': {'n': 'asc'},
+              'first': 2,
+            },
+          },
         },
-      }, pageSize: 2, entityType: 'todos');
+        pageSize: 2,
+        entityType: 'todos',
+      );
 
       await waitFor(() => inf.items.value.length >= 2);
       expect(inf.items.value.length, 2);

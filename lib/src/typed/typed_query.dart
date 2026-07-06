@@ -12,11 +12,13 @@ class Filter {
 
   Map<String, dynamic> toMap() => _map;
 
-  Filter operator &(Filter other) =>
-      Filter._({'and': [toMap(), other.toMap()]});
+  Filter operator &(Filter other) => Filter._({
+    'and': [toMap(), other.toMap()],
+  });
 
-  Filter operator |(Filter other) =>
-      Filter._({'or': [toMap(), other.toMap()]});
+  Filter operator |(Filter other) => Filter._({
+    'or': [toMap(), other.toMap()],
+  });
 }
 
 /// Ordering spec: `{field: 'asc' | 'desc'}`.
@@ -100,19 +102,19 @@ class TypedQuery<E extends InstantTable<E>> {
   final Map<String, dynamic>? _includes;
 
   TypedQuery(this.table, {String? relationAttr})
-      : _where = null,
-        _order = null,
-        _first = null,
-        _last = null,
-        _offset = null,
-        _limit = null,
-        _after = null,
-        _before = null,
-        _afterInclusive = null,
-        _beforeInclusive = null,
-        _fields = null,
-        _relationAttr = relationAttr,
-        _includes = null;
+    : _where = null,
+      _order = null,
+      _first = null,
+      _last = null,
+      _offset = null,
+      _limit = null,
+      _after = null,
+      _before = null,
+      _afterInclusive = null,
+      _beforeInclusive = null,
+      _fields = null,
+      _relationAttr = relationAttr,
+      _includes = null;
 
   TypedQuery._(
     this.table, {
@@ -129,19 +131,19 @@ class TypedQuery<E extends InstantTable<E>> {
     required List<Col<dynamic>>? fields,
     required String? relationAttr,
     required Map<String, dynamic>? includes,
-  })  : _where = where,
-        _order = order,
-        _first = first,
-        _last = last,
-        _offset = offset,
-        _limit = limit,
-        _after = after,
-        _before = before,
-        _afterInclusive = afterInclusive,
-        _beforeInclusive = beforeInclusive,
-        _fields = fields,
-        _relationAttr = relationAttr,
-        _includes = includes;
+  }) : _where = where,
+       _order = order,
+       _first = first,
+       _last = last,
+       _offset = offset,
+       _limit = limit,
+       _after = after,
+       _before = before,
+       _afterInclusive = afterInclusive,
+       _beforeInclusive = beforeInclusive,
+       _fields = fields,
+       _relationAttr = relationAttr,
+       _includes = includes;
 
   TypedQuery<E> _copyWith({
     Filter? where,
@@ -214,27 +216,31 @@ class TypedQuery<E extends InstantTable<E>> {
       throw ArgumentError(
         'select()/fields projection is not supported on a typed relation '
         'include: the generated fromRow requires every field. Use the untyped '
-        'query-map API if you need a projected relation.');
+        'query-map API if you need a projected relation.',
+      );
     }
     final attr = sub._relationAttr ?? sub.table.entityType;
-    final merged = <String, dynamic>{...?_includes, attr: sub._includeOptions()};
+    final merged = <String, dynamic>{
+      ...?_includes,
+      attr: sub._includeOptions(),
+    };
     return _copyWith(includes: merged);
   }
 
   /// Builds the nested options map (no `$` wrapper, no entityType key).
   Map<String, dynamic> _includeOptions() => {
-        if (_where != null) 'where': _where.toMap(),
-        if (_order != null) 'order': _order.toMap(),
-        if (_first != null) 'first': _first,
-        if (_last != null) 'last': _last,
-        if (_after != null) 'after': _after,
-        if (_before != null) 'before': _before,
-        if (_afterInclusive != null) 'afterInclusive': _afterInclusive,
-        if (_beforeInclusive != null) 'beforeInclusive': _beforeInclusive,
-        if (_limit != null) 'limit': _limit,
-        if (_offset != null) 'offset': _offset,
-        if (_includes != null) 'include': _includes,
-      };
+    if (_where != null) 'where': _where.toMap(),
+    if (_order != null) 'order': _order.toMap(),
+    if (_first != null) 'first': _first,
+    if (_last != null) 'last': _last,
+    if (_after != null) 'after': _after,
+    if (_before != null) 'before': _before,
+    if (_afterInclusive != null) 'afterInclusive': _afterInclusive,
+    if (_beforeInclusive != null) 'beforeInclusive': _beforeInclusive,
+    if (_limit != null) 'limit': _limit,
+    if (_offset != null) 'offset': _offset,
+    if (_includes != null) 'include': _includes,
+  };
 
   /// Compile to the InstaQL map.
   Map<String, dynamic> toQuery() {

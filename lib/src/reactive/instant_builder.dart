@@ -331,7 +331,8 @@ class InstantInfiniteBuilder extends StatelessWidget {
     BuildContext context,
     List<Map<String, dynamic>> items,
     bool hasMore,
-  ) builder;
+  )
+  builder;
 
   const InstantInfiniteBuilder({
     super.key,

@@ -44,9 +44,7 @@ class InstantDB {
   ReadonlySignal<bool> get isReady => _isReady.readonly();
 
   /// Whether the database is online and syncing.
-  @Deprecated(
-    'Use connectionStatus; online == ConnectionStatus.authenticated',
-  )
+  @Deprecated('Use connectionStatus; online == ConnectionStatus.authenticated')
   ReadonlySignal<bool> get isOnline => _isOnline.readonly();
 
   /// Reactive connection lifecycle status (connecting/opened/authenticated/
@@ -226,10 +224,7 @@ class InstantDB {
 
   /// Reactive typed query (see TypedQuery). Compiles to the InstaQL map and
   /// delegates to [query].
-  Signal<QueryResult> queryTyped(
-    TypedQuery query, {
-    bool syncedOnly = false,
-  }) {
+  Signal<QueryResult> queryTyped(TypedQuery query, {bool syncedOnly = false}) {
     return this.query(query.toQuery(), syncedOnly: syncedOnly);
   }
 

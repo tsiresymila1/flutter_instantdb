@@ -12,8 +12,17 @@ import '../core/logging_config.dart';
 
 /// InstaQL option keys the server requires nested under `$`.
 const _instaqlOptionKeys = {
-  'where', 'order', 'limit', 'offset', 'first', 'last',
-  'after', 'before', 'cursor', 'fields', 'aggregate',
+  'where',
+  'order',
+  'limit',
+  'offset',
+  'first',
+  'last',
+  'after',
+  'before',
+  'cursor',
+  'fields',
+  'aggregate',
 };
 
 /// Normalize an InstaQL query so options (where/order/limit/…) sit under `$`,
@@ -22,8 +31,9 @@ const _instaqlOptionKeys = {
 Map<String, dynamic> normalizeInstaQL(Map<String, dynamic> query) {
   final out = <String, dynamic>{};
   query.forEach((entity, spec) {
-    out[entity] =
-        spec is Map<String, dynamic> ? _normalizeInstaQLSpec(spec) : spec;
+    out[entity] = spec is Map<String, dynamic>
+        ? _normalizeInstaQLSpec(spec)
+        : spec;
   });
   return out;
 }
@@ -75,8 +85,11 @@ Map<String, List<Map<String, dynamic>>> tryConvertDatalogToCollectionFormat(
 
     final joinRows = extractJoinRows(datalogCandidate, log: log);
     if (joinRows.isNotEmpty) {
-      final entities =
-          parseJoinRowsToEntities(joinRows, attributeCache, log: log);
+      final entities = parseJoinRowsToEntities(
+        joinRows,
+        attributeCache,
+        log: log,
+      );
       groupEntitiesByType(
         entities,
         convertedData,
@@ -123,9 +136,7 @@ Map<String, List<Map<String, dynamic>>> tryConvertDatalogToCollectionFormat(
       final list = entry.value as List;
       if (list.first is Map) {
         convertedData[entry.key] = List<Map<String, dynamic>>.from(list);
-        log?.debug(
-          'Found collection format for entity type: ${entry.key}',
-        );
+        log?.debug('Found collection format for entity type: ${entry.key}');
       }
     }
   }

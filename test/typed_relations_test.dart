@@ -20,8 +20,11 @@ class _TodoTable extends InstantModelTable<_TodoTable, _Todo> {
   final n = const Col<int>('n');
 
   @override
-  _Todo fromRow(Map<String, dynamic> m) =>
-      _Todo(id: m['id'] as String, title: m['title'] as String, n: m['n'] as int);
+  _Todo fromRow(Map<String, dynamic> m) => _Todo(
+    id: m['id'] as String,
+    title: m['title'] as String,
+    n: m['n'] as int,
+  );
 }
 
 class _Goal {
@@ -39,14 +42,15 @@ class _GoalTable extends InstantModelTable<_GoalTable, _Goal> {
 
   @override
   _Goal fromRow(Map<String, dynamic> m) => _Goal(
-        id: m['id'] as String,
-        title: m['title'] as String,
-        todos: (m['todos'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>()
-                .map(_TodoTable().fromRow)
-                .toList() ??
-            const <_Todo>[],
-      );
+    id: m['id'] as String,
+    title: m['title'] as String,
+    todos:
+        (m['todos'] as List<dynamic>?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(_TodoTable().fromRow)
+            .toList() ??
+        const <_Todo>[],
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -67,15 +71,18 @@ void main() {
         appId: 'test-app-id',
         config: InstantConfig(
           syncEnabled: false,
-          persistenceDir:
-              'test_tr_${DateTime.now().microsecondsSinceEpoch}',
+          persistenceDir: 'test_tr_${DateTime.now().microsecondsSinceEpoch}',
         ),
       );
       // Seed: one goal with two linked todos (n=1 and n=2).
       await db.transact(db.tx['goals']['g1'].update({'title': 'Fit'}));
       await db.transact(db.tx['todos']['t1'].update({'title': 'Run', 'n': 1}));
       await db.transact(db.tx['todos']['t2'].update({'title': 'Lift', 'n': 2}));
-      await db.transact(db.tx['goals']['g1'].link({'todos': ['t1', 't2']}));
+      await db.transact(
+        db.tx['goals']['g1'].link({
+          'todos': ['t1', 't2'],
+        }),
+      );
     });
 
     tearDown(() async => db.dispose());
@@ -89,9 +96,9 @@ void main() {
     });
 
     test('typed nested where narrows the included set', () async {
-      final q = _GoalTable()
-          .query()
-          .include((g) => g.todos.where((t) => t.n.gte(2)));
+      final q = _GoalTable().query().include(
+        (g) => g.todos.where((t) => t.n.gte(2)),
+      );
       final r = await db.queryOnceTyped(q);
       final todos = _GoalTable()
           .fromRow(r.documents.firstWhere((d) => d['id'] == 'g1'))
@@ -100,25 +107,29 @@ void main() {
     });
 
     test(
-        'fromRow on an un-included parent yields an empty relation, not a crash',
-        () async {
-      // Query WITHOUT include — the todos key will be a list of id strings.
-      final r = await db.queryOnceTyped(_GoalTable().query());
-      final todos = _GoalTable()
-          .fromRow(r.documents.firstWhere((d) => d['id'] == 'g1'))
-          .todos;
-      expect(todos, isEmpty);
-    });
+      'fromRow on an un-included parent yields an empty relation, not a crash',
+      () async {
+        // Query WITHOUT include — the todos key will be a list of id strings.
+        final r = await db.queryOnceTyped(_GoalTable().query());
+        final todos = _GoalTable()
+            .fromRow(r.documents.firstWhere((d) => d['id'] == 'g1'))
+            .todos;
+        expect(todos, isEmpty);
+      },
+    );
 
     test('typed include applies nested cursor window', () async {
       // Seed a third todo (n=3) linked to g1.
+      await db.transact(db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
       await db.transact(
-          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
-      await db.transact(db.tx['goals']['g1'].link({'todos': ['t3']}));
+        db.tx['goals']['g1'].link({
+          'todos': ['t3'],
+        }),
+      );
 
-      final q = _GoalTable()
-          .query()
-          .include((g) => g.todos.order((t) => t.n.asc()).first(1));
+      final q = _GoalTable().query().include(
+        (g) => g.todos.order((t) => t.n.asc()).first(1),
+      );
       final r = await db.queryOnceTyped(q);
       final todos = _GoalTable()
           .fromRow(r.documents.firstWhere((d) => d['id'] == 'g1'))
@@ -128,13 +139,16 @@ void main() {
 
     test('per-relation pageInfo is reachable through the typed path', () async {
       // Seed a third todo (n=3) linked to g1 (setUp has t1 n=1, t2 n=2).
+      await db.transact(db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
       await db.transact(
-          db.tx['todos']['t3'].update({'title': 'Swim', 'n': 3}));
-      await db.transact(db.tx['goals']['g1'].link({'todos': ['t3']}));
+        db.tx['goals']['g1'].link({
+          'todos': ['t3'],
+        }),
+      );
 
-      final q = _GoalTable()
-          .query()
-          .include((g) => g.todos.order((t) => t.n.asc()).first(1));
+      final q = _GoalTable().query().include(
+        (g) => g.todos.order((t) => t.n.asc()).first(1),
+      );
       final r = await db.queryOnceTyped(q);
       expect(r.pageInfo?['goals.todos']?['hasNextPage'], true);
     });

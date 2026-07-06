@@ -15,8 +15,10 @@ void main() {
       final id = DateTime.now().microsecondsSinceEpoch.toString();
       db = await InstantDB.init(
         appId: 'test-app-id',
-        config:
-            InstantConfig(syncEnabled: false, persistenceDir: 'test_files_$id'),
+        config: InstantConfig(
+          syncEnabled: false,
+          persistenceDir: 'test_files_$id',
+        ),
       );
     });
 

@@ -147,7 +147,7 @@ class MismatchModel {
   final String id;
   final String title;
   const MismatchModel({required this.id, required String heading})
-      : title = heading;
+    : title = heading;
 }
 
 // ---------------------------------------------------------------------------

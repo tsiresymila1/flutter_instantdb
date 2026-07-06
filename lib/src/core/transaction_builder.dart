@@ -72,12 +72,12 @@ class EntityInstanceBuilder {
 
   /// Construct a builder whose target is resolved by a unique attribute.
   EntityInstanceBuilder.lookup(this.entityType, String attribute, dynamic value)
-      : entityId = '',
-        lookupRef = LookupRef(
-          entityType: entityType,
-          attribute: attribute,
-          value: value,
-        );
+    : entityId = '',
+      lookupRef = LookupRef(
+        entityType: entityType,
+        attribute: attribute,
+        value: value,
+      );
 
   /// Update entity with new data. Pass `opts: TxOpts(upsert: false)` for
   /// strict mode (do not create the entity if it does not exist).

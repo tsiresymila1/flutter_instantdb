@@ -65,9 +65,12 @@ void main() {
 
   group('paginate - fields projection', () {
     test('keeps id plus requested fields only', () {
-      final r = paginate([
-        {'id': 'a', 'title': 'T', 'status': 'open', 'secret': 1},
-      ], fields: ['title', 'status']);
+      final r = paginate(
+        [
+          {'id': 'a', 'title': 'T', 'status': 'open', 'secret': 1},
+        ],
+        fields: ['title', 'status'],
+      );
       expect(r.items.single.keys.toSet(), {'id', 'title', 'status'});
     });
   });
@@ -85,8 +88,12 @@ void main() {
 
   group('QueryResult.pageInfo', () {
     test('success carries optional pageInfo', () {
-      final r = QueryResult.success({'todos': []},
-          pageInfo: {'todos': {'hasNextPage': true}});
+      final r = QueryResult.success(
+        {'todos': []},
+        pageInfo: {
+          'todos': {'hasNextPage': true},
+        },
+      );
       expect(r.pageInfo?['todos']['hasNextPage'], isTrue);
     });
 

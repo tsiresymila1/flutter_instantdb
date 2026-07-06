@@ -63,17 +63,16 @@ void main() {
     });
 
     test('typed link / unlink map to the right op types', () {
-      final linkOp =
-          TypedTx(t).link('t1', 'tags', 'g1').toTransactionChunk().operations.single;
+      final linkOp = TypedTx(
+        t,
+      ).link('t1', 'tags', 'g1').toTransactionChunk().operations.single;
       expect(linkOp.type, OperationType.link);
       expect(linkOp.entityId, 't1');
       expect(linkOp.data, {'tags': 'g1'});
 
-      final unlinkOp = TypedTx(t)
-          .unlink('t1', 'tags', 'g1')
-          .toTransactionChunk()
-          .operations
-          .single;
+      final unlinkOp = TypedTx(
+        t,
+      ).unlink('t1', 'tags', 'g1').toTransactionChunk().operations.single;
       expect(unlinkOp.type, OperationType.unlink);
       expect(unlinkOp.entityId, 't1');
       expect(unlinkOp.data, {'tags': 'g1'});
@@ -115,8 +114,9 @@ void main() {
     // because `set<T>(Col<T>, T)` binds the value type to the column's T.
 
     test('createFromMap builds an add op with the whole map', () {
-      final chunk =
-          TypedTx(t).createFromMap({'id': 't1', 'title': 'Run', 'priority': 1});
+      final chunk = TypedTx(
+        t,
+      ).createFromMap({'id': 't1', 'title': 'Run', 'priority': 1});
       final op = chunk.operations.single;
       expect(op.type, OperationType.add);
       expect(op.entityId, 't1');
@@ -141,16 +141,22 @@ void main() {
       expect(op.data, {'priority': 1});
     });
 
-    test('linkRel / unlinkRel build link/unlink ops via the RelationRef attr',
-        () {
-      const rel = RelationRef<_Todos>('todos');
-      final linkOps = TypedTx(_Goals()).linkRel('g1', rel, ['t1', 't2']).operations;
-      expect(linkOps.length, 2);
-      expect(linkOps.every((o) => o.type == OperationType.link), isTrue);
-      final unlinkOps = TypedTx(_Goals()).unlinkRel('g1', rel, 't1').operations;
-      expect(unlinkOps.single.type, OperationType.unlink);
-      expect(unlinkOps.single.data, {'todos': 't1'});
-    });
+    test(
+      'linkRel / unlinkRel build link/unlink ops via the RelationRef attr',
+      () {
+        const rel = RelationRef<_Todos>('todos');
+        final linkOps = TypedTx(
+          _Goals(),
+        ).linkRel('g1', rel, ['t1', 't2']).operations;
+        expect(linkOps.length, 2);
+        expect(linkOps.every((o) => o.type == OperationType.link), isTrue);
+        final unlinkOps = TypedTx(
+          _Goals(),
+        ).unlinkRel('g1', rel, 't1').operations;
+        expect(unlinkOps.single.type, OperationType.unlink);
+        expect(unlinkOps.single.data, {'todos': 't1'});
+      },
+    );
   });
 
   group('TypedTx (integration, sqflite-ffi)', () {
@@ -175,9 +181,11 @@ void main() {
     tearDown(() async => db.dispose());
 
     test('typed create round-trips through the DB', () async {
-      await db.transact(db.txFor(t).create(id: 't1')
-        ..set(t.title, 'Run')
-        ..set(t.priority, 3));
+      await db.transact(
+        db.txFor(t).create(id: 't1')
+          ..set(t.title, 'Run')
+          ..set(t.priority, 3),
+      );
       final r = await db.queryOnce({'todos': {}});
       final todo = r.documents.firstWhere((d) => d['id'] == 't1');
       expect(todo['title'], 'Run');
@@ -194,12 +202,15 @@ void main() {
 
     test('typed lookup upserts by unique attr', () async {
       await db.transact(
-          db.txFor(t).lookup(t.email, 'a@b.com')..set(t.title, 'First'));
+        db.txFor(t).lookup(t.email, 'a@b.com')..set(t.title, 'First'),
+      );
       await db.transact(
-          db.txFor(t).lookup(t.email, 'a@b.com')..set(t.title, 'Second'));
+        db.txFor(t).lookup(t.email, 'a@b.com')..set(t.title, 'Second'),
+      );
       final r = await db.queryOnce({'todos': {}});
-      final matches =
-          r.documents.where((d) => d['email'] == 'a@b.com').toList();
+      final matches = r.documents
+          .where((d) => d['email'] == 'a@b.com')
+          .toList();
       expect(matches.length, 1); // upsert, not duplicate
       expect(matches.single['title'], 'Second');
     });

@@ -204,22 +204,16 @@ class AuthManager {
     required String idToken,
     String clientName = 'google',
     String? nonce,
-  }) => signInWithIdToken(
-    idToken: idToken,
-    clientName: clientName,
-    nonce: nonce,
-  );
+  }) =>
+      signInWithIdToken(idToken: idToken, clientName: clientName, nonce: nonce);
 
   /// Sign in with an Apple identity token (from `sign_in_with_apple`).
   Future<AuthUser> signInWithApple({
     required String idToken,
     String clientName = 'apple',
     String? nonce,
-  }) => signInWithIdToken(
-    idToken: idToken,
-    clientName: clientName,
-    nonce: nonce,
-  );
+  }) =>
+      signInWithIdToken(idToken: idToken, clientName: clientName, nonce: nonce);
 
   /// Sign in with a Clerk session token. [clientName] is the Clerk client name
   /// configured in the InstantDB dashboard.

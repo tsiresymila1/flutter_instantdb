@@ -12,20 +12,34 @@ void main() {
   group('TransactionChunk.ruleParams', () {
     test('attaches ruleParams to every operation options', () {
       final chunk = TransactionChunk([
-        Operation(type: OperationType.update, entityType: 'docs',
-            entityId: 'd1', data: {'title': 'x'}),
+        Operation(
+          type: OperationType.update,
+          entityType: 'docs',
+          entityId: 'd1',
+          data: {'title': 'x'},
+        ),
       ]).ruleParams({'token': 'abc'});
 
-      expect(chunk.operations.single.options?['ruleParams'],
-          equals({'token': 'abc'}));
+      expect(
+        chunk.operations.single.options?['ruleParams'],
+        equals({'token': 'abc'}),
+      );
     });
 
     test('preserves existing options and lookupRef', () {
       final chunk = TransactionChunk([
-        Operation(type: OperationType.update, entityType: 'docs',
-            entityId: 'd1', data: {'a': 1}, options: {'upsert': false},
-            lookupRef: const LookupRef(
-                entityType: 'docs', attribute: 'slug', value: 's')),
+        Operation(
+          type: OperationType.update,
+          entityType: 'docs',
+          entityId: 'd1',
+          data: {'a': 1},
+          options: {'upsert': false},
+          lookupRef: const LookupRef(
+            entityType: 'docs',
+            attribute: 'slug',
+            value: 's',
+          ),
+        ),
       ]).ruleParams({'token': 'abc'});
 
       final op = chunk.operations.single;
@@ -39,8 +53,9 @@ void main() {
     final tx = TransactionBuilder();
 
     test('lookup().update() sets lookupRef target and data', () {
-      final chunk = tx['profiles'].lookup('email', 'a@b.com')
-          .update({'name': 'A'});
+      final chunk = tx['profiles'].lookup('email', 'a@b.com').update({
+        'name': 'A',
+      });
       final op = chunk.operations.single;
       expect(op.type, OperationType.update);
       expect(op.entityType, 'profiles');
@@ -61,8 +76,9 @@ void main() {
     final tx = TransactionBuilder();
 
     test('update with upsert:false records option', () {
-      final chunk = tx['goals']['g1']
-          .update({'title': 'x'}, opts: const TxOpts(upsert: false));
+      final chunk = tx['goals']['g1'].update({
+        'title': 'x',
+      }, opts: const TxOpts(upsert: false));
       expect(chunk.operations.single.options?['upsert'], isFalse);
     });
 
@@ -73,8 +89,9 @@ void main() {
     });
 
     test('merge with upsert:false records option', () {
-      final chunk = tx['games']['gm1']
-          .merge({'state': {'a': 1}}, opts: const TxOpts(upsert: false));
+      final chunk = tx['games']['gm1'].merge({
+        'state': {'a': 1},
+      }, opts: const TxOpts(upsert: false));
       expect(chunk.operations.single.options?['upsert'], isFalse);
     });
   });
@@ -83,10 +100,11 @@ void main() {
     test('transact accepts any ToTransaction', () {
       final chunk = TransactionChunk([
         Operation(
-            type: OperationType.add,
-            entityType: 'todos',
-            entityId: 'x',
-            data: {'title': 'hi', '__type': 'todos'}),
+          type: OperationType.add,
+          entityType: 'todos',
+          entityId: 'x',
+          data: {'title': 'hi', '__type': 'todos'},
+        ),
       ]);
       expect(chunk, isA<ToTransaction>());
       expect(chunk.toTransactionChunk().operations, chunk.operations);

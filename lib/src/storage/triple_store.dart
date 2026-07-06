@@ -198,19 +198,20 @@ class TripleStore implements StorageInterface {
       whereArgs: ['__type'],
       distinct: true,
     );
-    final names = results
-        .map((row) {
-          final raw = row['value'];
-          // __type values are stored JSON-encoded (e.g. "\"todos\"").
-          try {
-            return jsonDecode(raw as String).toString();
-          } catch (_) {
-            return raw.toString();
-          }
-        })
-        .toSet()
-        .toList()
-      ..sort();
+    final names =
+        results
+            .map((row) {
+              final raw = row['value'];
+              // __type values are stored JSON-encoded (e.g. "\"todos\"").
+              try {
+                return jsonDecode(raw as String).toString();
+              } catch (_) {
+                return raw.toString();
+              }
+            })
+            .toSet()
+            .toList()
+          ..sort();
     return names;
   }
 
@@ -229,11 +230,10 @@ class TripleStore implements StorageInterface {
         return existing.first['value'] as String;
       }
       final id = const Uuid().v4();
-      await txn.insert(
-        'metadata',
-        {'key': key, 'value': id},
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await txn.insert('metadata', {
+        'key': key,
+        'value': id,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
       return id;
     });
   }

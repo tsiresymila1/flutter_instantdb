@@ -50,7 +50,11 @@ void main() {
 
     test('getAll with include populates typed nested relation', () async {
       await db.transact(db.tx['gadgets']['g1'].update({'label': 'A'}));
-      await db.transact(db.tx['widgets']['w0'].link({'gadgets': ['g1']}));
+      await db.transact(
+        db.tx['widgets']['w0'].link({
+          'gadgets': ['g1'],
+        }),
+      );
       final widgets = await Widget2Table()
           .query()
           .include((w) => w.gadgets)
@@ -61,54 +65,79 @@ void main() {
 
     test('createModel round-trips a whole model', () async {
       await db.transact(
-        db.txFor(Widget2Table()).createModel(
+        db
+            .txFor(Widget2Table())
+            .createModel(
               const Widget2(id: 'wm', name: 'M', weight: 7, gadgets: []),
             ),
       );
-      final got =
-          await Widget2Table().query().where((t) => t.id.eq('wm')).getAll(db);
+      final got = await Widget2Table()
+          .query()
+          .where((t) => t.id.eq('wm'))
+          .getAll(db);
       expect(got.single.name, 'M');
       expect(got.single.weight, 7);
     });
 
     test('updateModel round-trips a changed field', () async {
       await db.transact(
-        db.txFor(Widget2Table()).createModel(
+        db
+            .txFor(Widget2Table())
+            .createModel(
               const Widget2(id: 'wu', name: 'Before', weight: 1, gadgets: []),
             ),
       );
       await db.transact(
-        db.txFor(Widget2Table()).updateModel(
+        db
+            .txFor(Widget2Table())
+            .updateModel(
               'wu',
               const Widget2(id: 'wu', name: 'After', weight: 2, gadgets: []),
             ),
       );
-      final got =
-          await Widget2Table().query().where((t) => t.id.eq('wu')).getAll(db);
+      final got = await Widget2Table()
+          .query()
+          .where((t) => t.id.eq('wu'))
+          .getAll(db);
       expect(got.single.name, 'After');
       expect(got.single.weight, 2);
     });
 
     test('Table().tx(db) sugar createModel round-trips', () async {
       await db.transact(
-        Widget2Table().tx(db).createModel(
+        Widget2Table()
+            .tx(db)
+            .createModel(
               const Widget2(id: 'ws', name: 'S', weight: 4, gadgets: []),
             ),
       );
-      final got =
-          await Widget2Table().query().where((t) => t.id.eq('ws')).getAll(db);
+      final got = await Widget2Table()
+          .query()
+          .where((t) => t.id.eq('ws'))
+          .getAll(db);
       expect(got.single.name, 'S');
     });
 
     test('mergeModel merges a field', () async {
-      await db.transact(Widget2Table().tx(db).createModel(
-            const Widget2(id: 'wg', name: 'Before', weight: 1, gadgets: []),
-          ));
-      await db.transact(Widget2Table().tx(db).mergeModel(
-            'wg', const Widget2(id: 'wg', name: 'After', weight: 5, gadgets: []),
-          ));
-      final got =
-          await Widget2Table().query().where((t) => t.id.eq('wg')).getAll(db);
+      await db.transact(
+        Widget2Table()
+            .tx(db)
+            .createModel(
+              const Widget2(id: 'wg', name: 'Before', weight: 1, gadgets: []),
+            ),
+      );
+      await db.transact(
+        Widget2Table()
+            .tx(db)
+            .mergeModel(
+              'wg',
+              const Widget2(id: 'wg', name: 'After', weight: 5, gadgets: []),
+            ),
+      );
+      final got = await Widget2Table()
+          .query()
+          .where((t) => t.id.eq('wg'))
+          .getAll(db);
       expect(got.single.name, 'After');
       expect(got.single.weight, 5);
     });
@@ -116,19 +145,22 @@ void main() {
     test('linkRel links via the generated RelationRef', () async {
       await db.transact(db.tx['gadgets']['g1'].update({'label': 'A'}));
       await db.transact(
-        db.txFor(Widget2Table()).createModel(
+        db
+            .txFor(Widget2Table())
+            .createModel(
               const Widget2(id: 'wl', name: 'L', weight: 1, gadgets: []),
             ),
       );
       await db.transact(
         db.txFor(Widget2Table()).linkRel('wl', Widget2Table.gadgetsRel, ['g1']),
       );
-      final w = (await Widget2Table()
-              .query()
-              .where((t) => t.id.eq('wl'))
-              .include((x) => x.gadgets)
-              .getAll(db))
-          .single;
+      final w =
+          (await Widget2Table()
+                  .query()
+                  .where((t) => t.id.eq('wl'))
+                  .include((x) => x.gadgets)
+                  .getAll(db))
+              .single;
       expect(w.gadgets.map((g) => g.label), ['A']);
     });
   });

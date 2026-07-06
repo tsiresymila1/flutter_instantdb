@@ -6,13 +6,16 @@ void main() {
   group('ConnectionStatus enum', () {
     test('has the five upstream states', () {
       expect(ConnectionStatus.values, hasLength(5));
-      expect(ConnectionStatus.values, containsAll(const [
-        ConnectionStatus.connecting,
-        ConnectionStatus.opened,
-        ConnectionStatus.authenticated,
-        ConnectionStatus.closed,
-        ConnectionStatus.errored,
-      ]));
+      expect(
+        ConnectionStatus.values,
+        containsAll(const [
+          ConnectionStatus.connecting,
+          ConnectionStatus.opened,
+          ConnectionStatus.authenticated,
+          ConnectionStatus.closed,
+          ConnectionStatus.errored,
+        ]),
+      );
     });
   });
 
@@ -60,7 +63,8 @@ void main() {
     });
 
     test('id persists across re-init with same persistenceDir', () async {
-      final dir = 'test_localid_persist_${DateTime.now().microsecondsSinceEpoch}';
+      final dir =
+          'test_localid_persist_${DateTime.now().microsecondsSinceEpoch}';
 
       final db1 = await InstantDB.init(
         appId: 'test-app-id',

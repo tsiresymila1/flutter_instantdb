@@ -23,10 +23,10 @@ class InstantInfiniteQuery {
     required Map<String, dynamic> baseQuery,
     required String entityType,
     required int pageSize,
-  })  : _runOnce = runOnce,
-        _baseQuery = baseQuery,
-        _entityType = entityType,
-        _pageSize = pageSize {
+  }) : _runOnce = runOnce,
+       _baseQuery = baseQuery,
+       _entityType = entityType,
+       _pageSize = pageSize {
     _loadFirst();
   }
 

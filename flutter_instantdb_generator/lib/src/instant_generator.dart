@@ -86,8 +86,10 @@ class InstantGenerator extends GeneratorForAnnotation<InstantModel> {
         element: element,
       );
     }
-    final namedParams =
-        ctor.parameters.where((p) => p.isNamed).map((p) => p.name).toSet();
+    final namedParams = ctor.parameters
+        .where((p) => p.isNamed)
+        .map((p) => p.name)
+        .toSet();
     // Validate both scalars and relation fields have matching ctor params.
     final allFieldNames = {
       for (final f in fields) f.fieldName,
@@ -255,12 +257,14 @@ extension ${modelName}TxX on TypedTx<$tableName> {
         continue; // nullable unsupported field: skip emitting a column/mapping.
       }
 
-      result.add(_FieldInfo(
-        fieldName: field.name,
-        attr: _attrName(field),
-        dartType: dartType,
-        nullable: nullable,
-      ));
+      result.add(
+        _FieldInfo(
+          fieldName: field.name,
+          attr: _attrName(field),
+          dartType: dartType,
+          nullable: nullable,
+        ),
+      );
     }
     return result;
   }
@@ -288,7 +292,8 @@ extension ${modelName}TxX on TypedTx<$tableName> {
 
       // The related type name (the model class name, e.g. "Todo").
       final relatedTypeName =
-          (related.element as ClassElement?)?.name ?? related.getDisplayString(withNullability: false);
+          (related.element as ClassElement?)?.name ??
+          related.getDisplayString(withNullability: false);
       final relatedTableName = '${relatedTypeName}Table';
 
       // Validate the related element carries @InstantModel.
@@ -303,20 +308,21 @@ extension ${modelName}TxX on TypedTx<$tableName> {
       }
 
       // attr defaults to field name; can be overridden with @InstantLink(attr: 'x').
-      final attrOverride =
-          linkAnnotation?.getField('attr')?.toStringValue();
+      final attrOverride = linkAnnotation?.getField('attr')?.toStringValue();
       final attr = attrOverride ?? field.name;
 
       final nullable = type.nullabilitySuffix == NullabilitySuffix.question;
 
-      result.add(_LinkInfo(
-        fieldName: field.name,
-        attr: attr,
-        relatedTypeName: relatedTypeName,
-        relatedTableName: relatedTableName,
-        toMany: toMany,
-        nullable: nullable,
-      ));
+      result.add(
+        _LinkInfo(
+          fieldName: field.name,
+          attr: attr,
+          relatedTypeName: relatedTypeName,
+          relatedTableName: relatedTableName,
+          toMany: toMany,
+          nullable: nullable,
+        ),
+      );
     }
     return result;
   }

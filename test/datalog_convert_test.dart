@@ -193,7 +193,10 @@ void main() {
           {'id': 'e1', 'text': 'x'},
         ],
       };
-      final out = tryConvertDatalogToCollectionFormat(resultData, attributeCache);
+      final out = tryConvertDatalogToCollectionFormat(
+        resultData,
+        attributeCache,
+      );
       expect(out['todos']!.single['text'], 'x');
     });
 
@@ -203,7 +206,10 @@ void main() {
           {'id': 'm1', 'body': 'hi'},
         ],
       };
-      final out = tryConvertDatalogToCollectionFormat(resultData, attributeCache);
+      final out = tryConvertDatalogToCollectionFormat(
+        resultData,
+        attributeCache,
+      );
       expect(out['messages']!.single['body'], 'hi');
     });
 

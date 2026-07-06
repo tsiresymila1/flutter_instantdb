@@ -69,7 +69,9 @@ class _PlaygroundPageState extends State<PlaygroundPage> {
   // --- flows ---------------------------------------------------------------
 
   Future<String?> _firstTodoId() async {
-    final r = await _db.queryOnce({'todos': {'limit': 1}});
+    final r = await _db.queryOnce({
+      'todos': {'limit': 1},
+    });
     final list = (r.data?['todos'] as List?) ?? const [];
     return list.isEmpty ? null : (list.first as Map)['id'] as String?;
   }
@@ -114,189 +116,272 @@ class _PlaygroundPageState extends State<PlaygroundPage> {
   }
 
   Widget _card(String title, List<Widget> children) => Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Wrap(spacing: 8, runSpacing: 8, children: children),
-            ],
-          ),
-        ),
-      );
+    margin: const EdgeInsets.only(bottom: 12),
+    child: Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, runSpacing: 8, children: children),
+        ],
+      ),
+    ),
+  );
 
   Widget _btn(String label, VoidCallback onTap) =>
       ElevatedButton(onPressed: onTap, child: Text(label));
 
   Widget _authSection() => _card('Auth', [
-        AuthBuilder(
-          builder: (context, user) =>
-              Text('user: ${user?.email ?? '(none)'}${user?.isGuest == true ? ' [guest]' : ''}'),
-        ),
-        SizedBox(
-          width: 180,
-          child: TextField(
-            controller: _email,
-            decoration: const InputDecoration(labelText: 'email'),
-          ),
-        ),
-        SizedBox(
-          width: 120,
-          child: TextField(
-            controller: _code,
-            decoration: const InputDecoration(labelText: 'code'),
-          ),
-        ),
-        _btn('Guest sign-in', () => _run('signInAsGuest', () => _db.auth.signInAsGuest())),
-        _btn('Send magic code',
-            () => _run('sendMagicCode', () async {
-                  await _db.auth.sendMagicCode(email: _email.text);
-                  return 'sent to ${_email.text}';
-                })),
-        _btn('Verify code',
-            () => _run('verifyMagicCode',
-                () => _db.auth.verifyMagicCode(email: _email.text, code: _code.text))),
-        _btn('Sign out', () => _run('signOut', () async {
-              await _db.auth.signOut();
-              return 'signed out';
-            })),
-      ]);
+    AuthBuilder(
+      builder: (context, user) => Text(
+        'user: ${user?.email ?? '(none)'}${user?.isGuest == true ? ' [guest]' : ''}',
+      ),
+    ),
+    SizedBox(
+      width: 180,
+      child: TextField(
+        controller: _email,
+        decoration: const InputDecoration(labelText: 'email'),
+      ),
+    ),
+    SizedBox(
+      width: 120,
+      child: TextField(
+        controller: _code,
+        decoration: const InputDecoration(labelText: 'code'),
+      ),
+    ),
+    _btn(
+      'Guest sign-in',
+      () => _run('signInAsGuest', () => _db.auth.signInAsGuest()),
+    ),
+    _btn(
+      'Send magic code',
+      () => _run('sendMagicCode', () async {
+        await _db.auth.sendMagicCode(email: _email.text);
+        return 'sent to ${_email.text}';
+      }),
+    ),
+    _btn(
+      'Verify code',
+      () => _run(
+        'verifyMagicCode',
+        () => _db.auth.verifyMagicCode(email: _email.text, code: _code.text),
+      ),
+    ),
+    _btn(
+      'Sign out',
+      () => _run('signOut', () async {
+        await _db.auth.signOut();
+        return 'signed out';
+      }),
+    ),
+  ]);
 
   Widget _querySection() => _card('Query', [
-        // Live stream: rebuilds as todos change.
-        InstantBuilder(
-          query: const {'todos': {}},
-          loadingBuilder: (_) => const Text('stream: loading…'),
-          builder: (context, data) =>
-              Text('stream todos: ${(data['todos'] as List).length}'),
-        ),
-        _btn('queryOnce todos', () => _run('queryOnce', () async {
-              final r = await _db.queryOnce({'todos': {}});
-              return '${(r.data?['todos'] as List?)?.length ?? 0} todos';
-            })),
-        _btn('queryOnce where',
-            () => _run('queryOnce(where completed=false)', () async {
-                  final r = await _db.queryOnce({
-                    'todos': {'where': {'completed': false}},
-                  });
-                  return '${(r.data?['todos'] as List?)?.length ?? 0} open';
-                })),
-      ]);
+    // Live stream: rebuilds as todos change.
+    InstantBuilder(
+      query: const {'todos': {}},
+      loadingBuilder: (_) => const Text('stream: loading…'),
+      builder: (context, data) =>
+          Text('stream todos: ${(data['todos'] as List).length}'),
+    ),
+    _btn(
+      'queryOnce todos',
+      () => _run('queryOnce', () async {
+        final r = await _db.queryOnce({'todos': {}});
+        return '${(r.data?['todos'] as List?)?.length ?? 0} todos';
+      }),
+    ),
+    _btn(
+      'queryOnce where',
+      () => _run('queryOnce(where completed=false)', () async {
+        final r = await _db.queryOnce({
+          'todos': {
+            'where': {'completed': false},
+          },
+        });
+        return '${(r.data?['todos'] as List?)?.length ?? 0} open';
+      }),
+    ),
+  ]);
 
   Widget _txSection() => _card('Transactions', [
-        _btn('Create', () => _run('create todo', () async {
-              final id = _db.id();
-              await _db.transact(
-                  _db.create('todos', {'id': id, 'text': _todo.text, 'completed': false}));
-              return id;
-            })),
-        _btn('Toggle first', () => _run('update first todo', () async {
-              final id = await _firstTodoId();
-              if (id == null) return 'no todo';
-              await _db.transact(_db.update(id, {'completed': true}));
-              return 'toggled $id';
-            })),
-        _btn('Delete first', () => _run('delete first todo', () async {
-              final id = await _firstTodoId();
-              if (id == null) return 'no todo';
-              await _db.transact(_db.tx['todos'][id].delete());
-              return 'deleted $id';
-            })),
-      ]);
+    _btn(
+      'Create',
+      () => _run('create todo', () async {
+        final id = _db.id();
+        await _db.transact(
+          _db.create('todos', {
+            'id': id,
+            'text': _todo.text,
+            'completed': false,
+          }),
+        );
+        return id;
+      }),
+    ),
+    _btn(
+      'Toggle first',
+      () => _run('update first todo', () async {
+        final id = await _firstTodoId();
+        if (id == null) return 'no todo';
+        await _db.transact(_db.update(id, {'completed': true}));
+        return 'toggled $id';
+      }),
+    ),
+    _btn(
+      'Delete first',
+      () => _run('delete first todo', () async {
+        final id = await _firstTodoId();
+        if (id == null) return 'no todo';
+        await _db.transact(_db.tx['todos'][id].delete());
+        return 'deleted $id';
+      }),
+    ),
+  ]);
 
   Widget _aggSection() => _card('Aggregations', [
-        _btn('count', () => _run('count todos', () => _db.count('todos'))),
-        _btn('count open',
-            () => _run('count open', () => _db.count('todos', where: {'completed': false}))),
-        _btn('group by completed',
-            () => _run('aggregate groupBy', () => _db.aggregate('todos',
-                aggregates: {'count': '*'}, groupBy: ['completed']))),
-      ]);
+    _btn('count', () => _run('count todos', () => _db.count('todos'))),
+    _btn(
+      'count open',
+      () => _run(
+        'count open',
+        () => _db.count('todos', where: {'completed': false}),
+      ),
+    ),
+    _btn(
+      'group by completed',
+      () => _run(
+        'aggregate groupBy',
+        () => _db.aggregate(
+          'todos',
+          aggregates: {'count': '*'},
+          groupBy: ['completed'],
+        ),
+      ),
+    ),
+  ]);
 
   Widget _storageSection() => _card('Storage', [
-        _btn('Upload text file', () => _run('uploadFile', () async {
-              final path = 'playground/${_db.id()}.txt';
-              final bytes = Uint8List.fromList(
-                  utf8.encode('hello from playground'));
-              final f = await _db.storage
-                  .uploadFile(path, bytes, contentType: 'text/plain');
-              return 'uploaded ${f.path}';
-            })),
-        _btn('List files', () => _run('storage.list', () async {
-              final files = await _db.storage.list(limit: 20);
-              return '${files.length} files';
-            })),
-        _btn('Download URL of first', () => _run('getDownloadUrl', () async {
-              final files = await _db.storage.list(limit: 1);
-              if (files.isEmpty) return 'no files';
-              return _db.storage.getDownloadUrl(files.first.path);
-            })),
-        _btn('Delete first', () => _run('storage.delete', () async {
-              final files = await _db.storage.list(limit: 1);
-              if (files.isEmpty) return 'no files';
-              await _db.storage.delete(files.first.path);
-              return 'deleted ${files.first.path}';
-            })),
-      ]);
+    _btn(
+      'Upload text file',
+      () => _run('uploadFile', () async {
+        final path = 'playground/${_db.id()}.txt';
+        final bytes = Uint8List.fromList(utf8.encode('hello from playground'));
+        final f = await _db.storage.uploadFile(
+          path,
+          bytes,
+          contentType: 'text/plain',
+        );
+        return 'uploaded ${f.path}';
+      }),
+    ),
+    _btn(
+      'List files',
+      () => _run('storage.list', () async {
+        final files = await _db.storage.list(limit: 20);
+        return '${files.length} files';
+      }),
+    ),
+    _btn(
+      'Download URL of first',
+      () => _run('getDownloadUrl', () async {
+        final files = await _db.storage.list(limit: 1);
+        if (files.isEmpty) return 'no files';
+        return _db.storage.getDownloadUrl(files.first.path);
+      }),
+    ),
+    _btn(
+      'Delete first',
+      () => _run('storage.delete', () async {
+        final files = await _db.storage.list(limit: 1);
+        if (files.isEmpty) return 'no files';
+        await _db.storage.delete(files.first.path);
+        return 'deleted ${files.first.path}';
+      }),
+    ),
+  ]);
 
   Widget _presenceSection() => TopicListener(
+    roomId: _roomId,
+    topic: 'ping',
+    onEvent: (data) => _put('◆ topic ping → $data'),
+    child: _card('Presence (room "$_roomId")', [
+      PresenceBuilder(
         roomId: _roomId,
-        topic: 'ping',
-        onEvent: (data) => _put('◆ topic ping → $data'),
-        child: _card('Presence (room "$_roomId")', [
-          PresenceBuilder(
-            roomId: _roomId,
-            builder: (context, room, peers) => Text('peers: ${peers.length}'),
-          ),
-          TypingIndicatorBuilder(
-            roomId: _roomId,
-            builder: (context, typing) => Text('typing: ${typing.length}'),
-          ),
-          ReactionsBuilder(
-            roomId: _roomId,
-            builder: (context, reactions) => Text('reactions: ${reactions.length}'),
-          ),
-          _btn('Set presence',
-              () => _run('setPresence', () async {
-                    await _room?.setPresence({'name': 'me', 'at': DateTime.now().toIso8601String()});
-                    return 'ok';
-                  })),
-          _btn('Typing on', () => _run('setTyping(true)', () async {
-                await _room?.setTyping(true);
-                return 'ok';
-              })),
-          _btn('Typing off', () => _run('setTyping(false)', () async {
-                await _room?.setTyping(false);
-                return 'ok';
-              })),
-          _btn('React 🎉', () => _run('sendReaction', () async {
-                await _room?.sendReaction('🎉');
-                return 'ok';
-              })),
-          _btn('Publish topic', () => _run('publishTopic(ping)', () async {
-                await _room?.publishTopic('ping', {'ts': DateTime.now().millisecondsSinceEpoch});
-                return 'ok';
-              })),
-        ]),
-      );
+        builder: (context, room, peers) => Text('peers: ${peers.length}'),
+      ),
+      TypingIndicatorBuilder(
+        roomId: _roomId,
+        builder: (context, typing) => Text('typing: ${typing.length}'),
+      ),
+      ReactionsBuilder(
+        roomId: _roomId,
+        builder: (context, reactions) => Text('reactions: ${reactions.length}'),
+      ),
+      _btn(
+        'Set presence',
+        () => _run('setPresence', () async {
+          await _room?.setPresence({
+            'name': 'me',
+            'at': DateTime.now().toIso8601String(),
+          });
+          return 'ok';
+        }),
+      ),
+      _btn(
+        'Typing on',
+        () => _run('setTyping(true)', () async {
+          await _room?.setTyping(true);
+          return 'ok';
+        }),
+      ),
+      _btn(
+        'Typing off',
+        () => _run('setTyping(false)', () async {
+          await _room?.setTyping(false);
+          return 'ok';
+        }),
+      ),
+      _btn(
+        'React 🎉',
+        () => _run('sendReaction', () async {
+          await _room?.sendReaction('🎉');
+          return 'ok';
+        }),
+      ),
+      _btn(
+        'Publish topic',
+        () => _run('publishTopic(ping)', () async {
+          await _room?.publishTopic('ping', {
+            'ts': DateTime.now().millisecondsSinceEpoch,
+          });
+          return 'ok';
+        }),
+      ),
+    ]),
+  );
 
   Widget _logView() => SizedBox(
-        height: 180,
-        child: Container(
-          color: Colors.black,
-          padding: const EdgeInsets.all(8),
-          child: ListView.builder(
-            reverse: true,
-            itemCount: _log.length,
-            itemBuilder: (_, i) => Text(
-              _log[i],
-              style: const TextStyle(
-                  color: Colors.greenAccent, fontFamily: 'monospace', fontSize: 12),
-            ),
+    height: 180,
+    child: Container(
+      color: Colors.black,
+      padding: const EdgeInsets.all(8),
+      child: ListView.builder(
+        reverse: true,
+        itemCount: _log.length,
+        itemBuilder: (_, i) => Text(
+          _log[i],
+          style: const TextStyle(
+            color: Colors.greenAccent,
+            fontFamily: 'monospace',
+            fontSize: 12,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

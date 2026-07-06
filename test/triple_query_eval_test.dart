@@ -98,10 +98,30 @@ void main() {
     });
 
     test('\$in / \$nin', () {
-      expect(matchesOperator('b', {'\$in': ['a', 'b', 'c']}), isTrue);
-      expect(matchesOperator('z', {'\$in': ['a', 'b', 'c']}), isFalse);
-      expect(matchesOperator('z', {'\$nin': ['a', 'b', 'c']}), isTrue);
-      expect(matchesOperator('a', {'\$nin': ['a', 'b', 'c']}), isFalse);
+      expect(
+        matchesOperator('b', {
+          '\$in': ['a', 'b', 'c'],
+        }),
+        isTrue,
+      );
+      expect(
+        matchesOperator('z', {
+          '\$in': ['a', 'b', 'c'],
+        }),
+        isFalse,
+      );
+      expect(
+        matchesOperator('z', {
+          '\$nin': ['a', 'b', 'c'],
+        }),
+        isTrue,
+      );
+      expect(
+        matchesOperator('a', {
+          '\$nin': ['a', 'b', 'c'],
+        }),
+        isFalse,
+      );
     });
 
     test('\$like is case sensitive, \$ilike is not', () {
@@ -182,7 +202,10 @@ void main() {
     });
 
     test('sum of empty is 0', () {
-      expect(calculateAggregates(<Map<String, dynamic>>[], {'sum': 'val'})['sum'], 0);
+      expect(
+        calculateAggregates(<Map<String, dynamic>>[], {'sum': 'val'})['sum'],
+        0,
+      );
     });
   });
 

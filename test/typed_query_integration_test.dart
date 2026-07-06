@@ -22,7 +22,10 @@ void main() {
       final id = DateTime.now().microsecondsSinceEpoch.toString();
       db = await InstantDB.init(
         appId: 'test-app-id',
-        config: InstantConfig(syncEnabled: false, persistenceDir: 'test_typed_$id'),
+        config: InstantConfig(
+          syncEnabled: false,
+          persistenceDir: 'test_typed_$id',
+        ),
       );
       for (var i = 0; i < 5; i++) {
         await db.transact(
@@ -33,34 +36,41 @@ void main() {
 
     tearDown(() async => db.dispose());
 
-    test('queryOnceTyped filters + paginates like the hand-written map', () async {
-      final typed = await db.queryOnceTyped(
-        Todos()
-            .query()
-            .where((t) => t.n.gte(1))
-            .order((t) => t.n.asc())
-            .first(2),
-      );
-      expect(typed.documents.map((e) => e['n']), [1, 2]);
+    test(
+      'queryOnceTyped filters + paginates like the hand-written map',
+      () async {
+        final typed = await db.queryOnceTyped(
+          Todos()
+              .query()
+              .where((t) => t.n.gte(1))
+              .order((t) => t.n.asc())
+              .first(2),
+        );
+        expect(typed.documents.map((e) => e['n']), [1, 2]);
 
-      // Parity with the equivalent hand-written map.
-      final manual = await db.queryOnce({
-        'todos': {
-          r'$': {
-            'where': {'n': {r'$gte': 1}},
-            'order': {'n': 'asc'},
-            'first': 2,
+        // Parity with the equivalent hand-written map.
+        final manual = await db.queryOnce({
+          'todos': {
+            r'$': {
+              'where': {
+                'n': {r'$gte': 1},
+              },
+              'order': {'n': 'asc'},
+              'first': 2,
+            },
           },
-        },
-      });
-      expect(
-        typed.documents.map((e) => e['n']).toList(),
-        manual.documents.map((e) => e['n']).toList(),
-      );
-    });
+        });
+        expect(
+          typed.documents.map((e) => e['n']).toList(),
+          manual.documents.map((e) => e['n']).toList(),
+        );
+      },
+    );
 
     test('queryTyped returns a reactive signal', () async {
-      final sig = db.queryTyped(Todos().query().where((t) => t.title.eq('todo3')));
+      final sig = db.queryTyped(
+        Todos().query().where((t) => t.title.eq('todo3')),
+      );
       // Allow the async query to settle.
       await Future.delayed(const Duration(milliseconds: 150));
       expect(sig.value.documents.single['title'], 'todo3');

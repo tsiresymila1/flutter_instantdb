@@ -192,10 +192,7 @@ class QueryEngine {
   }
 
   Future<({Map<String, dynamic> data, Map<String, dynamic> pageInfo})>
-      _processQuery(
-    Map<String, dynamic> query, {
-    bool syncedOnly = false,
-  }) async {
+  _processQuery(Map<String, dynamic> query, {bool syncedOnly = false}) async {
     final results = <String, dynamic>{};
     final pageInfo = <String, dynamic>{};
 
@@ -280,7 +277,8 @@ class QueryEngine {
     final before = query['before'] as String?;
     final afterInclusive = query['afterInclusive'] == true;
     final beforeInclusive = query['beforeInclusive'] == true;
-    final usePaginate = fields != null ||
+    final usePaginate =
+        fields != null ||
         first != null ||
         last != null ||
         after != null ||
@@ -310,7 +308,8 @@ class QueryEngine {
     // Process includes (nested queries)
     if (include != null) {
       entities = await _processIncludes(
-        entities, include,
+        entities,
+        include,
         pathPrefix: entityType,
         relationPageInfo: relationPageInfo,
       );
@@ -377,7 +376,8 @@ class QueryEngine {
 
           var out = related;
           if (relationQuery != null) {
-            final useNestedPaginate = relationQuery['fields'] != null ||
+            final useNestedPaginate =
+                relationQuery['fields'] != null ||
                 relationQuery['first'] != null ||
                 relationQuery['last'] != null ||
                 relationQuery['after'] != null ||
@@ -388,8 +388,8 @@ class QueryEngine {
             // from the filter pass to prevent double-windowing.
             final filterQuery = useNestedPaginate
                 ? (Map<String, dynamic>.from(relationQuery)
-                  ..remove('limit')
-                  ..remove('offset'))
+                    ..remove('limit')
+                    ..remove('offset'))
                 : relationQuery;
             out = _applyQueryFilters(related, filterQuery);
 
@@ -404,8 +404,7 @@ class QueryEngine {
                 beforeInclusive: relationQuery['beforeInclusive'] == true,
                 offset: relationQuery['offset'] as int?,
                 limit: relationQuery['limit'] as int?,
-                fields:
-                    (relationQuery['fields'] as List?)?.cast<String>(),
+                fields: (relationQuery['fields'] as List?)?.cast<String>(),
               );
               out = page.items;
               if (relationPageInfo != null && pathPrefix != null) {
@@ -417,7 +416,8 @@ class QueryEngine {
               relationQuery?['include'] as Map<String, dynamic>?;
           if (nestedInclude != null) {
             out = await _processIncludes(
-              out, nestedInclude,
+              out,
+              nestedInclude,
               pathPrefix: pathPrefix != null
                   ? '$pathPrefix.$relationName'
                   : relationName,
