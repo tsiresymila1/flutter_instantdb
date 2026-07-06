@@ -45,15 +45,17 @@ extension _SyncConnect on SyncEngine {
   }
 
   void _handleAuthChange(AuthUser? user) {
-    if (user != null && _webSocket != null && _webSocket.isOpen) {
-      // Re-authenticate with new token
-      final authData = {
-        'op': 'auth',
-        'app-id': appId,
-        'refresh-token': user.refreshToken,
-        'client-event-id': _generateEventId(),
-      };
-      _webSocket.send(jsonEncode(authData));
+    // InstantDB authenticates the connection via the `init` handshake, which
+    // carries the refresh-token. A mid-connection auth message does not
+    // re-authenticate the session, so reconnect instead: closing triggers the
+    // reconnect path, which re-runs `init` with the new (or cleared) token.
+    // This is what makes authed writes (owner-scoped entities, trials, files)
+    // actually sync to the server after login.
+    // Only when a socket is already open; if none is up yet, the pending/next
+    // connect will carry the current token (avoids a double-connect race with
+    // the initial auth-state emission at startup).
+    if (_webSocket != null && _webSocket.isOpen) {
+      _webSocket.close(); // → _handleWebSocketClose → reconnect → init w/ token
     }
   }
 
