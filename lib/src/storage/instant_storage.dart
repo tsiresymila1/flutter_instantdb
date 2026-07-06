@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -64,6 +65,19 @@ class InstantStorage {
   Map<String, dynamic> _authHeader() =>
       _token != null ? {'authorization': 'Bearer $_token'} : {};
 
+  /// Dio may hand back a raw JSON string when the response content-type isn't
+  /// recognized as JSON; decode it so the shape checks below see a Map.
+  dynamic _decode(dynamic raw) {
+    if (raw is String && raw.trim().isNotEmpty) {
+      try {
+        return jsonDecode(raw);
+      } catch (_) {
+        return raw;
+      }
+    }
+    return raw;
+  }
+
   /// Upload [bytes] to [path]. Returns the created file record.
   Future<InstantFile> uploadFile(
     String path,
@@ -89,13 +103,14 @@ class InstantStorage {
           contentType: type,
         ),
       );
-      final data = response.data;
+      final data = _decode(response.data);
       final Map? record = (data is Map && data['data'] is Map)
           ? data['data'] as Map
           : (data is Map ? data : null);
       if (record == null) {
         throw InstantException(
-          message: 'Unexpected upload response shape',
+          message: 'Unexpected upload response shape: '
+              '${response.data.runtimeType} $data',
           code: 'storage_error',
         );
       }
@@ -112,7 +127,7 @@ class InstantStorage {
         '/storage/signed-download-url',
         queryParameters: {'app_id': appId, 'filename': path},
       );
-      final data = response.data;
+      final data = _decode(response.data);
       final url = (data is Map)
           ? (data['data'] is Map
               ? (data['data'] as Map)['url']
