@@ -1,0 +1,118 @@
+---
+title: Devtool
+description: In-app debugger for inspecting connection, data, and queries
+---
+
+The **devtool** is an in-app debugger (new in v2.3.0). It mounts a draggable
+floating button over your app; tapping it opens a bottom sheet with live
+connection status, a CRUD table viewer, and a raw query runner. It is meant for
+development only — gate it behind `kDebugMode`.
+
+## Quick start
+
+The easiest way to enable it is `InstantProvider(debug: true)`. The provider
+must live **under** `MaterialApp` (e.g. as `home`) so the inspector inherits the
+`Navigator`, `Overlay`, and `Localizations` its sheets, dialogs, and date-pickers
+need.
+
+```dart
+import 'package:flutter/foundation.dart' show kDebugMode;
+
+MaterialApp(
+  home: InstantProvider(
+    db: db,
+    debug: kDebugMode, // mounts the devtool automatically
+    child: const HomeScreen(),
+  ),
+)
+```
+
+`debug` defaults to `false`, so shipping builds are unaffected.
+
+## Manual placement
+
+If you provide the db **above** `MaterialApp` (to share it across multiple
+routes), the automatic mount can't reach a `Navigator`. Use the `InstantDevTool`
+widget instead and place it under the `Navigator` — for example wrapping a
+screen — still gated with `kDebugMode`:
+
+```dart
+MaterialApp(
+  home: kDebugMode
+      ? const InstantDevTool(child: HomeScreen())
+      : const HomeScreen(),
+)
+```
+
+`InstantDevTool` takes a single required `child`. It renders the same
+Overlay-based floating button; tapping it toggles the inspector sheet.
+
+## The inspector
+
+The sheet has three tabs, plus a debugger-only dark/light theme toggle in the
+header (it does not affect the host app theme).
+
+### Status
+
+- **App ID** — copyable.
+- **Connection state** — colour-coded (connecting / connected / error).
+- **Auth user** — current user's email and copyable id, marked guest or
+  registered.
+- **Storage backend** and the **schema entity list**.
+- **Live namespace count.**
+
+### Explorer
+
+A live table viewer. Pick a namespace and its rows render in a scrollable grid.
+The view is reactive — it updates on local writes and remote sync with no manual
+refresh.
+
+Full CRUD is available: create (➕), edit (✏️), and delete rows. All writes go
+through the normal optimistic sync path, exactly like `db.transact`.
+
+The row editor shows one typed input per column, labelled with the column name:
+
+- `string` → text field
+- `number` → numeric field
+- `boolean` → switch
+- `number` columns named like a timestamp (e.g. `createdAt`, `timestamp`) → a
+  date-time picker
+
+Field types come from your schema, falling back to the row's value types. With a
+schema declared, **all** tables show even when empty.
+
+### Query
+
+Run a raw InstaQL query as JSON and see the pretty-printed result.
+
+```json
+{ "todos": { "$": { "where": { "completed": true } } } }
+```
+
+## Empty tables and typed inputs
+
+To list empty tables and get correctly typed inputs, pass an `InstantSchema` to
+`InstantDB.init`:
+
+```dart
+final db = await InstantDB.init(
+  appId: 'your-app-id',
+  schema: schema,
+);
+```
+
+Without a schema, the Explorer only shows namespaces that currently have rows,
+and input types are inferred from each row's values.
+
+## Supporting APIs
+
+The Explorer is powered by two client methods you can also call directly:
+
+```dart
+// Namespaces (collections) known to the client.
+final Future<List<String>> namespaces = db.listNamespaces();
+
+// Field → type map for a namespace: 'string' | 'number' | 'boolean'.
+// Derived from the schema.
+final Map<String, String> types = db.namespaceFieldTypes('todos');
+```

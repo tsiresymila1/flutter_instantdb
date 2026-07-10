@@ -220,6 +220,25 @@ class HomePage extends StatelessWidget {
 }
 ```
 
+### Devtool
+
+Set `debug: true` on `InstantProvider` (placed under `MaterialApp`, e.g. as
+`home`) to mount an in-app debugger — a draggable button that opens an inspector
+with connection status, a live CRUD table viewer, and a raw query runner:
+
+```dart
+MaterialApp(
+  home: InstantProvider(
+    db: db,
+    debug: kDebugMode,
+    child: const HomeScreen(),
+  ),
+)
+```
+
+See [Devtool](/docs/advanced/devtool) for the full reference and the manual
+`InstantDevTool` widget.
+
 ## Custom Reactive Widgets
 
 Create your own reactive widgets using the underlying signals:
