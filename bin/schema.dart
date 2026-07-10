@@ -8,7 +8,7 @@
 /// It wraps the official InstantDB CLI and provides TypeScript ↔ Dart conversion.
 ///
 /// Usage:
-///   dart run instantdb_flutter:schema <command> [options]
+///   dart run flutter_instantdb:schema <command> [options]
 ///
 /// Commands:
 ///   pull      Pull schema from InstantDB cloud and convert to Dart
@@ -19,9 +19,9 @@
 ///   help      Show this help message
 ///
 /// Examples:
-///   dart run instantdb_flutter:schema pull
-///   dart run instantdb_flutter:schema push
-///   dart run instantdb_flutter:schema validate lib/schema/app_schema.dart
+///   dart run flutter_instantdb:schema pull
+///   dart run flutter_instantdb:schema push
+///   dart run flutter_instantdb:schema validate lib/schema/app_schema.dart
 
 import 'dart:io';
 import 'package:args/args.dart';
@@ -122,7 +122,7 @@ InstantDB Schema Management CLI
 Manage InstantDB schemas for Flutter/Dart projects.
 
 USAGE:
-  dart run instantdb_flutter:schema <command> [options]
+  dart run flutter_instantdb:schema <command> [options]
 
 COMMANDS:
   pull            Pull schema from cloud (instant-cli) and convert TS -> Dart
@@ -139,26 +139,26 @@ ${parser.usage}
 
 EXAMPLES:
   # Pull schema from cloud (requires npx instant-cli installed)
-  dart run instantdb_flutter:schema pull
+  dart run flutter_instantdb:schema pull
 
   # Push local Dart schema to cloud
-  dart run instantdb_flutter:schema push
+  dart run flutter_instantdb:schema push
 
   # Validate your Dart schema file
-  dart run instantdb_flutter:schema validate
+  dart run flutter_instantdb:schema validate
 
   # Show current schema status
-  dart run instantdb_flutter:schema status
+  dart run flutter_instantdb:schema status
 
   # Compare local vs cloud
-  dart run instantdb_flutter:schema diff
+  dart run flutter_instantdb:schema diff
 
   # Offline conversion (no cloud / npx)
-  dart run instantdb_flutter:schema to-dart instant.schema.ts -s lib/schema/app_schema.dart
-  dart run instantdb_flutter:schema to-ts -s lib/schema/app_schema.dart
+  dart run flutter_instantdb:schema to-dart instant.schema.ts -s lib/schema/app_schema.dart
+  dart run flutter_instantdb:schema to-ts -s lib/schema/app_schema.dart
 
   # Use custom schema file location
-  dart run instantdb_flutter:schema pull -s lib/my_schema.dart
+  dart run flutter_instantdb:schema pull -s lib/my_schema.dart
 
 PREREQUISITES:
   - Node.js and npx must be installed
@@ -166,7 +166,7 @@ PREREQUISITES:
   - Set INSTANT_APP_ID environment variable or use --app-id flag
 
 MORE INFO:
-  https://github.com/pillowsoft/instantdb_flutter
+  https://github.com/tsiresymila1/flutter_instantdb
   https://www.instantdb.com/docs/cli
 ''');
 }

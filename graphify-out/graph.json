@@ -44,7 +44,7 @@
       "file_type": "code",
       "source_file": "example/lib/pages/cursors_page.dart",
       "source_location": null,
-      "id": "package_flutter_instantdb_flutter_instantdb_dart",
+      "id": "package_flutter_flutter_instantdb_instantdb_dart",
       "community": 5,
       "norm_label": "package:flutter_instantdb/flutter_instantdb.dart"
     },
@@ -96,7 +96,7 @@
     {
       "label": "package:sqflite_common_ffi/sqflite_ffi.dart",
       "file_type": "code",
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
       "id": "package_sqflite_common_ffi_sqflite_ffi_dart",
       "community": 5,
@@ -553,20 +553,20 @@
       "norm_label": "seed"
     },
     {
-      "label": "instantdb_flutter_test.dart",
+      "label": "flutter_instantdb_test.dart",
       "file_type": "code",
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
-      "id": "test_instantdb_flutter_test_dart",
+      "id": "test_flutter_instantdb_test_dart",
       "community": 5,
-      "norm_label": "instantdb_flutter_test.dart"
+      "norm_label": "flutter_instantdb_test.dart"
     },
     {
       "label": "main",
       "file_type": "code",
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_test_instantdb_flutter_test_dart_main",
+      "id": "users_tsiresymila_development_flutter_flutter_instantdb_test_flutter_instantdb_test_dart_main",
       "community": 5,
       "norm_label": "main"
     },
@@ -8720,7 +8720,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_instantmodel",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_instantmodel",
       "community": 76,
       "norm_label": "instantmodel"
     },
@@ -8729,7 +8729,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_instantfield",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_instantfield",
       "community": 76,
       "norm_label": "instantfield"
     },
@@ -8738,7 +8738,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_todotable",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_todotable",
       "community": 76,
       "norm_label": "todotable"
     },
@@ -8747,7 +8747,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_todo",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_todo",
       "community": 76,
       "norm_label": "todo"
     },
@@ -8756,7 +8756,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_profiletable",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_profiletable",
       "community": 76,
       "norm_label": "profiletable"
     },
@@ -8765,7 +8765,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_profile",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_profile",
       "community": 76,
       "norm_label": "profile"
     },
@@ -8774,7 +8774,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_badmodel",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_badmodel",
       "community": 76,
       "norm_label": "badmodel"
     },
@@ -8783,7 +8783,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_mismatchmodel",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_mismatchmodel",
       "community": 76,
       "norm_label": "mismatchmodel"
     },
@@ -8792,7 +8792,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_fromrow",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_fromrow",
       "community": 76,
       "norm_label": "fromrow"
     },
@@ -8801,7 +8801,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/test/src/model_fixtures.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_computed",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_computed",
       "community": 76,
       "norm_label": "computed"
     },
@@ -8819,7 +8819,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/builder.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_builder_dart_instantbuilder",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_builder_dart_instantbuilder",
       "community": 51,
       "norm_label": "instantbuilder"
     },
@@ -8864,7 +8864,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_instantmodel",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_instantmodel",
       "community": 51,
       "norm_label": "instantmodel"
     },
@@ -8873,7 +8873,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_instantgenerator",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_instantgenerator",
       "community": 51,
       "norm_label": "instantgenerator"
     },
@@ -8882,7 +8882,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_fieldinfo",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_fieldinfo",
       "community": 51,
       "norm_label": "_fieldinfo"
     },
@@ -8891,7 +8891,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_generate",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_generate",
       "community": 51,
       "norm_label": "generate"
     },
@@ -8900,7 +8900,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_generateforannotatedelement",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_generateforannotatedelement",
       "community": 51,
       "norm_label": "generateforannotatedelement"
     },
@@ -8909,7 +8909,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_invalidgenerationsourceerror",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_invalidgenerationsourceerror",
       "community": 51,
       "norm_label": "invalidgenerationsourceerror"
     },
@@ -8918,7 +8918,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_generateforclass",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_generateforclass",
       "community": 51,
       "norm_label": "_generateforclass"
     },
@@ -8927,7 +8927,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_escape",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_escape",
       "community": 51,
       "norm_label": "_escape"
     },
@@ -8936,7 +8936,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_computed",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_computed",
       "community": 51,
       "norm_label": "computed"
     },
@@ -8945,7 +8945,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_issupportedscalar",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_issupportedscalar",
       "community": 51,
       "norm_label": "_issupportedscalar"
     },
@@ -8954,7 +8954,7 @@
       "file_type": "code",
       "source_file": "flutter_instantdb_generator/lib/src/instant_generator.dart",
       "source_location": null,
-      "id": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_attrname",
+      "id": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_attrname",
       "community": 51,
       "norm_label": "_attrname"
     },
@@ -29239,7 +29239,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_pagination_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29415,10 +29415,10 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
       "weight": 1.0,
-      "source": "test_instantdb_flutter_test_dart",
+      "source": "test_flutter_instantdb_test_dart",
       "target": "package_flutter_test_flutter_test_dart"
     },
     {
@@ -29439,7 +29439,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_model_table_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29449,7 +29449,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_tx_completeness_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29459,7 +29459,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_pagination_integration_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29469,7 +29469,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_connection_localid_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29479,7 +29479,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_typed_query_integration_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29489,7 +29489,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_auth_integration_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29499,7 +29499,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_schema_validation_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29509,7 +29509,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_room_presence_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29519,7 +29519,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_query_engine_advanced_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29529,7 +29529,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_transaction_builder_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29539,7 +29539,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_codegen_runtime_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29549,7 +29549,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_files_integration_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29559,7 +29559,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_presence_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29569,17 +29569,17 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_relational_include_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
       "weight": 1.0,
-      "source": "test_instantdb_flutter_test_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "source": "test_flutter_instantdb_test_dart",
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29589,7 +29589,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "test_fixtures_sample_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29599,7 +29599,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_main_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29609,7 +29609,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_typing_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29619,7 +29619,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_custom_cursors_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29629,7 +29629,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_tile_game_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29639,7 +29639,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_auth_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29649,7 +29649,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_avatars_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29659,7 +29659,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_reactions_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29669,7 +29669,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_todos_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "imports",
@@ -29679,7 +29679,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "example_lib_pages_cursors_page_dart",
-      "target": "package_flutter_instantdb_flutter_instantdb_dart"
+      "target": "package_flutter_flutter_instantdb_instantdb_dart"
     },
     {
       "relation": "defines",
@@ -29855,10 +29855,10 @@
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
       "weight": 1.0,
-      "source": "test_instantdb_flutter_test_dart",
+      "source": "test_flutter_instantdb_test_dart",
       "target": "package_sqflite_common_ffi_sqflite_ffi_dart"
     },
     {
@@ -30245,20 +30245,20 @@
       "relation": "defines",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
       "weight": 1.0,
-      "source": "test_instantdb_flutter_test_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_test_instantdb_flutter_test_dart_main"
+      "source": "test_flutter_instantdb_test_dart",
+      "target": "users_tsiresymila_development_flutter_flutter_instantdb_test_flutter_instantdb_test_dart_main"
     },
     {
       "relation": "imports",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "test/instantdb_flutter_test.dart",
+      "source_file": "test/flutter_instantdb_test.dart",
       "source_location": null,
       "weight": 1.0,
-      "source": "test_instantdb_flutter_test_dart",
+      "source": "test_flutter_instantdb_test_dart",
       "target": "package_flutter_dotenv_flutter_dotenv_dart"
     },
     {
@@ -69038,7 +69038,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_instantmodel"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_instantmodel"
     },
     {
       "relation": "defines",
@@ -69048,7 +69048,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_instantfield"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_instantfield"
     },
     {
       "relation": "defines",
@@ -69058,7 +69058,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_todotable"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_todotable"
     },
     {
       "relation": "defines",
@@ -69068,7 +69068,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_todo"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_todo"
     },
     {
       "relation": "defines",
@@ -69078,7 +69078,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_profiletable"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_profiletable"
     },
     {
       "relation": "defines",
@@ -69088,7 +69088,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_profile"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_profile"
     },
     {
       "relation": "defines",
@@ -69098,7 +69098,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_badmodel"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_badmodel"
     },
     {
       "relation": "defines",
@@ -69108,7 +69108,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_mismatchmodel"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_mismatchmodel"
     },
     {
       "relation": "defines",
@@ -69118,7 +69118,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_fromrow"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_fromrow"
     },
     {
       "relation": "defines",
@@ -69128,7 +69128,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_test_src_model_fixtures_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_test_src_model_fixtures_dart_computed"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_test_src_model_fixtures_dart_computed"
     },
     {
       "relation": "defines",
@@ -69138,7 +69138,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_builder_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_builder_dart_instantbuilder"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_builder_dart_instantbuilder"
     },
     {
       "relation": "imports",
@@ -69198,7 +69198,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_instantmodel"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_instantmodel"
     },
     {
       "relation": "defines",
@@ -69208,7 +69208,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_instantgenerator"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_instantgenerator"
     },
     {
       "relation": "defines",
@@ -69218,7 +69218,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_fieldinfo"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_fieldinfo"
     },
     {
       "relation": "defines",
@@ -69228,7 +69228,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_generate"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_generate"
     },
     {
       "relation": "defines",
@@ -69238,7 +69238,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_generateforannotatedelement"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_generateforannotatedelement"
     },
     {
       "relation": "defines",
@@ -69248,7 +69248,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_invalidgenerationsourceerror"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_invalidgenerationsourceerror"
     },
     {
       "relation": "defines",
@@ -69258,7 +69258,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_generateforclass"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_generateforclass"
     },
     {
       "relation": "defines",
@@ -69268,7 +69268,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_escape"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_escape"
     },
     {
       "relation": "defines",
@@ -69278,7 +69278,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_computed"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_computed"
     },
     {
       "relation": "defines",
@@ -69288,7 +69288,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_issupportedscalar"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_issupportedscalar"
     },
     {
       "relation": "defines",
@@ -69298,7 +69298,7 @@
       "source_location": null,
       "weight": 1.0,
       "source": "flutter_instantdb_generator_lib_src_instant_generator_dart",
-      "target": "users_tsiresymila_development_flutter_flutter_instantdb_flutter_instantdb_generator_lib_src_instant_generator_dart_attrname"
+      "target": "users_tsiresymila_development_flutter_flutter_flutter_instantdb_instantdb_generator_lib_src_instant_generator_dart_attrname"
     },
     {
       "relation": "imports",

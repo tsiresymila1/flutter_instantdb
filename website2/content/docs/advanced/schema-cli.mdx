@@ -12,15 +12,15 @@ generator. It is pure Dart (no analyzer, no extra dependencies).
 
 ```bash
 # Cloud round-trips (wrap instant-cli)
-dart run instantdb_flutter:schema pull   # instant-cli pull → convert TS to Dart
-dart run instantdb_flutter:schema push   # convert Dart to TS → instant-cli push
+dart run flutter_instantdb:schema pull   # instant-cli pull → convert TS to Dart
+dart run flutter_instantdb:schema push   # convert Dart to TS → instant-cli push
 
 # Offline conversion (no cloud / npx)
-dart run instantdb_flutter:schema to-dart instant.schema.ts -s lib/schema/app_schema.dart
-dart run instantdb_flutter:schema to-ts -s lib/schema/app_schema.dart
+dart run flutter_instantdb:schema to-dart instant.schema.ts -s lib/schema/app_schema.dart
+dart run flutter_instantdb:schema to-ts -s lib/schema/app_schema.dart
 
 # Best-effort normalized diff of the Dart schema vs instant.schema.ts
-dart run instantdb_flutter:schema diff -s lib/schema/app_schema.dart
+dart run flutter_instantdb:schema diff -s lib/schema/app_schema.dart
 ```
 
 After `pull`/`to-dart`, run `dart run build_runner build` to regenerate the
