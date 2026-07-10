@@ -45,9 +45,38 @@ class InstantDevTool extends StatefulWidget {
 }
 
 class _InstantDevToolState extends State<InstantDevTool> {
+  OverlayEntry? _entry;
   Offset? _pos; // null → default bottom-right
 
+  @override
+  void initState() {
+    super.initState();
+    // Insert the floating button into the app's Overlay (under the Navigator →
+    // has Directionality and floats above every screen, without wrapping or
+    // rebuilding the app subtree the way a Stack would). Deferred to after the
+    // frame so we don't mark the Overlay dirty while the tree is still building
+    // (InstantProvider builds us during its own build).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _entry != null) return;
+      _entry = OverlayEntry(builder: _buildButton);
+      Overlay.of(context).insert(_entry!);
+    });
+  }
+
+  @override
+  void dispose() {
+    _entry?.remove();
+    super.dispose();
+  }
+
+  bool _sheetOpen = false;
+
   void _open() {
+    if (_sheetOpen) {
+      Navigator.of(context).pop(); // second tap closes it (toggle)
+      return;
+    }
+    _sheetOpen = true;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -59,48 +88,59 @@ class _InstantDevToolState extends State<InstantDevTool> {
         db: InstantProvider.of(context),
         child: const _DevSheet(),
       ),
+    ).whenComplete(() => _sheetOpen = false);
+
+    // The sheet route is pushed above our button entry; re-insert the button on
+    // top so it stays tappable (second tap toggles the sheet closed).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final entry = _entry;
+      if (!mounted || entry == null || !entry.mounted) return;
+      final overlay = Overlay.of(context);
+      entry.remove();
+      overlay.insert(entry);
+    });
+  }
+
+  Widget _buildButton(BuildContext overlayContext) {
+    final media = MediaQuery.of(overlayContext);
+    final pos = _pos ?? Offset(media.size.width - 72, media.size.height - 100);
+    return Positioned(
+      left: pos.dx,
+      top: pos.dy,
+      child: GestureDetector(
+        onPanUpdate: (d) {
+          final p = (_pos ?? pos) + d.delta;
+          _pos = Offset(
+            p.dx.clamp(0.0, media.size.width - 56),
+            p.dy.clamp(media.padding.top, media.size.height - 56),
+          );
+          _entry?.markNeedsBuild();
+        },
+        child: Material(
+          color: Colors.transparent,
+          child: FloatingActionButton.small(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            heroTag: 'instant-devtool',
+            onPressed: _open,
+            // package: needed — the asset ships with this package, not the app.
+            child: Image.asset(
+              'assets/logo.png',
+              package: 'flutter_instantdb',
+              width: 24,
+              height: 24,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final pos = _pos ?? Offset(media.size.width - 72, media.size.height - 100);
-    return Stack(
-      children: [
-        widget.child,
-        Positioned(
-          left: pos.dx,
-          top: pos.dy,
-          child: GestureDetector(
-            onPanUpdate: (d) => setState(() {
-              final p = (_pos ?? pos) + d.delta;
-              _pos = Offset(
-                p.dx.clamp(0, media.size.width - 56),
-                p.dy.clamp(media.padding.top, media.size.height - 56),
-              );
-            }),
-            child: FloatingActionButton.small(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              heroTag: 'instant-devtool',
-              onPressed: _open,
-              // package: needed — the asset ships with this package, not the app.
-              child: Image.asset(
-                'assets/logo.png',
-                package: 'flutter_instantdb',
-                width: 24,
-                height: 24,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _DevSheet extends StatelessWidget {
@@ -642,10 +682,16 @@ class _ExplorerTabState extends State<_ExplorerTab> {
             else
               const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                '$ns  (${_rows.length})',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
+              // Live count — reads the same signal, so it updates on writes /
+              // sync and when switching namespaces (no manual refresh).
+              child: Watch((context) {
+                final r = _query?.value;
+                final n = (r?.data?[ns] as List?)?.length ?? 0;
+                return Text(
+                  '$ns  ($n)',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                );
+              }),
             ),
             if (_selected.isNotEmpty)
               TextButton.icon(

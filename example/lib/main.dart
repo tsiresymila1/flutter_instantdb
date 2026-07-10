@@ -81,14 +81,15 @@ class InstantDBExamplesApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InstantProvider(
-      db: db,
-      child: MaterialApp(
-        title: 'InstantDB Examples',
-        theme: ThemeData(useMaterial3: true),
-        // Devtool must sit UNDER the Navigator (so it can open sheets/dialogs),
-        // so wrap the screen — not MaterialApp.builder, which is above it.
-        home: const InstantDevTool(child: ExamplesRootScreen()),
+    return MaterialApp(
+      title: 'InstantDB Examples',
+      theme: ThemeData(useMaterial3: true),
+      // Provider under the Navigator so debug:true can mount the devtool (which
+      // opens sheets/dialogs). One flag — no manual InstantDevTool wrapping.
+      home: InstantProvider(
+        db: db,
+        debug: true,
+        child: const ExamplesRootScreen(),
       ),
     );
   }

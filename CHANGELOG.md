@@ -1,4 +1,18 @@
 
+## 2.3.0 - 2026-07-10
+
+### Devtool
+- **`InstantProvider(debug: true)`** mounts the devtool automatically — no manual `InstantDevTool` wrapping. Place the provider under your `MaterialApp` (e.g. as `home`) so it inherits the Navigator/Overlay/Localizations the inspector needs.
+- **Explorer is now a live table viewer with full CRUD.** Rows render in a scrollable grid (vertical + horizontal); create / edit / delete write through the normal optimistic sync path. Tables are reactive (`db.query` + `Watch`) — they refresh on local writes and remote sync without a manual refresh, and the header row count is live.
+- **Typed row editor.** One input per column, labelled by the column name (no more key/value pairs): string → text, number → numeric, boolean → switch, and a date-time picker for number columns named like a timestamp. Types come from the schema, falling back to the row's value types.
+- **Lists every table, even empty ones**, when a schema is provided (reads schema entities, not just namespaces with rows).
+- **Debugger-only dark/light theme toggle** — scoped to the sheet, never touches the host app's theme.
+- Floating button now uses an **`Overlay`** entry instead of a `Stack` (fixes a `Directionality` error and no longer rebuilds the app subtree); tapping it toggles the sheet open/closed.
+- Richer **Status** tab: colour-coded connection state, copyable App ID / user id, storage backend, schema entity + namespace counts.
+
+### Added
+- **`db.namespaceFieldTypes(ns)`** — declared field types (`string` / `number` / `boolean`) from the schema, used to render typed devtool inputs.
+
 ## 2.2.2 - 2026-07-06
 
 ### Fixed

@@ -4,6 +4,7 @@ import 'package:signals_flutter/signals_flutter.dart';
 import '../core/types.dart';
 import '../core/instant_db.dart';
 import '../query/infinite_query.dart';
+import 'devtool.dart';
 
 /// Main reactive widget for InstantDB queries
 class InstantBuilder extends StatefulWidget {
@@ -146,11 +147,27 @@ Signal<QueryResult> useInstantQuery(
   return db.query(query);
 }
 
-/// Provider widget for InstantDB instance
+/// Provider widget for InstantDB instance.
+///
+/// Set [debug] to `true` to mount the [InstantDevTool] (floating inspector) over
+/// the subtree — no manual wrapping needed. Because the devtool opens sheets /
+/// dialogs / pickers, place this provider **under** your `MaterialApp` (so it
+/// has a Navigator + Overlay + Localizations), e.g. as `home`:
+///
+/// ```dart
+/// MaterialApp(
+///   home: InstantProvider(db: db, debug: kDebugMode, child: const HomeScreen()),
+/// )
+/// ```
 class InstantProvider extends InheritedWidget {
   final InstantDB db;
 
-  const InstantProvider({super.key, required this.db, required super.child});
+  InstantProvider({
+    super.key,
+    required this.db,
+    required Widget child,
+    bool debug = false,
+  }) : super(child: debug ? InstantDevTool(child: child) : child);
 
   static InstantDB of(BuildContext context) {
     final provider = context
