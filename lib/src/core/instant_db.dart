@@ -24,6 +24,7 @@ class InstantDB {
   final String appId;
   final InstantConfig config;
   final InstantSchema? schema;
+  final AuthUser? _initialUser;
 
   late final StorageInterface _store;
   late final QueryEngine _queryEngine;
@@ -66,18 +67,27 @@ class InstantDB {
   /// Transaction builder for fluent API (e.g., tx.goals[goalId].update(...))
   TransactionBuilder get tx => _txBuilder;
 
-  InstantDB._({required this.appId, required this.config, this.schema});
+  InstantDB._({
+    required this.appId,
+    required this.config,
+    this.schema,
+    AuthUser? initialUser,
+  }) : _initialUser = initialUser;
 
-  /// Initialize a new InstantDB instance
+  /// Initialize a new InstantDB instance.
+  /// [initialUser] may contain a previously verified cached session so pending
+  /// writes use its token on the first sync handshake, including after restart.
   static Future<InstantDB> init({
     required String appId,
     InstantConfig? config,
     InstantSchema? schema,
+    AuthUser? initialUser,
   }) async {
     final db = InstantDB._(
       appId: appId,
       config: config ?? const InstantConfig(),
       schema: schema,
+      initialUser: initialUser,
     );
 
     await db._initialize();
@@ -106,6 +116,9 @@ class InstantDB {
       // Initialize auth manager with session storage
       // Initialize auth manager
       _authManager = AuthManager(appId: appId, baseUrl: config.baseUrl!);
+      if (_initialUser != null) {
+        _authManager.restoreCachedSession(_initialUser);
+      }
       _storage = InstantStorage(
         appId: appId,
         baseUrl: config.baseUrl!,

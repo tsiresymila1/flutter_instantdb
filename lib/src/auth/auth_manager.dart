@@ -42,6 +42,16 @@ class AuthManager {
 
   String? get refreshToken => computed(() => _refreshToken).value;
 
+  /// Restore a previously verified local session before opening the sync socket.
+  /// The server still validates the refresh token during the next handshake.
+  void restoreCachedSession(AuthUser user) {
+    if (user.refreshToken == null || user.refreshToken!.isEmpty) {
+      throw ArgumentError('A cached session requires a refresh token.');
+    }
+    _refreshToken = user.refreshToken;
+    _currentUser.value = user;
+  }
+
   /// Send magic code
   Future<void> sendMagicCode({required String email}) async {
     try {
@@ -92,6 +102,11 @@ class AuthManager {
       _refreshToken = refreshToken;
       return user;
     } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      if (status == 400 || status == 401 || status == 403) {
+        _refreshToken = null;
+        _currentUser.value = null;
+      }
       _handleError(e, 'Failed to verify refresh token');
       rethrow;
     }
